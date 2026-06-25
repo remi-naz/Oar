@@ -68,4 +68,7 @@ interface TransactionDao : BaseDao<TransactionEntity> {
 
     @Query("UPDATE transaction_table SET cycle_id = :cycleId WHERE id IN (:ids)")
     suspend fun updateCycleIdForTransactions(ids: Set<Long>, cycleId: Long)
+
+    @Query("SELECT id FROM transaction_table WHERE cycle_id = :cycleId")
+    suspend fun getTransactionIdsByCycle(cycleId: Long): List<Long>
 }

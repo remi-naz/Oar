@@ -11,6 +11,6 @@ import javax.inject.Inject
 class AllFoldersViewModel @Inject constructor(
     repo: FolderListRepository,
 ) : ViewModel() {
-    val folderListPagingData = repo.getFolderAndAggregatesPaged()
+    val folderListPagingData = repo.getFoldersListPaged()
         .cachedIn(viewModelScope)
 }

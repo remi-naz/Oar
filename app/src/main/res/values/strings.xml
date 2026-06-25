@@ -70,8 +70,7 @@
     <string name="cd_delete_tag">Delete Tag</string>
     <string name="cd_delete_folder">Delete Folder</string>
     <string name="cd_remove_from_folder">Remove from folder</string>
-    <string name="cd_folder_list_item_with_aggregate_amount">Folder %1$s created on %2$s</string>
-    <string name="cd_folder_list_item_without_aggregate_amount">Folder %1$s created on %2$s with aggregate amount of %3$s %4$s</string>
+    <string name="cd_folder_list_item">Folder %1$s created on %2$s</string>
     <string name="cd_tap_for_more_options">Tap for more options</string>
     <string name="cd_filter_options">Filter Options</string>
     <string name="cd_excluded">Excluded</string>
@@ -87,8 +86,6 @@
     <string name="cd_tap_to_edit_transaction">Tap to edit transaction</string>
     <string name="cd_long_press_to_toggle_selection">Long Press To Toggle Selection</string>
     <string name="cd_clear_transaction_selection">Clear Transaction Selection</string>
-    <string name="cd_folder_aggregate_amount_balanced">Your credits and debits are balanced</string>
-    <string name="cd_folder_aggregate_amount_unbalanced">You have an aggregated amount of %1$s %2$s</string>
     <string name="cd_tap_tag_to_filter_transactions">Tap tag to filter transactions</string>
     <string name="cd_tap_tag_to_assign_to_transactions">Tap to assign tag to transactions</string>
     <string name="cd_long_press_tag_to_edit">Long press to edit tag</string>
@@ -535,6 +532,7 @@
     <string name="cd_tap_to_select_folder">Tap to select folder %s</string>
     <string name="five_seconds">5 Seconds</string>
     <string name="create_colon_label">Create: %s</string>
+    <string name="cd_tap_to_see_cycle_aggregate">Tap to see cycle aggregate</string>
     <plurals name="transaction_deleted">
         <item quantity="one">Transaction Deleted</item>
         <item quantity="other">Transactions Deleted</item>

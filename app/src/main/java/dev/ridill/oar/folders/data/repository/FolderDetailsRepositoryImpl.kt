@@ -22,7 +22,7 @@ class FolderDetailsRepositoryImpl(
     private val animPreferencesManager: AnimPreferencesManager
 ) : FolderDetailsRepository {
     override fun getFolderDetailsById(id: Long): Flow<FolderDetails?> = dao
-        .getFolderAndAggregateById(id).mapLatest { it?.toFolderDetails() }
+        .getFolderByIdFlow(id).mapLatest { it?.toFolderDetails() }
 
     override fun getTransactionsInFolderPaged(
         folderId: Long
