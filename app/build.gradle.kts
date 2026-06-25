@@ -1,10 +1,7 @@
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.Locale
 
 plugins {
     alias(libs.plugins.com.android.application)
-    alias(libs.plugins.org.jetbrains.kotlin.android)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.parcelize)
     alias(libs.plugins.com.google.dagger.hilt.android)
     alias(libs.plugins.com.google.gms.google.services)
@@ -15,12 +12,12 @@ plugins {
 
 android {
     namespace = "dev.ridill.oar"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.ridill.oar"
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
 
@@ -68,38 +65,9 @@ android {
         }
     }
 
-    // Rename Build Outputs
-    applicationVariants.configureEach {
-        val artifactName = "${rootProject.name}-${name}-code${versionCode}-v${versionName}"
-
-        // Rename APKs
-        outputs.configureEach {
-            if (this is BaseVariantOutputImpl) {
-                outputFileName = "${artifactName}.apk"
-            }
-        }
-
-        // Rename AABs
-        tasks.named(
-            "sign${name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}Bundle",
-            com.android.build.gradle.internal.tasks.FinalizeBundleTask::class.java
-        ) {
-            val file: File = finalBundleFile.asFile.get()
-            val finalFile = File(file.parentFile, "${artifactName}.aab")
-            finalBundleFile.set(finalFile)
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
-            freeCompilerArgs.addAll(
-                listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
-            )
-        }
     }
     buildFeatures {
         compose = true
@@ -112,12 +80,23 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        val artifactName = "${rootProject.name}-${variant.name}-code${variant.outputs.first().versionCode.get()}-v${variant.outputs.first().versionName.get()}"
+
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("${artifactName}.apk")
+        }
+    }
+}
+
 composeCompiler {}
 
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.addAll(
+            "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
             "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
             "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
@@ -173,6 +152,7 @@ dependencies {
     // Dagger Hilt
     implementation(libs.com.google.dagger.hilt.android)
     ksp(libs.com.google.dagger.hilt.android.compiler)
+    ksp(libs.kotlinx.metadata.jvm)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Room Persistence
