@@ -3,34 +3,13 @@ package dev.ridill.oar.folders.data.local
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import dev.ridill.oar.core.data.db.BaseDao
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
-import dev.ridill.oar.folders.data.local.views.FolderAndAggregateView
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FolderDao : BaseDao<FolderEntity> {
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT * FROM folder_and_aggregate_view
-        ORDER BY CASE
-                WHEN aggregate > 0.0 THEN 1
-                WHEN aggregate < 0.0 THEN 0
-                WHEN aggregate = 0.0 THEN -1
-            END DESC,
-            name ASC, DATETIME(createdTimestamp) DESC
-        """
-    )
-    fun getFolderAndAggregatesPaged(): PagingSource<Int, FolderAndAggregateView>
-
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM folder_and_aggregate_view WHERE id = :id")
-    fun getFolderAndAggregateById(id: Long): Flow<FolderAndAggregateView?>
-
     @Query("SELECT * FROM folder_table WHERE name LIKE '%' || :query || '%' ORDER BY name ASC, DATETIME(created_timestamp) DESC")
     fun getFoldersPaged(query: String): PagingSource<Int, FolderEntity>
 

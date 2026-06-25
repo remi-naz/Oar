@@ -1,5 +1,6 @@
 package dev.ridill.oar.folders.presentation.allFolders
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,14 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -26,39 +26,50 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
-import dev.ridill.oar.core.ui.components.AmountWithTypeIndicator
+import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.EmptyListIndicator
 import dev.ridill.oar.core.ui.components.ExcludedIndicatorSmall
-import dev.ridill.oar.core.ui.components.ListSeparator
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.SnackbarController
-import dev.ridill.oar.core.ui.components.SpacerSmall
-import dev.ridill.oar.core.ui.components.TitleMediumText
+import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.navigation.destinations.AllFoldersScreenSpec
 import dev.ridill.oar.core.ui.theme.ContentAlpha
+import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.spacing
-import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.core.ui.util.mergedContentDescription
-import dev.ridill.oar.folders.domain.model.AggregateType
-import dev.ridill.oar.folders.domain.model.FolderUIModel
-import kotlin.math.absoluteValue
+import dev.ridill.oar.folders.domain.model.Folder
+import kotlinx.coroutines.flow.flowOf
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AllFoldersScreen(
     snackbarController: SnackbarController,
-    foldersPagingItems: LazyPagingItems<FolderUIModel>,
+    foldersPagingItems: LazyPagingItems<Folder>,
     navigateToAddFolder: () -> Unit,
     navigateToFolderDetails: (Long) -> Unit,
     navigateUp: () -> Unit
@@ -111,46 +122,23 @@ fun AllFoldersScreen(
                         start = MaterialTheme.spacing.medium,
                         end = MaterialTheme.spacing.medium
                     ),
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
-                    verticalItemSpacing = MaterialTheme.spacing.medium
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+                    verticalItemSpacing = MaterialTheme.spacing.small
                 ) {
                     repeat(foldersPagingItems.itemCount) { index ->
                         foldersPagingItems[index]?.let { item ->
-                            when (item) {
-                                is FolderUIModel.AggregateTypeSeparator -> {
-                                    item(
-                                        key = item.type.name,
-                                        contentType = "AggregateTypeSeparator",
-                                        span = StaggeredGridItemSpan.FullLine
-                                    ) {
-                                        ListSeparator(
-                                            label = stringResource(item.type.labelRes),
-                                            shape = MaterialTheme.shapes.small,
-                                            modifier = Modifier
-                                                .animateItem()
-                                        )
-                                    }
-                                }
-
-                                is FolderUIModel.FolderListItem -> {
-                                    item(
-                                        key = item.folderDetails.id,
-                                        contentType = "FolderCard"
-                                    ) {
-                                        FolderCard(
-                                            name = item.folderDetails.name,
-                                            created = item.folderDetails.createdDateFormatted,
-                                            excluded = item.folderDetails.excluded,
-                                            aggregateAmount = TextFormat.compactNumber(
-                                                item.folderDetails.aggregate.absoluteValue
-                                            ),
-                                            aggregateType = item.folderDetails.aggregateType,
-                                            onClick = { navigateToFolderDetails(item.folderDetails.id) },
-                                            modifier = Modifier
-                                                .animateItem()
-                                        )
-                                    }
-                                }
+                            item(
+                                key = item.id,
+                                contentType = "FolderCard"
+                            ) {
+                                FolderCard(
+                                    name = item.name,
+                                    created = item.createdTimestamp.format(DateUtil.Formatters.localizedDateMedium),
+                                    excluded = item.excluded,
+                                    onClick = { navigateToFolderDetails(item.id) },
+                                    modifier = Modifier
+                                        .animateItem()
+                                )
                             }
                         }
                     }
@@ -165,38 +153,42 @@ private fun FolderCard(
     name: String,
     created: String,
     excluded: Boolean,
-    aggregateAmount: String,
-    aggregateType: AggregateType,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val nameStyle = MaterialTheme.typography.titleMedium
-    val createdDateStyle = MaterialTheme.typography.bodySmall
-        .copy(
-            color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
-        )
+    val createdDateStyle = MaterialTheme.typography.bodySmall.copy(
+        color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
+    )
 
-    val folderContentDescription = when (aggregateType) {
-        AggregateType.BALANCED -> stringResource(
-            R.string.cd_folder_list_item_with_aggregate_amount,
-            name,
-            created
-        )
+    val folderContentDescription = stringResource(
+        R.string.cd_folder_list_item,
+        name,
+        created
+    )
 
-        else -> stringResource(
-            R.string.cd_folder_list_item_without_aggregate_amount,
-            name,
-            created,
-            aggregateAmount,
-            stringResource(aggregateType.labelRes)
-        )
-    }
+    val border = CardDefaults.outlinedCardBorder()
 
-    OutlinedCard(
-        onClick = onClick,
+    val folderShape = remember { FolderShape() }
+    Box(
         modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawOutline(
+                    outline = folderShape.createOutline(size, layoutDirection, Density(density)),
+                    brush = border.brush,
+                    style = Stroke(border.width.toPx())
+                )
+            }
+            .clip(folderShape)
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = MaterialTheme.spacing.medium,
+                vertical = MaterialTheme.spacing.extraLarge
+            )
             .mergedContentDescription(folderContentDescription)
-            .exclusionGraphicsLayer(excluded)
+            .exclusionGraphicsLayer(excluded),
+        contentAlignment = Alignment.BottomStart
     ) {
         Column(
             modifier = Modifier
@@ -224,19 +216,84 @@ private fun FolderCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .align(Alignment.End)
-            ) {
-                TitleMediumText(stringResource(R.string.aggregate_abr))
-                SpacerSmall()
-                AmountWithTypeIndicator(
-                    value = aggregateAmount,
-                    type = aggregateType
-                )
-            }
         }
+    }
+}
+
+private class FolderShape : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline = Outline.Generic(
+        path = Path().apply {
+            val scaleX = size.width / 24f
+            val scaleY = size.height / 24f
+
+            moveTo(10f * scaleX, 4f * scaleY)
+            lineTo(4f * scaleX, 4f * scaleY)
+            cubicTo(
+                2.9f * scaleX,
+                4f * scaleY,
+                2.01f * scaleX,
+                4.9f * scaleY,
+                2.01f * scaleX,
+                6f * scaleY
+            )
+            lineTo(2f * scaleX, 18f * scaleY)
+            cubicTo(
+                2f * scaleX,
+                19.1f * scaleY,
+                2.9f * scaleX,
+                20f * scaleY,
+                4f * scaleX,
+                20f * scaleY
+            )
+            lineTo(20f * scaleX, 20f * scaleY)
+            cubicTo(
+                21.1f * scaleX,
+                20f * scaleY,
+                22f * scaleX,
+                19.1f * scaleY,
+                22f * scaleX,
+                18f * scaleY
+            )
+            lineTo(22f * scaleX, 8f * scaleY)
+            cubicTo(
+                22f * scaleX,
+                6.9f * scaleY,
+                21.1f * scaleX,
+                6f * scaleY,
+                20f * scaleX,
+                6f * scaleY
+            )
+            lineTo(12f * scaleX, 6f * scaleY)
+            lineTo(10f * scaleX, 4f * scaleY)
+            close()
+        }
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewAllFoldersScreen() {
+    OarTheme {
+        AllFoldersScreen(
+            snackbarController = rememberSnackbarController(),
+            foldersPagingItems = flowOf(
+                PagingData.from(
+                    List(5) {
+                        Folder(
+                            id = it.toLong(),
+                            name = "Folder $it",
+                            createdTimestamp = DateUtil.now(),
+                            excluded = Random.nextBoolean()
+                        )
+                    }
+                )).collectAsLazyPagingItems(),
+            navigateToAddFolder = {},
+            navigateToFolderDetails = {},
+            navigateUp = {}
+        )
     }
 }
