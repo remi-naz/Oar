@@ -36,13 +36,14 @@ import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.MediumFloatingActionButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -145,7 +146,7 @@ fun AddEditTransactionScreen(
     val amountFocusRequester = remember { FocusRequester() }
     LaunchedEffect(isEditMode) {
         if (!isEditMode) {
-            delay(UtilConstants.FIELD_AUTO_FOCUS_DELAY)
+            delay(UtilConstants.FieldAutoFocusDelayDuration)
             amountFocusRequester.requestFocus()
         }
     }
@@ -715,7 +716,7 @@ private fun RepetitionSelectionSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
-        sheetState = rememberModalBottomSheetState(true)
+        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
     ) {
         TitleLargeText(
             text = stringResource(R.string.select_schedule_repetition),
