@@ -10,6 +10,7 @@ import dev.ridill.oar.tags.data.local.TagsDao
 import dev.ridill.oar.tags.data.repository.TagsRepositoryImpl
 import dev.ridill.oar.tags.domain.repository.TagsRepository
 import dev.ridill.oar.tags.presentation.addEditTag.AddEditTagViewModel
+import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionViewModel
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -23,4 +24,8 @@ object TagModule {
 
     @Provides
     fun provideAddEditTagEventBus(): EventBus<AddEditTagViewModel.AddEditTagEvent> = EventBus()
+
+    @Provides
+    fun provideTagSelectionEventBus(): EventBus<TagSelectionViewModel.TagSelectionEvent> =
+        EventBus()
 }

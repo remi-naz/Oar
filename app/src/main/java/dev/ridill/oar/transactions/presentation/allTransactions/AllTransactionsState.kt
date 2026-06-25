@@ -2,7 +2,6 @@ package dev.ridill.oar.transactions.presentation.allTransactions
 
 import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.ui.util.UiText
-import dev.ridill.oar.tags.domain.model.Tag
 import dev.ridill.oar.transactions.domain.model.AggregateAmountItem
 import dev.ridill.oar.transactions.domain.model.TransactionTypeFilter
 
@@ -16,7 +15,7 @@ data class AllTransactionsState(
     val transactionMultiSelectionModeActive: Boolean = false,
     val showDeleteTransactionConfirmation: Boolean = false,
     val showExcludedTransactions: Boolean = false,
-    val selectedTagFilters: List<Tag> = emptyList(),
+    val selectedTagFilterIds: Set<Long> = emptySet(),
     val showAggregationConfirmation: Boolean = false,
     val showMultiSelectionOptions: Boolean = false,
     val showFilterOptions: Boolean = false,

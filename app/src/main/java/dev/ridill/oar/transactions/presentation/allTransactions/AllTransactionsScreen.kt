@@ -14,7 +14,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -24,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -43,7 +41,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SegmentedButton
@@ -72,7 +69,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
@@ -107,8 +103,7 @@ import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
-import dev.ridill.oar.tags.domain.model.Tag
-import dev.ridill.oar.tags.presentation.components.ElevatedTagChip
+import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionField
 import dev.ridill.oar.transactions.domain.model.AllTransactionsMultiSelectionOption
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
 import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
@@ -374,9 +369,8 @@ fun AllTransactionsScreen(
             onTypeFilterSelect = actions::onTypeFilterSelect,
             showExcluded = state.showExcludedTransactions,
             onShowExcludedToggle = actions::onShowExcludedToggle,
-            selectedTags = state.selectedTagFilters,
-            onClearTagSelectionClick = actions::onClearTagFilterClick,
-            onChangeTagSelectionClick = actions::onChangeTagFiltersClick,
+            selectedTagFilterIds = state.selectedTagFilterIds,
+            onTagFilterIdsChange = actions::onTagFilterIdsChange,
         )
     }
 }
@@ -609,9 +603,8 @@ private fun FilterOptionsSheet(
     onClearAllFiltersClick: () -> Unit,
     selectedTypeFilter: TransactionTypeFilter,
     onTypeFilterSelect: (TransactionTypeFilter) -> Unit,
-    selectedTags: List<Tag>,
-    onChangeTagSelectionClick: () -> Unit,
-    onClearTagSelectionClick: () -> Unit,
+    selectedTagFilterIds: Set<Long>,
+    onTagFilterIdsChange: (Set<Long>) -> Unit,
     showExcluded: Boolean,
     onShowExcludedToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -654,10 +647,17 @@ private fun FilterOptionsSheet(
                 onTypeFilterSelect = onTypeFilterSelect
             )
 
-            TagFilterSection(
-                selectedTags = selectedTags,
-                onChangeTagSelectionClick = onChangeTagSelectionClick,
-                onClearTagSelectionClick = onClearTagSelectionClick
+            FilterSectionTitle(
+                resId = R.string.filter_section_tags,
+                showClearOption = selectedTagFilterIds.isNotEmpty(),
+                onClearClick = { onTagFilterIdsChange(emptySet()) }
+            )
+
+            TagSelectionField(
+                selectedIds = selectedTagFilterIds,
+                onSelectedIdsChange = onTagFilterIdsChange,
+                modifier = Modifier
+                    .padding(horizontal = MaterialTheme.spacing.medium)
             )
 
             FilterSectionTitle(resId = R.string.filter_section_more)
@@ -737,48 +737,3 @@ private fun TypeFilterSection(
     }
 }
 
-@Composable
-private fun TagFilterSection(
-    selectedTags: List<Tag>,
-    onChangeTagSelectionClick: () -> Unit,
-    onClearTagSelectionClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val isTagFilterActive by remember(selectedTags) {
-        derivedStateOf { selectedTags.isNotEmpty() }
-    }
-
-    FilterSectionTitle(
-        resId = R.string.filter_section_tags,
-        showClearOption = isTagFilterActive,
-        onClearClick = onClearTagSelectionClick
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        FlowRow(
-            modifier = modifier
-                .fillMaxWidth()
-                .sizeIn(minHeight = TagFilterFlowRowMinHeight),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = MaterialTheme.spacing.small,
-                alignment = Alignment.CenterHorizontally
-            ),
-            verticalArrangement = Arrangement.Center
-        ) {
-            selectedTags.forEach { tag ->
-                ElevatedTagChip(
-                    name = tag.name,
-                    color = tag.color,
-                    excluded = tag.excluded,
-                )
-            }
-        }
-        OutlinedButton(onClick = onChangeTagSelectionClick) {
-            Text(stringResource(R.string.select_tags))
-        }
-    }
-}
-
-private val TagFilterFlowRowMinHeight = 80.dp

@@ -50,15 +50,6 @@ data object AllTransactionsScreenSpec : ScreenSpec {
             onResult = viewModel::onFolderSelect
         )
 
-        FloatingWindowNavigationResultEffect(
-            resultKey = TagSelectionSheetSpec.SELECTED_TAG_IDS,
-            navBackStackEntry = navBackStackEntry,
-            viewModel,
-            snackbarController,
-            context,
-            onResult = viewModel::onTagSelectionResult
-        )
-
         NavigationResultEffect(
             resultKey = AddEditTxResult::name.name,
             navBackStackEntry = navBackStackEntry,
@@ -84,6 +75,13 @@ data object AllTransactionsScreenSpec : ScreenSpec {
             onResult = viewModel::onCycleSelect
         )
 
+        FloatingWindowNavigationResultEffect<Long?>(
+            resultKey = TagSelectionSheetSpec.SELECTED_TAG_ID,
+            navBackStackEntry = navBackStackEntry,
+            viewModel,
+            onResult = viewModel::onTagAssignmentSelectionResult
+        )
+
         CollectFlowEffect(viewModel.events, context, snackbarController) { event ->
             when (event) {
                 is AllTransactionsViewModel.AllTransactionsEvent.ShowUiMessage -> {
@@ -97,12 +95,9 @@ data object AllTransactionsScreenSpec : ScreenSpec {
                     navController.navigate(FolderSelectionSheetSpec.routeWithArgs(null))
                 }
 
-                is AllTransactionsViewModel.AllTransactionsEvent.NavigateToTagSelection -> {
+                is AllTransactionsViewModel.AllTransactionsEvent.NavigateToTagSelectionForAssignment -> {
                     navController.navigate(
-                        TagSelectionSheetSpec.routeWithArgs(
-                            event.multiSelection,
-                            event.preSelectedIds
-                        )
+                        TagSelectionSheetSpec.routeWithArgs()
                     )
                 }
 

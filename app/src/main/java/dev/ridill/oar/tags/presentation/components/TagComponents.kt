@@ -1,61 +1,19 @@
 package dev.ridill.oar.tags.presentation.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
-import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.ExcludedIcon
 import dev.ridill.oar.core.ui.theme.contentColor
-import dev.ridill.oar.core.ui.theme.spacing
-import dev.ridill.oar.tags.domain.model.Tag
-
-@Composable
-fun RecentTagsSelectorFlowRow(
-    recentTagsLazyPagingItems: LazyPagingItems<Tag>,
-    selectedTagId: Long?,
-    onTagClick: (Long) -> Unit,
-    onViewAllClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    FlowRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)
-    ) {
-        repeat(recentTagsLazyPagingItems.itemCount) { index ->
-            recentTagsLazyPagingItems[index]?.let { tag ->
-                TagChip(
-                    name = tag.name,
-                    color = tag.color,
-                    excluded = tag.excluded,
-                    selected = tag.id == selectedTagId,
-                    onClick = { onTagClick(tag.id) }
-                )
-            }
-        }
-
-        ElevatedAssistChip(
-            onClick = onViewAllClick,
-            label = { Text(stringResource(R.string.view_all)) },
-            border = null
-        )
-    }
-}
 
 @Composable
 fun TagChip(
@@ -65,6 +23,7 @@ fun TagChip(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    trailingIcon: @Composable (() -> Unit)? = null,
     enabled: Boolean = true
 ) = FilterChip(
     selected = selected,
@@ -77,6 +36,7 @@ fun TagChip(
             overflow = TextOverflow.Ellipsis
         )
     },
+    trailingIcon = trailingIcon,
     colors = tagChipColors(color = color),
     modifier = Modifier
         .widthIn(max = TagChipMaxWidth)
@@ -94,10 +54,11 @@ fun ElevatedTagChip(
     color: Color,
     excluded: Boolean,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
     enabled: Boolean = true
 ) = ElevatedFilterChip(
     selected = true,
-    onClick = {},
+    onClick = onClick,
     label = {
         Text(
             text = name,
