@@ -26,6 +26,21 @@ interface TagsDao : BaseDao<TagEntity> {
         limit: Int
     ): PagingSource<Int, TagEntity>
 
+    @Query(
+        """
+        SELECT *
+        FROM tag_table
+        WHERE (LENGTH(:query) > 0) AND (name LIKE '%' || :query || '%') AND (id NOT IN (:idIgnoreSet))
+        ORDER BY DATETIME(created_timestamp) DESC, name ASC
+        LIMIT :limit
+    """
+    )
+    fun searchTagsForSelection(
+        query: String,
+        idIgnoreSet: Set<Long>,
+        limit: Int
+    ): PagingSource<Int, TagEntity>
+
     @Transaction
     @Query(
         """

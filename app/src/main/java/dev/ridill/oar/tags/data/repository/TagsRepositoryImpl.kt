@@ -52,6 +52,22 @@ class TagsRepositoryImpl(
     ).flow
         .mapLatest { pagingData -> pagingData.map(TagAndAggregateRelation::toTagInfo) }
 
+    override fun searchTagsForSelection(
+        searchQuery: String,
+        ignoreIds: Set<Long>,
+        limit: Int
+    ): Flow<PagingData<Tag>> = Pager(
+        config = PagingConfig(UtilConstants.DEFAULT_PAGE_SIZE),
+        pagingSourceFactory = {
+            dao.searchTagsForSelection(
+                query = searchQuery,
+                idIgnoreSet = ignoreIds,
+                limit = limit
+            )
+        }
+    ).flow
+        .mapLatest { pagingData -> pagingData.map(TagEntity::toTag) }
+
     override suspend fun getTagById(id: Long): Tag? = withContext(Dispatchers.IO) {
         dao.getTagById(id)?.toTag()
     }

@@ -21,6 +21,12 @@ interface TagsRepository {
         limit: Int = UtilConstants.DEFAULT_TAG_LIST_LIMIT
     ): Flow<PagingData<TagInfo>>
 
+    fun searchTagsForSelection(
+        searchQuery: String = String.Empty,
+        ignoreIds: Set<Long> = emptySet(),
+        limit: Int = OarDatabase.INVALID_LIMIT
+    ): Flow<PagingData<Tag>>
+
     suspend fun saveTag(
         id: Long,
         name: String,

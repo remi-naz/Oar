@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.saveable
-import androidx.paging.cachedIn
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
@@ -14,10 +13,8 @@ import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.util.DateUtil
-import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.LocaleUtil
-import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.ifInfinite
@@ -31,7 +28,6 @@ import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.schedules.data.toTransaction
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
-import dev.ridill.oar.tags.domain.repository.TagsRepository
 import dev.ridill.oar.transactions.domain.model.AmountTransformation
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.model.TransactionType
@@ -51,7 +47,6 @@ class AddEditTransactionViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val cycleRepo: BudgetCycleRepository,
     private val transactionRepo: AddEditTransactionRepository,
-    tagsRepo: TagsRepository,
     private val evalService: ExpEvalService,
     private val eventBus: EventBus<AddEditTransactionEvent>
 ) : ViewModel(), AddEditTransactionActions {
@@ -119,11 +114,6 @@ class AddEditTransactionViewModel @Inject constructor(
 
     private val isTransactionExcluded = txInput.mapLatest { it?.excluded == true }
         .distinctUntilChanged()
-
-    val recentTagsPagingData = tagsRepo.getAllTagsPagingData(
-        searchQuery = String.Empty,
-        limit = UtilConstants.DEFAULT_TAG_LIST_LIMIT
-    ).cachedIn(viewModelScope)
 
     private val showDeleteConfirmation = savedStateHandle
         .getStateFlow(SHOW_DELETE_CONFIRMATION, false)
@@ -312,16 +302,10 @@ class AddEditTransactionViewModel @Inject constructor(
         )
     }
 
-    override fun onTagSelect(tagId: Long) {
+    override fun onTagSelect(tagId: Long?) {
         savedStateHandle[TX_INPUT] = txInput.value?.copy(
-            tagId = tagId.takeIf { it != txInput.value?.tagId }
+            tagId = tagId?.takeIf { it != txInput.value?.tagId }
         )
-    }
-
-    override fun onViewAllTagsClick() {
-        viewModelScope.launch {
-            eventBus.send(AddEditTransactionEvent.LaunchTagSelection(txInput.value?.tagId))
-        }
     }
 
     override fun onTimestampClick() {
@@ -563,7 +547,6 @@ class AddEditTransactionViewModel @Inject constructor(
             AddEditTransactionEvent
 
         data class LaunchFolderSelection(val preselectedId: Long?) : AddEditTransactionEvent
-        data class LaunchTagSelection(val preselectedId: Long?) : AddEditTransactionEvent
         data class NavigateToDuplicateTransactionCreation(val id: Long) :
             AddEditTransactionEvent
     }

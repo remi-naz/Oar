@@ -21,7 +21,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.domain.util.NewLine
@@ -139,7 +138,6 @@ data object AddEditTransactionScreenSpec : ScreenSpec {
         val amountInputState = viewModel.amountInputState
         val noteInputState = viewModel.noteInputState
         val state by viewModel.state.collectAsStateWithLifecycle()
-        val recentTagsLazyPagingItems = viewModel.recentTagsPagingData.collectAsLazyPagingItems()
 
         val isEditMode = isArgEditMode(navBackStackEntry)
         val isDuplicateMode = isArgDuplicateMode(navBackStackEntry)
@@ -160,14 +158,6 @@ data object AddEditTransactionScreenSpec : ScreenSpec {
             viewModel,
             onResult = viewModel::onAmountTransformationResult
         )
-
-        FloatingWindowNavigationResultEffect<Set<Long>>(
-            resultKey = TagSelectionSheetSpec.SELECTED_TAG_IDS,
-            navBackStackEntry = navBackStackEntry,
-            viewModel,
-        ) { ids ->
-            ids.firstOrNull()?.let(viewModel::onTagSelect)
-        }
 
         FloatingWindowNavigationResultEffect<Currency>(
             resultKey = CurrencySelectionSheetSpec.SELECTED_CURRENCY,
@@ -195,17 +185,6 @@ data object AddEditTransactionScreenSpec : ScreenSpec {
                 is AddEditTransactionViewModel.AddEditTransactionEvent.LaunchFolderSelection -> {
                     navController.navigate(
                         FolderSelectionSheetSpec.routeWithArgs(event.preselectedId)
-                    )
-                }
-
-                is AddEditTransactionViewModel.AddEditTransactionEvent.LaunchTagSelection -> {
-                    navController.navigate(
-                        TagSelectionSheetSpec.routeWithArgs(
-                            multiSelection = false,
-                            preselectedIds = event.preselectedId
-                                ?.let { setOf(it) }
-                                .orEmpty()
-                        )
                     )
                 }
 
@@ -238,7 +217,6 @@ data object AddEditTransactionScreenSpec : ScreenSpec {
             isEditMode = isEditMode,
             isDuplicateMode = isDuplicateMode,
             snackbarController = snackbarController,
-            recentTagsLazyPagingItems = recentTagsLazyPagingItems,
             amountInputState = amountInputState,
             noteInputState = noteInputState,
             state = state,

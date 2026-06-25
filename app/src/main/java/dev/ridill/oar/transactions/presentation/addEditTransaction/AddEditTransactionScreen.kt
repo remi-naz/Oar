@@ -76,17 +76,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
+import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.core.ui.components.BackArrowButton
-import dev.ridill.oar.core.ui.components.BodyMediumText
 import dev.ridill.oar.core.ui.components.ConfirmationDialog
 import dev.ridill.oar.core.ui.components.ExcludedIcon
 import dev.ridill.oar.core.ui.components.LabelledRadioButton
@@ -113,12 +110,10 @@ import dev.ridill.oar.core.ui.util.exclude
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.settings.presentation.components.SimplePreference
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
-import dev.ridill.oar.tags.domain.model.Tag
-import dev.ridill.oar.tags.presentation.components.RecentTagsSelectorFlowRow
+import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionField
 import dev.ridill.oar.transactions.domain.model.TransactionType
 import dev.ridill.oar.transactions.presentation.components.AmountRecommendationsRow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -130,7 +125,6 @@ fun AddEditTransactionScreen(
     isEditMode: Boolean,
     isDuplicateMode: Boolean,
     snackbarController: SnackbarController,
-    recentTagsLazyPagingItems: LazyPagingItems<Tag>,
     amountInputState: TextFieldState,
     noteInputState: TextFieldState,
     state: AddEditTransactionState,
@@ -315,11 +309,9 @@ fun AddEditTransactionScreen(
                         .align(Alignment.Start)
                 )
 
-                TagSelection(
-                    tagsLazyPagingItems = recentTagsLazyPagingItems,
-                    selectedTagId = state.selectedTagId,
-                    onTagClick = actions::onTagSelect,
-                    onViewAllClick = actions::onViewAllTagsClick,
+                TagSelectionField(
+                    selectedId = state.selectedTagId ?: OarDatabase.INVALID_ID_LONG,
+                    onSelectedIdChange = actions::onTagSelect,
                     modifier = Modifier
                         .padding(horizontal = MaterialTheme.spacing.medium)
                 )
@@ -640,30 +632,6 @@ private fun TransactionTypeSelector(
 }
 
 @Composable
-private fun TagSelection(
-    tagsLazyPagingItems: LazyPagingItems<Tag>,
-    selectedTagId: Long?,
-    onTagClick: (Long) -> Unit,
-    onViewAllClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
-    ) {
-        BodyMediumText(stringResource(R.string.tag_your_transaction))
-        RecentTagsSelectorFlowRow(
-            recentTagsLazyPagingItems = tagsLazyPagingItems,
-            selectedTagId = selectedTagId,
-            onTagClick = onTagClick,
-            onViewAllClick = onViewAllClick,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-    }
-}
-
-@Composable
 private fun TransactionRepeatModeIndicator(
     selectedRepeatMode: ScheduleRepetition,
     onClick: () -> Unit,
@@ -747,7 +715,6 @@ private fun PreviewScreenContent() {
             snackbarController = rememberSnackbarController(),
             amountInputState = rememberTextFieldState(),
             noteInputState = rememberTextFieldState(),
-            recentTagsLazyPagingItems = flowOf(PagingData.empty<Tag>()).collectAsLazyPagingItems(),
             state = AddEditTransactionState(
                 isScheduleTxMode = true,
                 selectedRepetition = ScheduleRepetition.MONTHLY
@@ -756,8 +723,7 @@ private fun PreviewScreenContent() {
                 override fun onAmountFocusLost() {}
                 override fun onEvaluateExpressionClick() {}
                 override fun onRecommendedAmountClick(amount: Long) {}
-                override fun onTagSelect(tagId: Long) {}
-                override fun onViewAllTagsClick() {}
+                override fun onTagSelect(tagId: Long?) {}
                 override fun onTimestampClick() {}
                 override fun onDateSelectionDismiss() {}
                 override fun onPickTimeClick() {}

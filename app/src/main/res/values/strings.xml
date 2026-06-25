@@ -491,6 +491,8 @@
     <string name="clear">Clear</string>
     <string name="select_folder">Select Folder</string>
     <string name="select_tags">Select Tags</string>
+    <string name="search_tag_placeholder">Eg. groceries…</string>
+    <string name="suggested">Suggested</string>
     <string name="folder_name">Folder Name</string>
     <string name="new_folder_input_text">Create a folder to group your transactions</string>
     <string name="clear_selection">Clear Selection</string>
@@ -532,6 +534,7 @@
     <string name="cd_tap_to_select_cycle">Tap to select cycle %s</string>
     <string name="cd_tap_to_select_folder">Tap to select folder %s</string>
     <string name="five_seconds">5 Seconds</string>
+    <string name="create_colon_label">Create: %s</string>
     <plurals name="transaction_deleted">
         <item quantity="one">Transaction Deleted</item>
         <item quantity="other">Transactions Deleted</item>

@@ -20,7 +20,6 @@ import dev.ridill.oar.core.domain.util.textAsFlow
 import dev.ridill.oar.core.ui.navigation.destinations.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.destinations.NavDestination
 import dev.ridill.oar.core.ui.util.UiText
-import dev.ridill.oar.tags.domain.repository.TagsRepository
 import dev.ridill.oar.transactions.domain.model.AllTransactionsMultiSelectionOption
 import dev.ridill.oar.transactions.domain.model.TransactionTypeFilter
 import dev.ridill.oar.transactions.domain.repository.AllTransactionsRepository
@@ -34,7 +33,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AllTransactionsViewModel @Inject constructor(
     private val transactionRepo: AllTransactionsRepository,
-    private val tagsRepo: TagsRepository,
     private val aggregatesRepo: AggregationsRepository,
     private val savedStateHandle: SavedStateHandle,
     private val eventBus: EventBus<AllTransactionsEvent>
@@ -56,9 +54,6 @@ class AllTransactionsViewModel @Inject constructor(
 
     private val selectedTagIds = savedStateHandle
         .getStateFlow<Set<Long>>(SELECTED_TAG_IDS, emptySet())
-    private val selectedTags = selectedTagIds.flatMapLatest { ids ->
-        tagsRepo.getTagsListFlowByIds(ids)
-    }
 
     private val selectedTransactionIds = savedStateHandle
         .getStateFlow<Set<Long>>(SELECTED_TRANSACTION_IDS, emptySet())
@@ -86,7 +81,7 @@ class AllTransactionsViewModel @Inject constructor(
     }.cachedIn(viewModelScope)
 
     val searchResults = searchQueryState.textAsFlow()
-        .debounce(UtilConstants.DEBOUNCE_TIMEOUT)
+        .debounce(UtilConstants.DebounceTimeoutDuration)
         .flatMapLatest { query ->
             transactionRepo.getSearchResults(query)
         }.cachedIn(viewModelScope)
@@ -134,7 +129,7 @@ class AllTransactionsViewModel @Inject constructor(
         showAggregationConfirmation,
         showMultiSelectionOptions,
         showFilterOptions,
-        selectedTags,
+        selectedTagIds,
         showAggregates
     ).mapLatest { (
                       searchModeActive,
@@ -149,7 +144,7 @@ class AllTransactionsViewModel @Inject constructor(
                       showAggregationConfirmation,
                       showMultiSelectionOptions,
                       showFilterOptions,
-                      selectedTags,
+                      selectedTagIds,
                       showAggregates
                   ) ->
         AllTransactionsState(
@@ -165,7 +160,7 @@ class AllTransactionsViewModel @Inject constructor(
             showAggregationConfirmation = showAggregationConfirmation,
             showMultiSelectionOptions = showMultiSelectionOptions,
             showFilterOptions = showFilterOptions,
-            selectedTagFilters = selectedTags,
+            selectedTagFilterIds = selectedTagIds,
             showAggregates = showAggregates
         )
     }.asStateFlow(viewModelScope, AllTransactionsState())
@@ -238,8 +233,7 @@ class AllTransactionsViewModel @Inject constructor(
                 }
 
                 AllTransactionsMultiSelectionOption.ASSIGN_TAG -> {
-                    savedStateHandle[TAG_RESULT_PURPOSE] = TAG_RESULT_FOR_ASSIGNMENT
-                    eventBus.send(AllTransactionsEvent.NavigateToTagSelection(false, emptySet()))
+                    eventBus.send(AllTransactionsEvent.NavigateToTagSelectionForAssignment)
                 }
 
                 AllTransactionsMultiSelectionOption.REMOVE_TAG -> {
@@ -273,18 +267,9 @@ class AllTransactionsViewModel @Inject constructor(
         }
     }
 
-    fun onTagSelectionResult(ids: Set<Long>) = viewModelScope.launch {
-        when (savedStateHandle.get<String>(TAG_RESULT_PURPOSE)) {
-            TAG_RESULT_FOR_ASSIGNMENT -> {
-                ids.firstOrNull()
-                    ?.let { assignTagToTransactions(it) }
-            }
-
-            TAG_RESULT_FOR_FILTER -> {
-                savedStateHandle[SELECTED_TAG_IDS] = ids
-            }
-
-            else -> error("Invalid tag result purpose")
+    fun onTagAssignmentSelectionResult(tagId: Long?) {
+        if (tagId != null) viewModelScope.launch {
+            assignTagToTransactions(tagId)
         }
     }
 
@@ -316,15 +301,8 @@ class AllTransactionsViewModel @Inject constructor(
         )
     }
 
-    override fun onChangeTagFiltersClick() {
-        viewModelScope.launch {
-            savedStateHandle[TAG_RESULT_PURPOSE] = TAG_RESULT_FOR_FILTER
-            eventBus.send(AllTransactionsEvent.NavigateToTagSelection(true, selectedTagIds.value))
-        }
-    }
-
-    override fun onClearTagFilterClick() {
-        savedStateHandle[SELECTED_TAG_IDS] = emptySet<Long>()
+    override fun onTagFilterIdsChange(ids: Set<Long>) {
+        savedStateHandle[SELECTED_TAG_IDS] = ids
     }
 
     private suspend fun showFolderSelection() {
@@ -440,11 +418,7 @@ class AllTransactionsViewModel @Inject constructor(
 
     sealed interface AllTransactionsEvent {
         data class ShowUiMessage(val uiText: UiText) : AllTransactionsEvent
-        data class NavigateToTagSelection(
-            val multiSelection: Boolean,
-            val preSelectedIds: Set<Long>
-        ) : AllTransactionsEvent
-
+        data object NavigateToTagSelectionForAssignment : AllTransactionsEvent
         data class NavigateToAddEditTx(val id: Long) : AllTransactionsEvent
         data object NavigateToFolderSelection : AllTransactionsEvent
         data object ScheduleSaved : AllTransactionsEvent
@@ -461,7 +435,3 @@ private const val SHOW_DELETE_TRANSACTION_CONFIRMATION = "SHOW_DELETE_TRANSACTIO
 private const val SHOW_AGGREGATION_CONFIRMATION = "SHOW_AGGREGATION_CONFIRMATION"
 private const val SHOW_MULTI_SELECTION_OPTIONS = "SHOW_MULTI_SELECTION_OPTIONS"
 private const val SHOW_FILTER_OPTIONS = "SHOW_FILTER_OPTIONS"
-
-private const val TAG_RESULT_PURPOSE = "TAG_RESULT_PURPOSE"
-private const val TAG_RESULT_FOR_ASSIGNMENT = "TAG_RESULT_FOR_ASSIGNMENT"
-private const val TAG_RESULT_FOR_FILTER = "TAG_RESULT_FOR_FILTER"
