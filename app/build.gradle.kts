@@ -60,8 +60,8 @@ android {
 
         create("production") {
             dimension = "env"
-            versionCode = 11
-            versionName = "1.0.1"
+            versionCode = 12
+            versionName = "1.2.0"
         }
     }
 
@@ -82,7 +82,8 @@ android {
 
 androidComponents {
     onVariants { variant ->
-        val artifactName = "${rootProject.name}-${variant.name}-code${variant.outputs.first().versionCode.get()}-v${variant.outputs.first().versionName.get()}"
+        val artifactName =
+            "${rootProject.name}-${variant.name}-code${variant.outputs.first().versionCode.get()}-v${variant.outputs.first().versionName.get()}"
 
         variant.outputs.forEach { output ->
             output.outputFileName.set("${artifactName}.apk")
