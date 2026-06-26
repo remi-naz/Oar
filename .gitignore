@@ -47,3 +47,6 @@ app/google-services.json
 
 # Kotlin 2.0
 /.kotlin/
+
+# Claude Code
+.claude/
