@@ -99,9 +99,18 @@ class OarViewModel @Inject constructor(
             }
     }
 
-    fun startAppAutoLockTimer() = viewModelScope.launch {
+    fun startAppAutoLockTimerIfApplicable() = viewModelScope.launch {
         val preferences = preferences.first()
-        if (!preferences.appLockEnabled || preferences.isAppLocked) return@launch
+        if (!preferences.appLockEnabled) {
+            // Stop the entire service because app lock not enabled.
+            appLockServiceManager.stopAppUnlockedIndicator()
+            return@launch
+        }
+        if (preferences.isAppLocked) {
+            // Stop the timer because app is locked.
+            appLockServiceManager.stopAppLockTimer()
+            return@launch
+        }
 
         appLockServiceManager.startAppAutoLockTimer()
     }
@@ -109,7 +118,7 @@ class OarViewModel @Inject constructor(
     fun startAppUnlockOrServiceStop() = viewModelScope.launch {
         val preferences = preferences.first()
         if (!preferences.appLockEnabled) {
-            appLockServiceManager.stopAppLockTimer()
+            appLockServiceManager.stopAppUnlockedIndicator()
             return@launch
         }
         if (preferences.isAppLocked) {

@@ -12,25 +12,25 @@ class AppLockServiceManager(
     private val context: Context
 ) {
     fun startAppUnlockedIndicator() {
-        startServiceWithAction(AppLockService.Action.INIT_SERVICE)
+        performServiceAction(AppLockService.Action.INIT_SERVICE)
     }
 
     fun stopAppUnlockedIndicator() {
-        startServiceWithAction(AppLockService.Action.STOP_SERVICE)
+        performServiceAction(AppLockService.Action.STOP_SERVICE)
     }
 
     fun startAppAutoLockTimer() {
-        startServiceWithAction(AppLockService.Action.START_AUTO_LOCK_TIMER)
+        performServiceAction(AppLockService.Action.START_AUTO_LOCK_TIMER)
     }
 
     fun stopAppLockTimer() {
-        startServiceWithAction(AppLockService.Action.STOP_AUTO_LOCK_TIMER)
+        performServiceAction(AppLockService.Action.STOP_AUTO_LOCK_TIMER)
     }
 
-    private fun startServiceWithAction(
+    private fun performServiceAction(
         serviceAction: AppLockService.Action
     ) {
-        logI(AppLockService::class.simpleName) { "startServiceWithAction() called with: action = $serviceAction" }
+        logI(AppLockService::class.simpleName) { "performServiceAction() called with: action = $serviceAction" }
         tryOrNull(AppLockServiceManager::class.java.name) {
             val serviceIntent = Intent(context, AppLockService::class.java).apply {
                 action = serviceAction.name
