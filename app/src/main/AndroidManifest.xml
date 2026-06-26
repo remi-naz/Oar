@@ -4,7 +4,9 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -23,7 +25,8 @@
         <activity
             android:name=".application.OarActivity"
             android:exported="true"
-            android:theme="@style/Theme.Oar.Splash">
+            android:theme="@style/Theme.Oar.Splash"
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
