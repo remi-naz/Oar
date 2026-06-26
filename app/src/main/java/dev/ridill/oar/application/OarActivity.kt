@@ -170,7 +170,7 @@ class OarActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        viewModel.startAppAutoLockTimer()
+        viewModel.startAppAutoLockTimerIfApplicable()
         super.onStop()
     }
 

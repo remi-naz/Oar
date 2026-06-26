@@ -11,6 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.R
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.domain.notification.NotificationHelper
+import dev.ridill.oar.core.domain.util.BuildUtil
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.di.AppLockFeature
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
 class AppLockService : Service() {
@@ -59,10 +61,12 @@ class AppLockService : Service() {
         logI(AppLockService::class.simpleName) { "Starting app lock timer" }
         timerJob?.cancel()
         timerJob = serviceScope.launch {
-            val interval = preferencesManager.preferences.first().appAutoLockInterval
-            delay(interval.duration)
-            logI(AppLockService::class.simpleName) { "Locking app after auto lock timer" }
+            val interval = if (BuildUtil.isDebug) 3.seconds
+            else preferencesManager.preferences.first().appAutoLockInterval.duration
+            logI(AppLockService::class.simpleName) { "Locking app after $interval" }
+            delay(interval)
             preferencesManager.updateAppLocked(true)
+            logI(AppLockService::class.simpleName) { "App locked" }
             stopSelf()
         }
     }
