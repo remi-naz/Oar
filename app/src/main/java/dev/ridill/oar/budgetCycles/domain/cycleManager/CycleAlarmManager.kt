@@ -23,23 +23,17 @@ class CycleAlarmManager(
     override fun canScheduleExactAlarms(): Boolean = !BuildUtil.isApiLevelAtLeast31
             || alarmManager.canScheduleExactAlarms()
 
+    override fun cancelCycleCompletion(cycleId: Long) {
+        val pendingIntent = buildPendingIntent(cycleId)
+        alarmManager.cancel(pendingIntent)
+    }
+
     override fun scheduleCycleCompletion(
         cycleId: Long,
         endDate: LocalDateTime
     ): Result<Unit, BudgetCycleError> = try {
         val endTimeMillis = DateUtil.toMillis(endDate)
-
-        val intent = Intent(context, CycleCompletionReceiver::class.java).apply {
-            this.action = CycleManager.action(context)
-            putExtra(CycleManager.EXTRA_CYCLE_ID, cycleId)
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            cycleId.hashCode(),
-            intent,
-            UtilConstants.pendingIntentFlags
-        )
-
+        val pendingIntent = buildPendingIntent(cycleId)
         alarmManager.setWindow(
             AlarmManager.RTC,
             endTimeMillis,
@@ -47,14 +41,26 @@ class CycleAlarmManager(
             pendingIntent
         )
 
-        logD("CycleManager") { "Scheduled cycle ID = $cycleId to complete at $endDate" }
-
+        logD(CycleManager::class.simpleName) { "Scheduled cycle ID = $cycleId to complete at $endDate" }
         Result.Success(Unit)
     } catch (t: Throwable) {
-        logE(t, "CycleManager")
+        logE(t, CycleManager::class.simpleName)
         Result.Error(
             BudgetCycleError.CYCLE_SCHEDULE_FAILED,
             UiText.StringResource(R.string.error_failed_to_schedule_cycle, true)
+        )
+    }
+
+    private fun buildPendingIntent(cycleId: Long): PendingIntent {
+        val intent = Intent(context, CycleCompletionReceiver::class.java).apply {
+            this.action = CycleManager.action(context)
+            putExtra(CycleManager.EXTRA_CYCLE_ID, cycleId)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            cycleId.hashCode(),
+            intent,
+            UtilConstants.pendingIntentFlags
         )
     }
 }

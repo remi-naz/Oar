@@ -16,6 +16,8 @@ interface CycleManager {
 
     fun canScheduleExactAlarms(): Boolean
 
+    fun cancelCycleCompletion(cycleId: Long)
+
     fun scheduleCycleCompletion(
         cycleId: Long,
         endDate: LocalDateTime

@@ -210,8 +210,10 @@ class BudgetCycleRepositoryImpl(
         cycleDao.getLastCycle()?.toEntry()
     }
 
-    override fun scheduleCycleCompletion(cycle: BudgetCycleEntry): Result<Unit, BudgetCycleError> =
-        manager.scheduleCycleCompletion(
+    override fun scheduleCycleCompletion(
+        cycle: BudgetCycleEntry
+    ): Result<Unit, BudgetCycleError> = manager
+        .scheduleCycleCompletion(
             cycleId = cycle.id,
             endDate = cycle.endDate
                 .plusDays(1)
@@ -268,6 +270,7 @@ class BudgetCycleRepositoryImpl(
             val activeCycle = cycleDao.getActiveCycle()
                 ?: throw CycleNotFoundThrowable(cycleId)
             logD(TAG) { "entry = $entry created with ID = $cycleId" }
+            existingCycle?.id?.let { manager.cancelCycleCompletion(it) }
             scheduleCycleCompletion(activeCycle.toEntry(true))
         } catch (t: CycleEntryCreationFailedThrowable) {
             logE(t, TAG) { "createNewCycleAndScheduleCompletion" }
@@ -475,7 +478,7 @@ class BudgetCycleRepositoryImpl(
                 configValue = id.toString()
             )
         )
-        logI(TAG) {"set Id = $id as active cycle"  }
+        logI(TAG) { "set Id = $id as active cycle" }
     }
 
     override suspend fun getCyclesSelectorsPagingData(
