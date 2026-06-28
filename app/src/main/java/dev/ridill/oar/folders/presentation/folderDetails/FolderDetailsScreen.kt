@@ -48,7 +48,10 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.aggregations.presentation.AmountAggregatesList
 import dev.ridill.oar.budgetCycles.domain.model.CycleIndicator
@@ -69,6 +72,8 @@ import dev.ridill.oar.core.ui.components.SpacerSmall
 import dev.ridill.oar.core.ui.components.SwipeActionsContainer
 import dev.ridill.oar.core.ui.components.icons.CalendarClock
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
+import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
@@ -81,6 +86,7 @@ import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
 import dev.ridill.oar.transactions.domain.model.TransactionType
 import dev.ridill.oar.transactions.presentation.components.NewTransactionFab
 import dev.ridill.oar.transactions.presentation.components.TransactionListItem
+import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -504,6 +510,66 @@ private fun FolderTransactionsOptionsSheet(
             modifier = Modifier
                 .fillParentMaxWidth()
                 .animateItem()
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewFolderDetailsScreen() {
+    val transactionPagingItems = flowOf(
+        PagingData.from(
+            listOf(
+                TransactionListItemUIModel.CycleSeparator(
+                    CycleIndicator(1L, "August 2023")
+                ),
+                TransactionListItemUIModel.TransactionItem(
+                    id = 1L,
+                    note = "Sample Transaction",
+                    amount = 100.0,
+                    currency = java.util.Currency.getInstance("INR"),
+                    timestamp = LocalDateTime.now(),
+                    type = TransactionType.DEBIT,
+                    excluded = false,
+                    cycleEntry = CycleIndicator(1L, "August 2023"),
+                    tag = null,
+                    folder = null,
+                    scheduleId = null
+                )
+            )
+        )
+    ).collectAsLazyPagingItems()
+
+    OarTheme {
+        FolderDetailsScreen(
+            snackbarController = rememberSnackbarController(),
+            state = FolderDetailsState(
+                folderName = "Sample Folder",
+                createdTimestamp = LocalDateTime.now()
+            ),
+            transactionPagingItems = transactionPagingItems,
+            actions = object : FolderDetailsActions {
+                override fun onCycleSelect(id: Long) {}
+                override fun onDeleteClick() {}
+                override fun onDeleteDismiss() {}
+                override fun onDeleteFolderOnlyClick() {}
+                override fun onDeleteFolderAndTransactionsClick() {}
+                override fun onTransactionSwipeActionRevealed() {}
+                override fun onRemoveTransactionFromFolderClick(id: Long) {}
+                override fun onTransactionLongPress(id: Long) {}
+                override fun onTransactionSelectionChange(id: Long) {}
+                override fun onMultiSelectionModeDismiss() {}
+                override fun onMultiSelectionOptionDismiss() {}
+                override fun onMultiSelectionOptionsClick() {}
+                override fun onMultiSelectionOptionClick(option: FolderTransactionsMultiSelectionOption) {}
+                override fun onDeleteTransactionsDismiss() {}
+                override fun onDeleteTransactionsConfirm() {}
+                override fun onRemoveTransactionsFromFolderDismiss() {}
+                override fun onRemoveTransactionsFromFolderConfirm() {}
+            },
+            navigateToEditFolder = {},
+            navigateToAddEditTransaction = {},
+            navigateUp = {}
         )
     }
 }
