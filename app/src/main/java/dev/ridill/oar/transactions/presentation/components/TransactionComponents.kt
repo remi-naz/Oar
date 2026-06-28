@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.NewLine
-import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.domain.util.WhiteSpace
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.orZero
@@ -110,15 +109,36 @@ fun TransactionListItem(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
                 CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
-                    if (note.isEmpty() && folder != null) {
-                        FolderIndicator(
-                            name = folder.name
-                        )
-                    } else {
-                        NoteText(
-                            note = note,
-                            type = type
-                        )
+                    when {
+                        note.isNotEmpty() -> {
+                            Text(
+                                text = note,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                color = LocalContentColor.current,
+                                style = LocalTextStyle.current.copy(fontWeight = FontWeight.Medium)
+                            )
+                        }
+
+                        tag != null -> {
+                            TagLabel(name = tag.name)
+                        }
+
+                        folder != null -> {
+                            FolderIndicator(name = folder.name)
+                        }
+
+                        else -> {
+                            Text(
+                                text = stringResource(type.labelRes),
+                                overflow = TextOverflow.Ellipsis,
+                                color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT),
+                                style = LocalTextStyle.current.copy(
+                                    fontStyle = FontStyle.Italic,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -171,26 +191,32 @@ fun TransactionListItem(
 }
 
 @Composable
-private fun NoteText(
-    note: String,
-    type: TransactionType,
+private fun TagLabel(
+    name: String,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = note.ifEmpty { stringResource(type.labelRes) },
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier,
-        color = LocalContentColor.current.copy(
-            alpha = if (note.isEmpty()) ContentAlpha.SUB_CONTENT
-            else Float.One
-        ),
-        style = LocalTextStyle.current.copy(
-            fontStyle = if (note.isEmpty()) FontStyle.Italic
-            else null,
-            fontWeight = FontWeight.Medium
-        )
-    )
+    CompositionLocalProvider(
+        LocalContentColor provides LocalContentColor.current
+            .copy(alpha = ContentAlpha.SUB_CONTENT)
+    ) {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_tag),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(SmallIndicatorSize)
+            )
+            Text(
+                text = name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
 }
 
 @Composable
