@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -32,13 +33,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import dev.ridill.oar.R
+import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.theme.ContentAlpha
+import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import kotlin.math.roundToInt
 
@@ -125,11 +130,14 @@ internal fun FolderCard(
                 .layoutId(FolderContent)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
                 if (excluded) {
-                    ExcludedIconSmall()
+                    ExcludedIconSmall(
+                        modifier = Modifier
+                            .padding(top = MaterialTheme.spacing.extraSmall)
+                    )
                 }
                 Text(
                     text = name,
@@ -197,4 +205,19 @@ private class FolderCardMeasurePolicy : MeasurePolicy {
 @Composable
 private fun rememberMeasurePolicy(): MeasurePolicy = remember {
     FolderCardMeasurePolicy()
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewFolderCard() {
+    OarTheme {
+        Surface {
+            FolderCard(
+                name = LoremIpsum(2).values.joinToString(),
+                created = DateUtil.now().format(DateUtil.Formatters.localizedDateLong),
+                excluded = true,
+                onClick = {},
+            )
+        }
+    }
 }

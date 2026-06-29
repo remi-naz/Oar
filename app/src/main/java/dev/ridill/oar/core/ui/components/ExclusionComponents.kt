@@ -47,9 +47,8 @@ fun ExcludedIconSmall(
     modifier: Modifier = Modifier,
     tint: Color = DefaultTint,
 ) = ExcludedIcon(
-    modifier = Modifier
-        .size(DefaultIndicatorSizeSmall)
-        .then(modifier),
+    modifier = modifier
+        .size(DefaultIndicatorSizeSmall),
     tint = tint
 )
 
