@@ -45,6 +45,7 @@ import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
+import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 import kotlin.math.roundToInt
 
 @Composable
@@ -131,7 +132,9 @@ internal fun FolderCard(
         ) {
             Row(
                 verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+                modifier = Modifier
+                    .exclusionGraphicsLayer(excluded)
             ) {
                 if (excluded) {
                     ExcludedIconSmall(
