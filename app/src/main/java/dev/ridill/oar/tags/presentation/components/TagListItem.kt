@@ -15,9 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import dev.ridill.oar.R
-import dev.ridill.oar.core.ui.components.ExcludedIcon
+import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.components.ListItemLeadingContentContainer
-import dev.ridill.oar.core.ui.theme.IconSizeSmall
 import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
@@ -38,9 +37,7 @@ fun TagListItem(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
                 if (excluded) {
-                    ExcludedIcon(
-                        size = IconSizeSmall
-                    )
+                    ExcludedIconSmall()
                 }
                 Text(name)
             }

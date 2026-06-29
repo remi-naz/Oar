@@ -29,7 +29,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.DateUtil
-import dev.ridill.oar.core.ui.components.ExcludedIndicatorSmall
+import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.components.ListItemLeadingContentContainer
 import dev.ridill.oar.core.ui.components.ListSearchSheet
 import dev.ridill.oar.core.ui.theme.spacing
@@ -159,7 +159,7 @@ private fun FolderSelectionCard(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
                 if (excluded) {
-                    ExcludedIndicatorSmall()
+                    ExcludedIconSmall()
                 }
                 Text(
                     text = name,

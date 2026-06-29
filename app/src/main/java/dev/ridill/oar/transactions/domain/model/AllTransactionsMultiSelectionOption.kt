@@ -25,7 +25,7 @@ enum class AllTransactionsMultiSelectionOption(
         labelRes = R.string.all_transactions_multi_selection_option_remove_tag
     ),
     EXCLUDE_FROM_EXPENDITURE(
-        iconRes = R.drawable.ic_outlined_exclude,
+        iconRes = R.drawable.ic_excluded,
         labelRes = R.string.all_transactions_multi_selection_option_mark_excluded
     ),
     INCLUDE_IN_EXPENDITURE(
