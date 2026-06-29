@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import dev.ridill.oar.R
-import dev.ridill.oar.core.ui.components.ExcludedIndicatorSmall
+import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.spacing
 import kotlin.math.roundToInt
@@ -129,7 +129,7 @@ internal fun FolderCard(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
                 if (excluded) {
-                    ExcludedIndicatorSmall()
+                    ExcludedIconSmall()
                 }
                 Text(
                     text = name,
