@@ -63,7 +63,10 @@ import dev.ridill.oar.core.ui.util.UiText
 fun OarModalBottomSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    sheetState: SheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
+    sheetState: SheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    ),
     sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,

@@ -25,6 +25,7 @@ import dev.ridill.oar.core.ui.components.OutlinedTextFieldSheet
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.UiText
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun AddEditFolderSheet(
@@ -40,7 +41,7 @@ fun AddEditFolderSheet(
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(isEditMode) {
         if (!isEditMode) {
-            delay(500)
+            delay(500.milliseconds)
             focusRequester.requestFocus()
         }
     }

@@ -17,13 +17,10 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -45,6 +42,7 @@ import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.ButtonWithLoadingIndicator
 import dev.ridill.oar.core.ui.components.DisplayMediumText
 import dev.ridill.oar.core.ui.components.DisplaySmallText
+import dev.ridill.oar.core.ui.components.OarModalBottomSheet
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.PasswordField
 import dev.ridill.oar.core.ui.components.SecureTextFieldKeyboardOptions
@@ -154,10 +152,9 @@ private fun PasswordUpdateSheet(
         }
     }
 
-    ModalBottomSheet(
+    OarModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
-        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
     ) {
         Column(
             modifier = Modifier

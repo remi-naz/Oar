@@ -34,15 +34,12 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.MediumFloatingActionButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -88,6 +85,7 @@ import dev.ridill.oar.core.ui.components.ConfirmationDialog
 import dev.ridill.oar.core.ui.components.ExcludedIcon
 import dev.ridill.oar.core.ui.components.LabelledRadioButton
 import dev.ridill.oar.core.ui.components.OarDatePickerDialog
+import dev.ridill.oar.core.ui.components.OarModalBottomSheet
 import dev.ridill.oar.core.ui.components.OarPlainTooltip
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.OarTextField
@@ -681,10 +679,9 @@ private fun RepetitionSelectionSheet(
     onRepetitionSelect: (ScheduleRepetition) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ModalBottomSheet(
+    OarModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
-        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
     ) {
         TitleLargeText(
             text = stringResource(R.string.select_schedule_repetition),
