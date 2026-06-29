@@ -3,10 +3,10 @@ package dev.ridill.oar.core.ui.components
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -21,40 +21,42 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
-import dev.ridill.oar.core.ui.theme.IconSizeSmall
 import dev.ridill.oar.core.ui.theme.spacing
 
 @Composable
 fun ExcludedIcon(
     modifier: Modifier = Modifier,
-    size: Dp = DefaultIndicatorSize,
-    tint: Color = LocalContentColor.current
-) = Icon(
-    imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_exclude),
-    contentDescription = stringResource(R.string.cd_excluded),
-    modifier = Modifier
-        .size(size)
-        .then(modifier),
-    tint = tint
-)
+    tint: Color = DefaultTint,
+) {
+    Icon(
+        imageVector = ImageVector.vectorResource(R.drawable.ic_excluded),
+        contentDescription = null,
+        tint = tint,
+        modifier = modifier
+            .defaultMinSize(
+                minWidth = DefaultIndicatorSize,
+                minHeight = DefaultIndicatorSize,
+            )
+    )
+}
 
 @Composable
-fun ExcludedIndicatorSmall(
+fun ExcludedIconSmall(
     modifier: Modifier = Modifier,
-    tint: Color = LocalContentColor.current
-) = Icon(
-    imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_exclude),
-    contentDescription = stringResource(R.string.cd_excluded),
+    tint: Color = DefaultTint,
+) = ExcludedIcon(
     modifier = Modifier
-        .size(IconSizeSmall)
+        .size(DefaultIndicatorSizeSmall)
         .then(modifier),
     tint = tint
 )
 
 private val DefaultIndicatorSize = 16.dp
+private val DefaultIndicatorSizeSmall = 14.dp
+private val DefaultTint: Color
+    @Composable get() = MaterialTheme.colorScheme.error
 
 @Composable
 fun MarkExcludedSwitch(
@@ -77,9 +79,7 @@ fun MarkExcludedSwitch(
             )
             .then(modifier)
     ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_exclude),
-            contentDescription = null,
+        ExcludedIcon(
             modifier = Modifier
                 .size(SwitchDefaults.IconSize)
         )

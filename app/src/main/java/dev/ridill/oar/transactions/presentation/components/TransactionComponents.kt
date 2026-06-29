@@ -48,7 +48,7 @@ import dev.ridill.oar.core.domain.util.WhiteSpace
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.core.ui.components.AmountWithTypeIndicator
-import dev.ridill.oar.core.ui.components.ExcludedIndicatorSmall
+import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.components.LabelLargeText
 import dev.ridill.oar.core.ui.components.ListItemLeadingContentContainer
 import dev.ridill.oar.core.ui.theme.ContentAlpha
@@ -109,6 +109,9 @@ fun TransactionListItem(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
                 CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
+                    if (excluded) {
+                        ExcludedIconSmall()
+                    }
                     when {
                         note.isNotEmpty() -> {
                             Text(
@@ -152,18 +155,10 @@ fun TransactionListItem(
             )
         },
         trailingContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-            ) {
-                if (excluded) {
-                    ExcludedIndicatorSmall()
-                }
-                AmountWithTypeIndicator(
-                    value = amount,
-                    type = type
-                )
-            }
+            AmountWithTypeIndicator(
+                value = amount,
+                type = type
+            )
         },
         supportingContent = {
             if (note.isNotEmpty()) {
@@ -368,7 +363,7 @@ private fun PreviewTransactionListItem() {
             modifier = Modifier,
             tag = TagIndicator(id = Long.Zero, name = "Test", color = Color.Yellow),
             folder = null,
-            excluded = false
+            excluded = true
         )
     }
 }
