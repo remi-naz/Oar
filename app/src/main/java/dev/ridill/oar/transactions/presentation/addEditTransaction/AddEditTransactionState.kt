@@ -31,5 +31,5 @@ data class AddEditTransactionState(
     val selectedCycleId: Long? = null,
 ) {
     val timestampUtc: ZonedDateTime
-        get() = timestamp.atZone(ZoneId.of(ZoneOffset.UTC.id))
+        get() = timestamp.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC)
 }
