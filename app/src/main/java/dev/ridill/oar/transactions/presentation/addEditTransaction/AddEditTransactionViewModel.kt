@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.ZoneOffset
 import java.util.Currency
 import javax.inject.Inject
 
@@ -320,7 +321,8 @@ class AddEditTransactionViewModel @Inject constructor(
         savedStateHandle[TX_INPUT] = txInput.value?.copy(
             timestamp = DateUtil.dateFromMillisWithTime(
                 millis = millis,
-                time = txInput.value?.timestamp?.toLocalTime() ?: DateUtil.timeNow()
+                time = txInput.value?.timestamp?.toLocalTime() ?: DateUtil.timeNow(),
+                zoneId = ZoneOffset.UTC
             )
         )
         savedStateHandle[SHOW_DATE_PICKER] = false

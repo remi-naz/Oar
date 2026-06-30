@@ -4,6 +4,8 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import dev.ridill.oar.aggregations.data.local.AggregationsDao
 import dev.ridill.oar.budgetCycles.data.local.BudgetCycleDao
 import dev.ridill.oar.budgetCycles.data.local.entity.BudgetCycleEntity
@@ -21,6 +23,8 @@ import dev.ridill.oar.tags.data.local.entity.TagEntity
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import dev.ridill.oar.transactions.data.local.views.TransactionDetailsView
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Database(
     entities = [
@@ -36,7 +40,7 @@ import dev.ridill.oar.transactions.data.local.views.TransactionDetailsView
         BudgetCycleDetailsView::class,
         TransactionDetailsView::class,
     ],
-    version = 5,
+    version = 6,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -62,4 +66,49 @@ abstract class OarDatabase : RoomDatabase() {
     abstract fun schedulesDao(): SchedulesDao
     abstract fun currencyListDao(): CurrencyListDao
     abstract fun configDao(): ConfigDao
+}
+
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        val zone = ZoneId.systemDefault()
+        migrateColumn(db, zone, "transaction_table", "id", "timestamp")
+        migrateColumn(db, zone, "schedules_table", "id", "last_payment_timestamp")
+        migrateColumn(db, zone, "schedules_table", "id", "next_payment_timestamp")
+        migrateColumn(db, zone, "folder_table", "id", "created_timestamp")
+        migrateColumn(db, zone, "tag_table", "id", "created_timestamp")
+    }
+
+    private fun migrateColumn(
+        db: SupportSQLiteDatabase,
+        zone: ZoneId,
+        table: String,
+        idColumn: String,
+        column: String
+    ) {
+        val cursor = db.query(
+            "SELECT $idColumn, $column FROM $table WHERE $column IS NOT NULL"
+        )
+        try {
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(0)
+                val value = cursor.getString(1) ?: continue
+                // Skip rows that are already in UTC instant format
+                if (value.endsWith('Z') || value.contains('+')) continue
+                val utcStr = runCatching {
+                    LocalDateTime.parse(value)
+                        .atZone(zone)
+                        .toInstant()
+                        .toString()
+                }.getOrNull() ?: continue
+                db.execSQL(
+                    "UPDATE $table SET $column = ? WHERE $idColumn = ?",
+                    arrayOf<Any>(utcStr, id)
+                )
+            }
+        } catch (_: Throwable) {
+
+        } finally {
+            cursor.close()
+        }
+    }
 }

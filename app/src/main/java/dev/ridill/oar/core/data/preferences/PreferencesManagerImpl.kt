@@ -12,6 +12,8 @@ import dev.ridill.oar.core.domain.util.logE
 import dev.ridill.oar.core.domain.util.orFalse
 import dev.ridill.oar.core.domain.util.orTrue
 import dev.ridill.oar.core.domain.util.tryOrNull
+import java.time.Instant
+import java.time.ZoneId
 import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
 import dev.ridill.oar.settings.domain.modal.AppTheme
 import dev.ridill.oar.settings.domain.repositoty.FatalBackupError
@@ -41,7 +43,10 @@ class PreferencesManagerImpl(
             )
             val dynamicColorsEnabled = preferences[Keys.DYNAMIC_COLORS_ENABLED].orFalse()
             val lastBackupDateTime = preferences[Keys.LAST_BACKUP_TIMESTAMP]
-                ?.let { DateUtil.parseDateTimeOrNull(it) }
+                ?.let { str ->
+                    tryOrNull { Instant.parse(str).atZone(ZoneId.systemDefault()).toLocalDateTime() }
+                        ?: DateUtil.parseDateTimeOrNull(str)
+                }
             val transactionAutoDetectEnabled =
                 preferences[Keys.TRANSACTION_AUTO_DETECT_ENABLED].orFalse()
             val allTransactionsShowExcludedOption =
@@ -100,7 +105,10 @@ class PreferencesManagerImpl(
     override suspend fun updateLastBackupTimestamp(localDateTime: LocalDateTime) {
         withContext(Dispatchers.IO) {
             dataStore.edit { preferences ->
-                preferences[Keys.LAST_BACKUP_TIMESTAMP] = localDateTime.toString()
+                preferences[Keys.LAST_BACKUP_TIMESTAMP] = localDateTime
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toString()
             }
         }
     }
