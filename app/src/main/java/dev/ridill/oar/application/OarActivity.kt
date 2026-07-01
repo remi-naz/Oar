@@ -13,17 +13,14 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.auth.AuthPromptCallback
 import androidx.biometric.auth.startClass2BiometricOrCredentialAuthentication
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.navigation.BottomSheetNavigator
-import androidx.compose.material.navigation.rememberBottomSheetNavigator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -41,8 +38,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.SinglePaneSceneStrategy
+import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.BiometricUtil
@@ -51,9 +51,15 @@ import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.circularReveal
-import dev.ridill.oar.core.ui.navigation.OarNavHost
-import dev.ridill.oar.core.ui.navigation.destinations.DashboardScreenSpec
-import dev.ridill.oar.core.ui.navigation.destinations.OnboardingScreenSpec
+import dev.ridill.oar.core.ui.components.slideInHorizontallyWithFadeIn
+import dev.ridill.oar.core.ui.components.slideOutHorizontallyWithFadeOut
+import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
+import dev.ridill.oar.core.ui.navigation.DashboardRoute
+import dev.ridill.oar.core.ui.navigation.OarNavigator
+import dev.ridill.oar.core.ui.navigation.OnboardingRoute
+import dev.ridill.oar.core.ui.navigation.buildOarEntryProvider
+import dev.ridill.oar.core.ui.navigation.rememberNavResultBusNavEntryDecorator
+import dev.ridill.oar.core.ui.navigation.rememberOarNavigator
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.UiText
@@ -133,25 +139,21 @@ class OarActivity : AppCompatActivity() {
                 )
             }
 
-            val bottomSheetNavigator = rememberBottomSheetNavigator()
-            val navController = rememberNavController(bottomSheetNavigator)
+            val backStack = rememberNavBackStack(DashboardRoute)
+            val navigator = rememberOarNavigator(backStack)
 
             LaunchedEffect(showOnboarding) {
-                if (showOnboarding) navController.navigate(OnboardingScreenSpec.route) {
-                    popUpTo(DashboardScreenSpec.route) {
-                        inclusive = true
-                    }
+                if (showOnboarding) {
+                    backStack.clear()
+                    backStack.add(OnboardingRoute)
                 }
             }
 
-            val windowSizeClass = calculateWindowSizeClass(activity = this)
             CompositionLocalProvider(
                 LocalCurrencyPreference provides appCurrencyPreference
             ) {
                 ScreenContent(
-                    navController = navController,
-                    bottomSheetNavigator = bottomSheetNavigator,
-                    windowSizeClass = windowSizeClass,
+                    navigator = navigator,
                     darkTheme = darkTheme,
                     dynamicTheme = dynamicTheme,
                     appLockErrorMessage = appLockErrorMessage,
@@ -243,9 +245,7 @@ const val RUN_CONFIG_RESTORE_EXTRA = "RUN_CONFIG_RESTORE_EXTRA"
 
 @Composable
 private fun ScreenContent(
-    navController: NavHostController,
-    bottomSheetNavigator: BottomSheetNavigator,
-    windowSizeClass: WindowSizeClass,
+    navigator: OarNavigator,
     darkTheme: Boolean,
     dynamicTheme: Boolean,
     appLockErrorMessage: UiText?,
@@ -287,10 +287,37 @@ private fun ScreenContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            OarNavHost(
-                windowSizeClass = windowSizeClass,
-                bottomSheetNavigator = bottomSheetNavigator,
-                navController = navController
+            NavDisplay(
+                backStack = navigator.backStack,
+                onBack = navigator::goBack,
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                    rememberNavResultBusNavEntryDecorator(),
+                ),
+                entryProvider = buildOarEntryProvider(navigator),
+                sceneStrategies = listOf(
+                    SinglePaneSceneStrategy(),
+                    BottomSheetSceneStrategy()
+                ),
+                transitionSpec = {
+                    ContentTransform(
+                        targetContentEnter = slideInHorizontallyWithFadeIn { it / 2 },
+                        initialContentExit = slideOutHorizontallyWithFadeOut { -it / 2 },
+                    )
+                },
+                popTransitionSpec = {
+                    ContentTransform(
+                        targetContentEnter = slideInHorizontallyWithFadeIn { -it / 2 },
+                        initialContentExit = slideOutHorizontallyWithFadeOut { it / 2 },
+                    )
+                },
+                predictivePopTransitionSpec = {
+                    ContentTransform(
+                        targetContentEnter = slideInHorizontallyWithFadeIn { -it / 2 },
+                        initialContentExit = slideOutHorizontallyWithFadeOut { it / 2 },
+                    )
+                }
             )
 
             if (showAppLock) {

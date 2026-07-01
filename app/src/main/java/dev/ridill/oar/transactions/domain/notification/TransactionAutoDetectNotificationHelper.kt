@@ -9,15 +9,14 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationChannelGroupCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import dev.ridill.oar.R
 import dev.ridill.oar.application.OarActivity
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.UtilConstants
-import dev.ridill.oar.core.ui.navigation.destinations.ARG_TRANSACTION_ID
-import dev.ridill.oar.core.ui.navigation.destinations.AddEditTransactionScreenSpec
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.model.TransactionType
+
+const val ARG_TRANSACTION_ID = "ARG_TRANSACTION_ID"
 
 @SuppressLint("MissingPermission")
 class TransactionAutoDetectNotificationHelper(
@@ -96,16 +95,9 @@ class TransactionAutoDetectNotificationHelper(
     }
 
     private fun buildContentIntent(id: Long): PendingIntent? {
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            AddEditTransactionScreenSpec.buildDeeplink(id),
-            context,
-            OarActivity::class.java
-        )
-        return TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(intent)
-            getPendingIntent(id.hashCode(), UtilConstants.pendingIntentFlags)
-        }
+        // TODO: restore deep link target navigation (Nav3 advanced deep-link recipe)
+        val intent = Intent(context, OarActivity::class.java)
+        return PendingIntent.getActivity(context, id.hashCode(), intent, UtilConstants.pendingIntentFlags)
     }
 
     private fun buildDeleteAction(id: Long): NotificationCompat.Action {

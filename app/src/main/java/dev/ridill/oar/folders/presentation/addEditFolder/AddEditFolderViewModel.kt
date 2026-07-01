@@ -6,11 +6,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.saveable
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.textAsFlow
-import dev.ridill.oar.core.ui.navigation.destinations.AddEditFolderSheetSpec
+import dev.ridill.oar.core.ui.navigation.AddEditFolderSheetRoute
+import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.folders.domain.model.Folder
 import dev.ridill.oar.folders.domain.repository.AddEditFolderRepository
@@ -20,16 +24,20 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AddEditFolderViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = AddEditFolderViewModel.Factory::class)
+class AddEditFolderViewModel @AssistedInject constructor(
+    @Assisted val route: AddEditFolderSheetRoute,
     private val savedStateHandle: SavedStateHandle,
     private val repo: AddEditFolderRepository,
     private val eventBus: EventBus<AddEditFolderEvent>
 ) : ViewModel(), AddEditFolderActions {
 
-    private val folderId = AddEditFolderSheetSpec.getFolderIdFromSavedStateHandle(savedStateHandle)
+    @AssistedFactory
+    interface Factory {
+        fun create(route: AddEditFolderSheetRoute): AddEditFolderViewModel
+    }
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading get() = _isLoading.asStateFlow()
 
@@ -49,7 +57,8 @@ class AddEditFolderViewModel @Inject constructor(
     }
 
     private fun onInit() = viewModelScope.launch {
-        val folder = repo.getFolderDetails(folderId) ?: Folder.NEW
+        val folderId = route.folderId.takeIf { it != INVALID_ID_LONG }
+        val folder = folderId?.let { repo.getFolderDetails(it) } ?: Folder.NEW
         savedStateHandle[FOLDER_INPUT] = folder
         folderNameState.setTextAndPlaceCursorAtEnd(folder.name)
     }

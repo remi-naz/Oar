@@ -11,7 +11,6 @@ import androidx.paging.compose.itemKey
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.LabelledRadioButton
 import dev.ridill.oar.core.ui.components.ListSearchSheet
-import dev.ridill.oar.core.ui.navigation.destinations.CurrencySelectionSheetSpec
 import java.util.Currency
 
 @Composable
@@ -26,7 +25,7 @@ fun CurrencySelectionSheet(
     ListSearchSheet(
         inputState = searchQueryState,
         onDismiss = onDismiss,
-        title = stringResource(CurrencySelectionSheetSpec.labelRes),
+        title = stringResource(R.string.destination_select_currency),
         placeholder = stringResource(R.string.search_currency),
         modifier = modifier
     ) {

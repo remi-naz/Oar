@@ -8,12 +8,10 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationChannelGroupCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import dev.ridill.oar.R
 import dev.ridill.oar.application.OarActivity
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.UtilConstants
-import dev.ridill.oar.core.ui.navigation.destinations.BackupSettingsScreenSpec
 
 class BackupNotificationHelper(
     private val context: Context
@@ -67,15 +65,8 @@ class BackupNotificationHelper(
     }
 
     private fun buildContentIntent(): PendingIntent? {
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            BackupSettingsScreenSpec.buildDeeplink(),
-            context,
-            OarActivity::class.java
-        )
-        return TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(intent)
-            getPendingIntent(1, UtilConstants.pendingIntentFlags)
-        }
+        // TODO: restore deep link target navigation (Nav3 advanced deep-link recipe)
+        val intent = Intent(context, OarActivity::class.java)
+        return PendingIntent.getActivity(context, 1, intent, UtilConstants.pendingIntentFlags)
     }
 }

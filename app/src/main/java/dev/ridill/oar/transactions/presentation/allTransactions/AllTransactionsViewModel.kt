@@ -17,8 +17,8 @@ import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.addOrRemove
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.textAsFlow
-import dev.ridill.oar.core.ui.navigation.destinations.AddEditTxResult
-import dev.ridill.oar.core.ui.navigation.destinations.NavDestination
+import dev.ridill.oar.core.ui.navigation.AddEditTxResult
+import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.transactions.domain.model.AllTransactionsMultiSelectionOption
 import dev.ridill.oar.transactions.domain.model.TransactionTypeFilter
@@ -316,7 +316,7 @@ class AllTransactionsViewModel @Inject constructor(
     }
 
     fun onFolderSelect(folderId: Long) {
-        if (folderId == NavDestination.ARG_INVALID_ID_LONG) return
+        if (folderId == INVALID_ID_LONG) return
         viewModelScope.launch {
             val selectedIds = selectedTransactionIds.value
             transactionRepo.addTransactionsToFolderByIds(

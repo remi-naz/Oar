@@ -49,7 +49,6 @@ import dev.ridill.oar.core.ui.components.SecureTextFieldKeyboardOptions
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
-import dev.ridill.oar.core.ui.navigation.destinations.BackupEncryptionScreenSpec
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 
@@ -69,7 +68,7 @@ fun BackupEncryptionScreen(
         isLoading = state.isLoading,
         topBar = {
             MediumFlexibleTopAppBar(
-                title = { Text(stringResource(BackupEncryptionScreenSpec.labelRes)) },
+                title = { Text(stringResource(R.string.destination_backup_encryption)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
                 scrollBehavior = topAppBarScrollBehavior
             )
@@ -94,7 +93,7 @@ fun BackupEncryptionScreen(
                 modifier = Modifier
                     .size(IconSize)
             )
-            DisplaySmallText(stringResource(BackupEncryptionScreenSpec.labelRes))
+            DisplaySmallText(stringResource(R.string.destination_backup_encryption))
 
             SpacerMedium()
 

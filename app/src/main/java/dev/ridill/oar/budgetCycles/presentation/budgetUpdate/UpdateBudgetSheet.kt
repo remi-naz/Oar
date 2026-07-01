@@ -11,7 +11,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.OutlinedTextFieldSheet
 import dev.ridill.oar.core.ui.components.rememberAmountOutputTransformation
-import dev.ridill.oar.core.ui.navigation.destinations.UpdateBudgetSheetSpec
 import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.UiText
 
@@ -26,7 +25,7 @@ fun UpdateBudgetSheet(
 ) {
     val localCurrency = LocalCurrencyPreference.current
     OutlinedTextFieldSheet(
-        titleRes = UpdateBudgetSheetSpec.labelRes,
+        titleRes = R.string.destination_update_budget,
         inputState = inputState,
         onDismiss = onDismiss,
         onConfirm = onConfirm,

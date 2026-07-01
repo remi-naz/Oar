@@ -27,7 +27,6 @@ import dev.ridill.oar.core.ui.components.LabelledRadioButton
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.PermissionRationaleDialog
 import dev.ridill.oar.core.ui.components.SnackbarController
-import dev.ridill.oar.core.ui.navigation.destinations.SecuritySettingsScreenSpec
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
 import dev.ridill.oar.settings.presentation.components.SimpleSettingsPreference
@@ -45,7 +44,7 @@ fun SecuritySettingsScreen(
     OarScaffold(
         topBar = {
             MediumFlexibleTopAppBar(
-                title = { Text(stringResource(SecuritySettingsScreenSpec.labelRes)) },
+                title = { Text(stringResource(R.string.destination_security_settings)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
                 scrollBehavior = topAppBarScrollBehavior
             )
