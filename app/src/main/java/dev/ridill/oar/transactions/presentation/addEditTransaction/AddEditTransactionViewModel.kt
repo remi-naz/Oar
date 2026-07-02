@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.saveable
 import com.zhuinden.flowcombinetuplekt.combineTuple
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
@@ -20,10 +23,10 @@ import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.ifInfinite
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.core.domain.util.textAsFlow
-import dev.ridill.oar.core.ui.navigation.destinations.AddEditTransactionScreenSpec
-import dev.ridill.oar.core.ui.navigation.destinations.AddEditTxResult
-import dev.ridill.oar.core.ui.navigation.destinations.NavDestination
-import dev.ridill.oar.core.ui.navigation.destinations.TransformationResult
+import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
+import dev.ridill.oar.core.ui.navigation.AddEditTxResult
+import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
+import dev.ridill.oar.core.ui.navigation.TransformationResult
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.schedules.data.toTransaction
@@ -41,10 +44,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.ZoneOffset
 import java.util.Currency
-import javax.inject.Inject
 
-@HiltViewModel
-class AddEditTransactionViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = AddEditTransactionViewModel.Factory::class)
+class AddEditTransactionViewModel @AssistedInject constructor(
+    @Assisted val route: AddEditTransactionRoute,
     private val savedStateHandle: SavedStateHandle,
     private val cycleRepo: BudgetCycleRepository,
     private val transactionRepo: AddEditTransactionRepository,
@@ -52,22 +55,15 @@ class AddEditTransactionViewModel @Inject constructor(
     private val eventBus: EventBus<AddEditTransactionEvent>
 ) : ViewModel(), AddEditTransactionActions {
 
-    private val transactionIdArg = AddEditTransactionScreenSpec
-        .getTransactionIdFromSavedStateHandle(savedStateHandle)
-
-    private val linkFolderIdArg = AddEditTransactionScreenSpec
-        .getFolderIdToLinkFromSavedStateHandle(savedStateHandle)
-
-    private val scheduleModeArg = AddEditTransactionScreenSpec
-        .getIsScheduleModeFromSavedStateHandle(savedStateHandle)
-
-    private val isDuplicateModeArg = AddEditTransactionScreenSpec
-        .getIsDuplicateModeFromSavedStateHandle(savedStateHandle)
+    @AssistedFactory
+    interface Factory {
+        fun create(route: AddEditTransactionRoute): AddEditTransactionViewModel
+    }
 
     private val isLoading = MutableStateFlow(false)
 
     private val coercedIdArg: Long
-        get() = transactionIdArg.coerceAtLeast(OarDatabase.DEFAULT_ID_LONG)
+        get() = route.transactionId.coerceAtLeast(OarDatabase.DEFAULT_ID_LONG)
 
     private val isScheduleTxMode = savedStateHandle.getStateFlow(IS_SCHEDULE_MODE, false)
 
@@ -138,12 +134,12 @@ class AddEditTransactionViewModel @Inject constructor(
     ).mapLatest { (scheduleMode) ->
         var optionEntries = AddEditTxOption.entries.toSet()
 
-        if (transactionIdArg == NavDestination.ARG_INVALID_ID_LONG) {
+        if (route.transactionId == INVALID_ID_LONG) {
             optionEntries = optionEntries - AddEditTxOption.DELETE
             optionEntries = optionEntries - AddEditTxOption.DUPLICATE
         }
 
-        if (isDuplicateModeArg) {
+        if (route.isDuplicateMode) {
             optionEntries = optionEntries - AddEditTxOption.DUPLICATE
         }
 
@@ -226,8 +222,8 @@ class AddEditTransactionViewModel @Inject constructor(
 
         viewModelScope.launch {
             val activeCycle = cycleRepo.getActiveCycle()
-            val transaction: Transaction = if (scheduleModeArg) {
-                val schedule = transactionRepo.getScheduleById(transactionIdArg)
+            val transaction: Transaction = if (route.isScheduleMode) {
+                val schedule = transactionRepo.getScheduleById(route.transactionId)
                 savedStateHandle[SELECTED_REPETITION] = schedule?.repetition
                     ?: ScheduleRepetition.NO_REPEAT
 
@@ -236,11 +232,11 @@ class AddEditTransactionViewModel @Inject constructor(
                     dateTime = schedule.nextPaymentTimestamp
                         ?: DateUtil.now()
                             .plusDays(1L),
-                    txId = transactionIdArg
+                    txId = route.transactionId
                 )
             } else {
-                var transaction = transactionRepo.getTransactionById(transactionIdArg)
-                if (isDuplicateModeArg) {
+                var transaction = transactionRepo.getTransactionById(route.transactionId)
+                if (route.isDuplicateMode) {
                     transaction = transaction?.copy(
                         id = OarDatabase.DEFAULT_ID_LONG,
                     )
@@ -250,14 +246,14 @@ class AddEditTransactionViewModel @Inject constructor(
                 cycleId = activeCycle?.id ?: OarDatabase.INVALID_ID_LONG,
                 currency = activeCycle?.currency ?: LocaleUtil.defaultCurrency,
             )
-            savedStateHandle[IS_SCHEDULE_MODE] = scheduleModeArg
+            savedStateHandle[IS_SCHEDULE_MODE] = route.isScheduleMode
             val dateNow = DateUtil.now()
             val timestamp = if (isScheduleTxMode.value && transaction.timestamp <= dateNow)
                 dateNow.plusDays(1)
             else transaction.timestamp
 
             savedStateHandle[TX_INPUT] = transaction.copy(
-                folderId = linkFolderIdArg ?: transaction.folderId,
+                folderId = route.linkFolderId ?: transaction.folderId,
                 timestamp = timestamp
             )
             amountInputState.setTextAndPlaceCursorAtEnd(transaction.amount)
@@ -438,7 +434,7 @@ class AddEditTransactionViewModel @Inject constructor(
 
     fun onFolderSelectionResult(id: Long) {
         savedStateHandle[TX_INPUT] = txInput.value?.copy(
-            folderId = id.takeIf { it != NavDestination.ARG_INVALID_ID_LONG }
+            folderId = id.takeIf { it != INVALID_ID_LONG }
         )
     }
 
@@ -500,12 +496,9 @@ class AddEditTransactionViewModel @Inject constructor(
             isLoading.update { true }
             var scheduleOrTxIdForInsertion = txInput.id
             if (isScheduleTxMode.value) {
-                // Saving schedule
-                // scheduleModeArg = false means this input started off as a transaction
-                // and is being changed to a schedule now
-                // so delete the initial transaction before saving the schedule
-                // and reset the id to Default value to save new schedule
-                if (!scheduleModeArg) {
+                // scheduleModeArg = false means this tx was converted to a schedule;
+                // delete the initial transaction before saving the schedule
+                if (!route.isScheduleMode) {
                     transactionRepo.deleteTransaction(txInput.id)
                     scheduleOrTxIdForInsertion = OarDatabase.DEFAULT_ID_LONG
                 }
@@ -519,13 +512,10 @@ class AddEditTransactionViewModel @Inject constructor(
                 isLoading.update { false }
                 eventBus.send(AddEditTransactionEvent.NavigateUpWithResult(AddEditTxResult.SCHEDULE_SAVED))
             } else {
-                // Saving transaction
-                // scheduleModeArg = true means this input started off as a schedule
-                // and is being changed to a transaction now
-                // so delete the initial schedule before saving the transaction
-                // and reset the id to Default value to save new transaction
+                // scheduleModeArg = true means this schedule was converted to a transaction;
+                // delete the initial schedule before saving the transaction
                 var linkedScheduleId = txInput.scheduleId
-                if (scheduleModeArg) {
+                if (route.isScheduleMode) {
                     transactionRepo.deleteSchedule(txInput.id)
                     linkedScheduleId = null
                     scheduleOrTxIdForInsertion = OarDatabase.DEFAULT_ID_LONG

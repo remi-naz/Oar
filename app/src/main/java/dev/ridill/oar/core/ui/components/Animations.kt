@@ -11,16 +11,16 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import dev.ridill.oar.core.domain.util.Zero
 
 @Composable
@@ -56,12 +56,13 @@ fun FadedVisibility(
     visible: Boolean,
     modifier: Modifier = Modifier,
     label: String = "FadedVisibility",
-    content: @Composable AnimatedVisibilityScope.() -> Unit
+    animationSpec: FiniteAnimationSpec<Float> = MaterialTheme.motionScheme.defaultSpatialSpec(),
+    content: @Composable AnimatedVisibilityScope.() -> Unit,
 ) = AnimatedVisibility(
     visible = visible,
     modifier = modifier,
-    enter = fadeIn(),
-    exit = fadeOut(),
+    enter = fadeIn(animationSpec),
+    exit = fadeOut(animationSpec),
     label = label,
     content = content
 )
@@ -77,63 +78,37 @@ fun simpleFadeOut(
 ): ExitTransition = fadeOut(animationSpec, targetAlpha)
 
 fun slideInHorizontallyWithFadeIn(
-    duration: Int = AnimationConstants.DefaultDurationMillis,
-    initialOffsetX: (fullWidth: Int) -> Int = { it }
+    slideAnimationSpec: FiniteAnimationSpec<IntOffset> = tween(AnimationConstants.DefaultDurationMillis),
+    fadeAnimationSpec: FiniteAnimationSpec<Float> = tween(AnimationConstants.DefaultDurationMillis),
+    initialOffsetX: (fullWidth: Int) -> Int = { it / 2 },
 ): EnterTransition = slideInHorizontally(
-    animationSpec = tween(durationMillis = duration),
+    animationSpec = slideAnimationSpec,
     initialOffsetX = initialOffsetX
-) + simpleFadeIn(
-    animationSpec = tween(durationMillis = duration)
-)
+) + simpleFadeIn(animationSpec = fadeAnimationSpec)
 
 fun slideOutHorizontallyWithFadeOut(
-    duration: Int = AnimationConstants.DefaultDurationMillis,
-    targetOffsetX: (fullWidth: Int) -> Int = { it }
+    slideAnimationSpec: FiniteAnimationSpec<IntOffset> = tween(AnimationConstants.DefaultDurationMillis),
+    fadeAnimationSpec: FiniteAnimationSpec<Float> = tween(AnimationConstants.DefaultDurationMillis),
+    targetOffsetX: (fullWidth: Int) -> Int = { it },
 ): ExitTransition = slideOutHorizontally(
-    animationSpec = tween(durationMillis = duration),
+    animationSpec = slideAnimationSpec,
     targetOffsetX = targetOffsetX
-) + simpleFadeOut(
-    animationSpec = tween(durationMillis = duration)
-)
+) + simpleFadeOut(animationSpec = fadeAnimationSpec)
 
 fun slideInVerticallyWithFadeIn(
-    duration: Int = AnimationConstants.DefaultDurationMillis,
-    initialOffsetY: (fullWidth: Int) -> Int = { it }
+    slideAnimationSpec: FiniteAnimationSpec<IntOffset> = tween(AnimationConstants.DefaultDurationMillis),
+    fadeAnimationSpec: FiniteAnimationSpec<Float> = tween(AnimationConstants.DefaultDurationMillis),
+    initialOffsetY: (fullWidth: Int) -> Int = { it },
 ): EnterTransition = slideInVertically(
-    animationSpec = tween(durationMillis = duration),
+    animationSpec = slideAnimationSpec,
     initialOffsetY = initialOffsetY
-) + simpleFadeIn(
-    animationSpec = tween(durationMillis = duration)
-)
+) + simpleFadeIn(animationSpec = fadeAnimationSpec)
 
 fun slideOutVerticallyWithFadeOut(
-    duration: Int = AnimationConstants.DefaultDurationMillis,
-    targetOffsetY: (fullWidth: Int) -> Int = { it }
+    slideAnimationSpec: FiniteAnimationSpec<IntOffset> = tween(AnimationConstants.DefaultDurationMillis),
+    fadeAnimationSpec: FiniteAnimationSpec<Float> = tween(AnimationConstants.DefaultDurationMillis),
+    targetOffsetY: (fullWidth: Int) -> Int = { it },
 ): ExitTransition = slideOutVertically(
-    animationSpec = tween(durationMillis = duration),
+    animationSpec = slideAnimationSpec,
     targetOffsetY = targetOffsetY
-) + simpleFadeOut(
-    animationSpec = tween(durationMillis = duration)
-)
-
-fun scaleInWithFadeIn(
-    duration: Int = AnimationConstants.DefaultDurationMillis,
-    initialScale: Float = DEFAULT_SCALE_FACTOR
-): EnterTransition = scaleIn(
-    animationSpec = tween(durationMillis = duration),
-    initialScale = initialScale
-) + simpleFadeIn(
-    animationSpec = tween(durationMillis = duration)
-)
-
-fun scaleOutWithFadeOut(
-    duration: Int = AnimationConstants.DefaultDurationMillis,
-    targetScale: Float = DEFAULT_SCALE_FACTOR
-): ExitTransition = scaleOut(
-    animationSpec = tween(durationMillis = duration),
-    targetScale = targetScale
-) + simpleFadeOut(
-    animationSpec = tween(durationMillis = duration)
-)
-
-private const val DEFAULT_SCALE_FACTOR = 0.9f
+) + simpleFadeOut(animationSpec = fadeAnimationSpec)

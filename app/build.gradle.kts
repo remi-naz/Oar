@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.parcelize)
+    alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.com.google.dagger.hilt.android)
     alias(libs.plugins.com.google.gms.google.services)
     alias(libs.plugins.com.google.devtools.ksp)
@@ -108,6 +109,7 @@ kotlin {
             "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
             "-opt-in=androidx.compose.ui.text.ExperimentalTextApi",
             "-opt-in=androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
         )
     }
 }
@@ -132,15 +134,16 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.animation)
 
-    implementation(libs.androidx.compose.material)
-
     androidTestImplementation(composeBom)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Compose Navigation
-    implementation(libs.androidx.navigation.compose)
+    // Navigation 3
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.org.jetbrains.kotlinx.serialization.json)
 
     // Lifecycle Components
     implementation(libs.androidx.lifecycle.runtime.compose)

@@ -20,7 +20,6 @@ import androidx.paging.compose.itemKey
 import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.model.CycleSelector
 import dev.ridill.oar.core.ui.components.ListSearchSheet
-import dev.ridill.oar.core.ui.navigation.destinations.CycleSelectionSheetSpec
 import dev.ridill.oar.core.ui.theme.spacing
 
 @Composable
@@ -35,7 +34,7 @@ fun CycleSelectionSheet(
     ListSearchSheet(
         inputState = queryState,
         onDismiss = onDismiss,
-        title = stringResource(CycleSelectionSheetSpec.labelRes),
+        title = stringResource(R.string.destination_budget_cycle_selection),
         placeholder = stringResource(R.string.search_cycle),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
         additionalEndContent = {

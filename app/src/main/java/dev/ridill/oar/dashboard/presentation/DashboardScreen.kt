@@ -75,8 +75,10 @@ import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.components.scrollableLayout.ScrollableHeaderLayout
 import dev.ridill.oar.core.ui.components.scrollableLayout.ScrollableLayoutDefaults
-import dev.ridill.oar.core.ui.navigation.destinations.AllTransactionsScreenSpec
-import dev.ridill.oar.core.ui.navigation.destinations.BottomNavDestination
+import androidx.navigation3.runtime.NavKey
+import dev.ridill.oar.core.ui.navigation.AllFoldersRoute
+import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
+import dev.ridill.oar.core.ui.navigation.SettingsRoute
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -100,7 +102,7 @@ fun DashboardScreen(
     state: DashboardState,
     navigateToAllTransactions: () -> Unit,
     navigateToAddEditTransaction: (id: Long?, isSchedule: Boolean) -> Unit,
-    navigateToBottomNavDestination: (BottomNavDestination) -> Unit
+    navigateTo: (NavKey) -> Unit
 ) {
     val areActiveSchedulesEmpty by remember(state.activeSchedules) {
         derivedStateOf { state.activeSchedules.isEmpty() }
@@ -115,20 +117,27 @@ fun DashboardScreen(
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    BottomNavDestination.bottomNavDestinations.forEach { destination ->
+                    val bottomNavItems = remember {
+                        listOf(
+                            Triple(SettingsRoute, R.drawable.ic_outlined_settings, R.string.destination_settings),
+                            Triple(AllSchedulesRoute, R.drawable.ic_outlined_alarm_clock, R.string.destination_schedules_graph),
+                            Triple(AllFoldersRoute, R.drawable.ic_outlined_folder, R.string.destination_folders_graph),
+                        )
+                    }
+                    bottomNavItems.forEach { (route, iconRes, labelRes) ->
                         OarPlainTooltip(
-                            tooltipText = stringResource(destination.labelRes),
+                            tooltipText = stringResource(labelRes),
                             focusable = false
                         ) {
                             IconButton(
-                                onClick = { navigateToBottomNavDestination(destination) },
+                                onClick = { navigateTo(route) },
                                 colors = IconButtonDefaults.iconButtonColors(
                                     contentColor = MaterialTheme.colorScheme.primary
                                 )
                             ) {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(destination.iconRes),
-                                    contentDescription = stringResource(destination.labelRes)
+                                    imageVector = ImageVector.vectorResource(iconRes),
+                                    contentDescription = stringResource(labelRes)
                                 )
                             }
                         }
@@ -460,7 +469,7 @@ private fun RecentSpendsHeader(
             modifier = Modifier
                 .alignBy(LastBaseline)
         ) {
-            Text("${stringResource(AllTransactionsScreenSpec.labelRes)} >")
+            Text("${stringResource(R.string.destination_all_transactions)} >")
         }
     }
 }
@@ -526,7 +535,7 @@ private fun PreviewDashboardScreen() {
             navigateToAllTransactions = {},
             navigateToAddEditTransaction = { _, _ -> },
             snackbarController = rememberSnackbarController(),
-            navigateToBottomNavDestination = {},
+            navigateTo = {},
             recentSpends = flowOf(PagingData.empty<TransactionEntry>()).collectAsLazyPagingItems(),
         )
     }

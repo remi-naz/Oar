@@ -3,17 +3,14 @@ package dev.ridill.oar.settings.domain.notification
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationChannelGroupCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import dev.ridill.oar.R
-import dev.ridill.oar.application.OarActivity
+import dev.ridill.oar.application.OarDeepLink
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.UtilConstants
-import dev.ridill.oar.core.ui.navigation.destinations.BackupSettingsScreenSpec
 
 class BackupNotificationHelper(
     private val context: Context
@@ -67,15 +64,14 @@ class BackupNotificationHelper(
     }
 
     private fun buildContentIntent(): PendingIntent? {
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            BackupSettingsScreenSpec.buildDeeplink(),
+        val intent = OarDeepLink.backupSettingsIntent(context)
+        return PendingIntent.getActivity(
             context,
-            OarActivity::class.java
+            CONTENT_INTENT_REQUEST_CODE.hashCode(),
+            intent,
+            UtilConstants.pendingIntentFlags
         )
-        return TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(intent)
-            getPendingIntent(1, UtilConstants.pendingIntentFlags)
-        }
     }
 }
+
+private const val CONTENT_INTENT_REQUEST_CODE = "BACKUP_CONTENT_INTENT"

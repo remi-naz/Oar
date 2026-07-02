@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.zhuinden.flowcombinetuplekt.combineTuple
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.aggregations.domain.repository.AggregationsRepository
@@ -12,7 +15,7 @@ import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.orFalse
-import dev.ridill.oar.core.ui.navigation.destinations.FolderDetailsScreenSpec
+import dev.ridill.oar.core.ui.navigation.FolderDetailsRoute
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.folders.domain.model.FolderTransactionsMultiSelectionOption
 import dev.ridill.oar.folders.domain.repository.FolderDetailsRepository
@@ -24,10 +27,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class FolderDetailsViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = FolderDetailsViewModel.Factory::class)
+class FolderDetailsViewModel @AssistedInject constructor(
+    @Assisted val route: FolderDetailsRoute,
     private val savedStateHandle: SavedStateHandle,
     private val repo: FolderDetailsRepository,
     private val aggRepo: AggregationsRepository,
@@ -35,11 +38,12 @@ class FolderDetailsViewModel @Inject constructor(
     private val eventBus: EventBus<FolderDetailsEvent>
 ) : ViewModel(), FolderDetailsActions {
 
-    private val folderIdArg = FolderDetailsScreenSpec
-        .getFolderIdArgFromSavedStateHandle(savedStateHandle)
+    @AssistedFactory
+    interface Factory {
+        fun create(route: FolderDetailsRoute): FolderDetailsViewModel
+    }
 
-    private val folderIdFlow = MutableStateFlow(folderIdArg)
-    private val folderDetails = repo.getFolderDetailsById(folderIdArg)
+    private val folderDetails = repo.getFolderDetailsById(route.folderId)
     private val folderName = folderDetails
         .mapLatest { it?.name.orEmpty() }
         .distinctUntilChanged()
@@ -50,7 +54,7 @@ class FolderDetailsViewModel @Inject constructor(
         .mapLatest { it?.excluded.orFalse() }
         .distinctUntilChanged()
 
-    val transactionPagingData = repo.getTransactionsInFolderPaged(folderIdArg)
+    val transactionPagingData = repo.getTransactionsInFolderPaged(route.folderId)
         .cachedIn(viewModelScope)
 
     private val showDeleteFolderConfirmation = savedStateHandle
@@ -150,8 +154,7 @@ class FolderDetailsViewModel @Inject constructor(
 
     override fun onDeleteFolderOnlyClick() {
         viewModelScope.launch {
-            val id = folderIdFlow.value
-            repo.deleteFolderById(id)
+            repo.deleteFolderById(route.folderId)
             savedStateHandle[SHOW_DELETE_FOLDER_CONFIRMATION] = false
             eventBus.send(FolderDetailsEvent.FolderDeleted)
         }
@@ -159,8 +162,7 @@ class FolderDetailsViewModel @Inject constructor(
 
     override fun onDeleteFolderAndTransactionsClick() {
         viewModelScope.launch {
-            val id = folderIdFlow.value
-            repo.deleteFolderWithTransactions(id)
+            repo.deleteFolderWithTransactions(route.folderId)
             savedStateHandle[SHOW_DELETE_FOLDER_CONFIRMATION] = false
             eventBus.send(FolderDetailsEvent.FolderDeleted)
         }
@@ -184,7 +186,7 @@ class FolderDetailsViewModel @Inject constructor(
     }
 
     fun onRemoveTransactionUndo(txId: Long) = viewModelScope.launch {
-        repo.addTransactionToFolder(txId, folderIdArg)
+        repo.addTransactionToFolder(txId, route.folderId)
     }
 
     override fun onTransactionLongPress(id: Long) {

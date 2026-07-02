@@ -50,7 +50,6 @@ import dev.ridill.oar.core.ui.components.PermissionState
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.SwipeActionsContainer
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
-import dev.ridill.oar.core.ui.navigation.destinations.AllSchedulesScreenSpec
 import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.isEmpty
@@ -96,7 +95,7 @@ fun AllSchedulesScreen(
                             R.string.count_selected,
                             state.selectedScheduleIds.size
                         )
-                        else stringResource(AllSchedulesScreenSpec.labelRes)
+                        else stringResource(R.string.destination_all_schedules)
                     )
                 },
                 navigationIcon = {

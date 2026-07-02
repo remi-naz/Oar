@@ -45,7 +45,6 @@ import dev.ridill.oar.core.ui.components.PermissionRationaleDialog
 import dev.ridill.oar.core.ui.components.RadioOptionListDialog
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.icons.Message
-import dev.ridill.oar.core.ui.navigation.destinations.SettingsScreenSpec
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.settings.domain.modal.AppTheme
@@ -75,7 +74,7 @@ fun SettingsScreen(
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
             MediumFlexibleTopAppBar(
-                title = { Text(stringResource(SettingsScreenSpec.labelRes)) },
+                title = { Text(stringResource(R.string.destination_settings)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
                 scrollBehavior = topAppBarScrollBehavior
             )
