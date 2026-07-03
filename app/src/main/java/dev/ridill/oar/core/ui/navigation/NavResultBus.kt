@@ -7,16 +7,23 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.receiveAsFlow
 
 class NavResultBus {
-    private val _channel = Channel<Any>(Channel.CONFLATED)
+    private val _results = MutableSharedFlow<Any>(replay = 1)
 
-    fun <T : Any> sendResult(result: T) { _channel.trySend(result) }
+    fun <T : Any> sendResult(result: T) {
+        _results.tryEmit(result)
+    }
 
-    val results get() = _channel.receiveAsFlow()
+    val results: SharedFlow<Any> = _results.asSharedFlow()
+
+    fun consumeResult() {
+        _results.resetReplayCache()
+    }
 }
 
 val LocalResultBus = compositionLocalOf<NavResultBus> { error("No NavResultBus provided") }
@@ -25,7 +32,10 @@ val LocalResultBus = compositionLocalOf<NavResultBus> { error("No NavResultBus p
 inline fun <reified T : Any> ResultEffect(crossinline onResult: (T) -> Unit) {
     val bus = LocalResultBus.current
     LaunchedEffect(bus) {
-        bus.results.filterIsInstance<T>().collect { onResult(it) }
+        bus.results.filterIsInstance<T>().collect {
+            onResult(it)
+            bus.consumeResult()
+        }
     }
 }
 
