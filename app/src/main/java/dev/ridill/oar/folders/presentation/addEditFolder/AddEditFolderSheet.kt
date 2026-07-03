@@ -21,7 +21,7 @@ import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.ui.components.ButtonWithLoadingIndicator
 import dev.ridill.oar.core.ui.components.MarkExcludedSwitch
-import dev.ridill.oar.core.ui.components.OutlinedTextFieldSheet
+import dev.ridill.oar.core.ui.components.OutlinedTextFieldSheetContent
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.UiText
 import kotlinx.coroutines.delay
@@ -35,7 +35,6 @@ fun AddEditFolderSheet(
     errorMessage: UiText?,
     isEditMode: Boolean,
     actions: AddEditFolderActions,
-    onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -46,7 +45,7 @@ fun AddEditFolderSheet(
         }
     }
 
-    OutlinedTextFieldSheet(
+    OutlinedTextFieldSheetContent(
         title = {
             Row(
                 modifier = Modifier
@@ -64,7 +63,6 @@ fun AddEditFolderSheet(
             }
         },
         inputState = nameState,
-        onDismiss = onDismiss,
         text = {
             if (!isEditMode) {
                 Text(

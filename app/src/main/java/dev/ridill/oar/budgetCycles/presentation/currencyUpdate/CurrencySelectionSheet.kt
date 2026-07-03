@@ -10,7 +10,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.LabelledRadioButton
-import dev.ridill.oar.core.ui.components.ListSearchSheet
+import dev.ridill.oar.core.ui.components.ListSearchSheetContent
 import java.util.Currency
 
 @Composable
@@ -18,13 +18,11 @@ fun CurrencySelectionSheet(
     searchQueryState: TextFieldState,
     selectedCode: String?,
     currenciesPagingData: LazyPagingItems<Currency>,
-    onDismiss: () -> Unit,
     onConfirm: (Currency) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ListSearchSheet(
+    ListSearchSheetContent(
         inputState = searchQueryState,
-        onDismiss = onDismiss,
         title = stringResource(R.string.destination_select_currency),
         placeholder = stringResource(R.string.search_currency),
         modifier = modifier

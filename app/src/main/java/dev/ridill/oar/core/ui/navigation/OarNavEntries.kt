@@ -86,7 +86,7 @@ import dev.ridill.oar.tags.presentation.addEditTag.AddEditTagSheet
 import dev.ridill.oar.tags.presentation.addEditTag.AddEditTagViewModel
 import dev.ridill.oar.tags.presentation.allTags.AllTagsScreen
 import dev.ridill.oar.tags.presentation.allTags.AllTagsViewModel
-import dev.ridill.oar.tags.presentation.tagSelection.SingleTagSelectionSheet
+import dev.ridill.oar.tags.presentation.tagSelection.SingleTagSelectionSheetContent
 import dev.ridill.oar.transactions.presentation.addEditTransaction.AddEditTransactionScreen
 import dev.ridill.oar.transactions.presentation.addEditTransaction.AddEditTransactionViewModel
 import dev.ridill.oar.transactions.presentation.allTransactions.AllTransactionsScreen
@@ -507,7 +507,6 @@ fun EntryProviderScope<NavKey>.transactionEntries(
         val resultBus = LocalResultBus.current
 
         AmountTransformationSheet(
-            onDismiss = navigator::goBack,
             selectedTransformation = selectedTransformation,
             onTransformationSelect = viewModel::onTransformationSelect,
             factorInput = viewModel.factorInputState,
@@ -642,8 +641,7 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
             excluded = { input.value.excluded },
             errorMessage = errorMessage,
             isEditMode = editMode,
-            actions = viewModel,
-            onDismiss = navigator::goBack
+            actions = viewModel
         )
     }
 
@@ -666,7 +664,6 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
             foldersListLazyPagingItems = foldersList,
             onFolderSelect = viewModel::onFolderSelect,
             onCreateNewClick = { navigator.navigate(AddEditFolderSheetRoute()) },
-            onDismiss = navigator::goBack,
             onClearSelectionClick = {
                 resultBus.sendResult<FolderSelectedResult>(FolderSelectedResult(INVALID_ID_LONG))
                 navigator.goBack()
@@ -743,7 +740,6 @@ fun EntryProviderScope<NavKey>.tagEntries(navigator: OarNavigator) {
             excluded = { input.value.excluded },
             errorMessage = error,
             isEditMode = isEditMode,
-            onDismiss = navigator::goBack,
             showDeleteTagConfirmation = showDeleteTagConfirmation,
             actions = viewModel
         )
@@ -753,9 +749,8 @@ fun EntryProviderScope<NavKey>.tagEntries(navigator: OarNavigator) {
         val preSelectedId = key.preselectedId.takeIf { it != INVALID_ID_LONG }
         val resultBus = LocalResultBus.current
 
-        SingleTagSelectionSheet(
+        SingleTagSelectionSheetContent(
             preSelectedId = preSelectedId,
-            onDismiss = navigator::goBack,
             onConfirm = { selectedId ->
                 resultBus.sendResult<TagSelectedResult>(TagSelectedResult(selectedId))
                 navigator.goBack()
@@ -911,7 +906,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
             placeholder = TextFormat.number(currentBudget),
             inputState = inputState,
             onConfirm = viewModel::onConfirm,
-            onDismiss = navigator::goBack,
             errorMessage = inputError
         )
     }
@@ -1133,7 +1127,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
             searchQueryState = searchQueryState,
             selectedCode = key.preSelectedCurrCode,
             currenciesPagingData = currenciesLazyPagingItems,
-            onDismiss = navigator::goBack,
             onConfirm = { currency ->
                 resultBus.sendResult<Currency>(currency)
                 navigator.goBack()
@@ -1156,7 +1149,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
             cyclesLazyPagingItems = cyclesLazyPagingItems,
             selectedId = selectedId,
             onCycleSelect = viewModel::onCycleSelect,
-            onDismiss = navigator::goBack,
             onConfirm = {
                 resultBus.sendResult<CycleSelectedResult>(CycleSelectedResult(selectedId))
                 navigator.goBack()

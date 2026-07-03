@@ -324,8 +324,8 @@ private fun ScreenContent(
                     motionScheme = motionScheme
                 ),
                 sceneStrategies = listOf(
-                    SinglePaneSceneStrategy(),
-                    BottomSheetSceneStrategy()
+                    BottomSheetSceneStrategy(),
+                    SinglePaneSceneStrategy()
                 ),
                 transitionSpec = {
                     ContentTransform(
