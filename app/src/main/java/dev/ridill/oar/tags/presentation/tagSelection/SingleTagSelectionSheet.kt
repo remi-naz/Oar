@@ -12,37 +12,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.ridill.oar.R
-import dev.ridill.oar.core.ui.components.OarModalBottomSheet
 import dev.ridill.oar.core.ui.components.TitleLargeText
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 
 @Composable
-fun SingleTagSelectionSheet(
-    onDismiss: () -> Unit,
+fun SingleTagSelectionSheetContent(
     preSelectedId: Long?,
     onConfirm: (Long?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OarModalBottomSheet(
-        onDismissRequest = onDismiss,
-        modifier = modifier
-    ) {
-        SingleTagSelectionSheetContent(
-            preSelectedId = preSelectedId,
-            onConfirm = { id -> onConfirm(id) },
-        )
-    }
-}
-
-
-@Composable
-private fun SingleTagSelectionSheetContent(
-    preSelectedId: Long?,
-    onConfirm: (Long?) -> Unit,
-) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = MaterialTheme.spacing.medium)
             .padding(bottom = MaterialTheme.spacing.large)

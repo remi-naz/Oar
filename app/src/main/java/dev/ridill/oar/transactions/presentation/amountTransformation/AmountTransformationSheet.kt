@@ -19,13 +19,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import dev.ridill.oar.R
-import dev.ridill.oar.core.ui.components.TextFieldSheet
+import dev.ridill.oar.core.ui.components.TextFieldSheetContent
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.transactions.domain.model.AmountTransformation
 
 @Composable
 fun AmountTransformationSheet(
-    onDismiss: () -> Unit,
     selectedTransformation: AmountTransformation,
     onTransformationSelect: (AmountTransformation) -> Unit,
     factorInput: TextFieldState,
@@ -46,7 +45,7 @@ fun AmountTransformationSheet(
             AmountTransformation.PERCENT -> R.string.enter_percent
         }
     }
-    TextFieldSheet(
+    TextFieldSheetContent(
         title = {
             Text(
                 text = stringResource(R.string.transform_amount),
@@ -55,7 +54,6 @@ fun AmountTransformationSheet(
             )
         },
         inputState = factorInput,
-        onDismiss = onDismiss,
         text = {
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier

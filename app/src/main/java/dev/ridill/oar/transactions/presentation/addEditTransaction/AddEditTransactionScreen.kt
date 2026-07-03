@@ -97,7 +97,6 @@ import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.TitleLargeText
 import dev.ridill.oar.core.ui.components.rememberAmountOutputTransformation
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
-import dev.ridill.oar.core.ui.navigation.destinations.AllSchedulesScreenSpec
 import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.IconSizeSmall
 import dev.ridill.oar.core.ui.theme.OarTheme
@@ -663,7 +662,7 @@ private fun TransactionRepeatModeIndicator(
         Text(
             text = stringResource(
                 R.string.scheduled_transactions_can_be_found_in_corresponding_screen,
-                stringResource(AllSchedulesScreenSpec.labelRes)
+                stringResource(R.string.destination_all_schedules)
             ),
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier

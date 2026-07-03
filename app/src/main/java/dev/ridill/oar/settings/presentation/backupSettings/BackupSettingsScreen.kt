@@ -47,7 +47,6 @@ import dev.ridill.oar.core.ui.components.RadioOptionListDialog
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.icons.Google
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
-import dev.ridill.oar.core.ui.navigation.destinations.BackupSettingsScreenSpec
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.settings.domain.modal.BackupInterval
@@ -73,7 +72,7 @@ fun BackupSettingsScreen(
         snackbarController = snackbarController,
         topBar = {
             MediumFlexibleTopAppBar(
-                title = { Text(stringResource(BackupSettingsScreenSpec.labelRes)) },
+                title = { Text(stringResource(R.string.destination_backup_settings)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
                 scrollBehavior = topAppBarScrollBehavior
             )

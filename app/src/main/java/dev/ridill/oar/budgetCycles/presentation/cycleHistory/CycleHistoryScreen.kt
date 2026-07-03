@@ -59,7 +59,6 @@ import dev.ridill.oar.core.ui.components.TitleLargeText
 import dev.ridill.oar.core.ui.components.TitleMediumText
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSwipeToActionState
-import dev.ridill.oar.core.ui.navigation.destinations.BudgetCyclesScreenSpec
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.NegativeRed
 import dev.ridill.oar.core.ui.theme.OarTheme
@@ -87,7 +86,7 @@ fun BudgetCyclesScreenContent(
     OarScaffold(
         topBar = {
             MediumFlexibleTopAppBar(
-                title = { Text(stringResource(BudgetCyclesScreenSpec.labelRes)) },
+                title = { Text(stringResource(R.string.destination_budget_cycles)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
                 scrollBehavior = topAppBarScrollBehavior
             )

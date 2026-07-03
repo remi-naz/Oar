@@ -6,7 +6,6 @@ import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.Zero
-import dev.ridill.oar.core.ui.navigation.destinations.ARG_TRANSACTION_ID
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository

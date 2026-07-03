@@ -2,6 +2,7 @@ package dev.ridill.oar.application
 
 import android.Manifest
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.SystemBarStyle
@@ -13,17 +14,18 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.auth.AuthPromptCallback
 import androidx.biometric.auth.startClass2BiometricOrCredentialAuthentication
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.navigation.BottomSheetNavigator
-import androidx.compose.material.navigation.rememberBottomSheetNavigator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -35,14 +37,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.unit.IntOffset
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.SinglePaneSceneStrategy
+import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.BiometricUtil
@@ -51,9 +59,15 @@ import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.circularReveal
-import dev.ridill.oar.core.ui.navigation.OarNavHost
-import dev.ridill.oar.core.ui.navigation.destinations.DashboardScreenSpec
-import dev.ridill.oar.core.ui.navigation.destinations.OnboardingScreenSpec
+import dev.ridill.oar.core.ui.components.slideInHorizontallyWithFadeIn
+import dev.ridill.oar.core.ui.components.slideOutHorizontallyWithFadeOut
+import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
+import dev.ridill.oar.core.ui.navigation.DashboardRoute
+import dev.ridill.oar.core.ui.navigation.OarNavigator
+import dev.ridill.oar.core.ui.navigation.OnboardingRoute
+import dev.ridill.oar.core.ui.navigation.buildOarEntryProvider
+import dev.ridill.oar.core.ui.navigation.rememberNavResultBusNavEntryDecorator
+import dev.ridill.oar.core.ui.navigation.rememberOarNavigator
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.UiText
@@ -67,6 +81,7 @@ import kotlinx.coroutines.launch
 class OarActivity : AppCompatActivity() {
 
     private val viewModel: OarViewModel by viewModels()
+    private val pendingDeepLink = mutableStateOf<NavKey?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -76,7 +91,7 @@ class OarActivity : AppCompatActivity() {
             logI(OarActivity::class.simpleName) { "$RUN_CONFIG_RESTORE_EXTRA = $runConfigRestore" }
             if (runConfigRestore) viewModel.startConfigRestore()
         }
-
+        pendingDeepLink.value = OarDeepLink.resolve(intent)
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -121,37 +136,43 @@ class OarActivity : AppCompatActivity() {
             CollectFlowEffect(snapshotFlow { darkTheme }) { isDarkTheme ->
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(
-                        lightScrim = android.graphics.Color.TRANSPARENT,
-                        darkScrim = android.graphics.Color.TRANSPARENT,
+                        lightScrim = Color.TRANSPARENT,
+                        darkScrim = Color.TRANSPARENT,
                         detectDarkMode = { isDarkTheme }
                     ),
                     navigationBarStyle = SystemBarStyle.auto(
-                        lightScrim = android.graphics.Color.TRANSPARENT,
-                        darkScrim = android.graphics.Color.TRANSPARENT,
+                        lightScrim = Color.TRANSPARENT,
+                        darkScrim = Color.TRANSPARENT,
                         detectDarkMode = { isDarkTheme }
                     )
                 )
             }
 
-            val bottomSheetNavigator = rememberBottomSheetNavigator()
-            val navController = rememberNavController(bottomSheetNavigator)
+            val backStack = rememberNavBackStack(DashboardRoute)
+            val navigator = rememberOarNavigator(backStack)
 
             LaunchedEffect(showOnboarding) {
-                if (showOnboarding) navController.navigate(OnboardingScreenSpec.route) {
-                    popUpTo(DashboardScreenSpec.route) {
-                        inclusive = true
-                    }
+                if (showOnboarding) {
+                    backStack.clear()
+                    backStack.add(OnboardingRoute)
                 }
             }
 
-            val windowSizeClass = calculateWindowSizeClass(activity = this)
+            val deepLinkKey = pendingDeepLink.value
+            LaunchedEffect(deepLinkKey, showOnboarding) {
+                if (deepLinkKey != null && !showOnboarding) {
+                    backStack.clear()
+                    backStack.add(DashboardRoute)
+                    backStack.add(deepLinkKey)
+                    pendingDeepLink.value = null
+                }
+            }
+
             CompositionLocalProvider(
                 LocalCurrencyPreference provides appCurrencyPreference
             ) {
                 ScreenContent(
-                    navController = navController,
-                    bottomSheetNavigator = bottomSheetNavigator,
-                    windowSizeClass = windowSizeClass,
+                    navigator = navigator,
                     darkTheme = darkTheme,
                     dynamicTheme = dynamicTheme,
                     appLockErrorMessage = appLockErrorMessage,
@@ -181,8 +202,10 @@ class OarActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         val runConfigRestore = intent.getBooleanExtra(RUN_CONFIG_RESTORE_EXTRA, false)
         if (runConfigRestore) viewModel.startConfigRestore()
+        pendingDeepLink.value = OarDeepLink.resolve(intent)
     }
 
     private fun checkAppPermissions() {
@@ -243,9 +266,7 @@ const val RUN_CONFIG_RESTORE_EXTRA = "RUN_CONFIG_RESTORE_EXTRA"
 
 @Composable
 private fun ScreenContent(
-    navController: NavHostController,
-    bottomSheetNavigator: BottomSheetNavigator,
-    windowSizeClass: WindowSizeClass,
+    navigator: OarNavigator,
     darkTheme: Boolean,
     dynamicTheme: Boolean,
     appLockErrorMessage: UiText?,
@@ -287,10 +308,67 @@ private fun ScreenContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            OarNavHost(
-                windowSizeClass = windowSizeClass,
-                bottomSheetNavigator = bottomSheetNavigator,
-                navController = navController
+            val motionScheme = MaterialTheme.motionScheme
+            val slideAnimationSpec = motionScheme.slowSpatialSpec<IntOffset>()
+            val scaleAnimation = motionScheme.slowSpatialSpec<Float>()
+            NavDisplay(
+                backStack = navigator.backStack,
+                onBack = navigator::goBack,
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                    rememberNavResultBusNavEntryDecorator(),
+                ),
+                entryProvider = buildOarEntryProvider(
+                    navigator = navigator,
+                    motionScheme = motionScheme
+                ),
+                sceneStrategies = listOf(
+                    BottomSheetSceneStrategy(),
+                    SinglePaneSceneStrategy()
+                ),
+                transitionSpec = {
+                    ContentTransform(
+                        targetContentEnter = slideInHorizontallyWithFadeIn(
+                            slideAnimationSpec = slideAnimationSpec,
+                            fadeAnimationSpec = scaleAnimation,
+                            initialOffsetX = { it / 2 }
+                        ),
+                        initialContentExit = scaleOut(
+                            animationSpec = scaleAnimation,
+                            targetScale = NAV_ANIM_SCALE,
+                            transformOrigin = TransformOrigin.Center,
+                        ) + fadeOut(animationSpec = scaleAnimation),
+                    )
+                },
+                popTransitionSpec = {
+                    ContentTransform(
+                        targetContentEnter = scaleIn(
+                            animationSpec = scaleAnimation,
+                            initialScale = NAV_ANIM_SCALE,
+                            transformOrigin = TransformOrigin.Center,
+                        ) + fadeIn(animationSpec = scaleAnimation),
+                        initialContentExit = slideOutHorizontallyWithFadeOut(
+                            slideAnimationSpec = slideAnimationSpec,
+                            fadeAnimationSpec = scaleAnimation,
+                            targetOffsetX = { it / 2 }
+                        )
+                    )
+                },
+                predictivePopTransitionSpec = {
+                    ContentTransform(
+                        targetContentEnter = scaleIn(
+                            animationSpec = scaleAnimation,
+                            initialScale = NAV_ANIM_SCALE,
+                            transformOrigin = TransformOrigin.Center,
+                        ) + fadeIn(animationSpec = scaleAnimation),
+                        initialContentExit = slideOutHorizontallyWithFadeOut(
+                            slideAnimationSpec = slideAnimationSpec,
+                            fadeAnimationSpec = scaleAnimation,
+                            targetOffsetX = { it / 2 }
+                        )
+                    )
+                }
             )
 
             if (showAppLock) {
@@ -312,3 +390,4 @@ private fun ScreenContent(
 
 private const val UNLOCK_ICON_ANIM_DURATION = 800
 private const val APP_SCREEN_VISIBILITY_ANIM_DURATION = 500
+internal const val NAV_ANIM_SCALE = 0.95f

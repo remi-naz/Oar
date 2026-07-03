@@ -11,7 +11,7 @@ import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.ifNaN
-import dev.ridill.oar.core.ui.navigation.destinations.AddEditTxResult
+import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.dashboard.domain.repository.DashboardRepository
 import dev.ridill.oar.transactions.domain.model.Transaction

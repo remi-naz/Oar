@@ -36,7 +36,6 @@ import dev.ridill.oar.core.ui.components.EmptyListIndicator
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
-import dev.ridill.oar.core.ui.navigation.destinations.AllFoldersScreenSpec
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.spacing
@@ -61,7 +60,7 @@ fun AllFoldersScreen(
     OarScaffold(
         topBar = {
             MediumFlexibleTopAppBar(
-                title = { Text(stringResource(AllFoldersScreenSpec.labelRes)) },
+                title = { Text(stringResource(R.string.destination_all_folders)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
                 scrollBehavior = topAppBarScrollBehavior
             )

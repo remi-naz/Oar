@@ -8,13 +8,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.saveable
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.capitalizeFirstChar
 import dev.ridill.oar.core.domain.util.textAsFlow
-import dev.ridill.oar.core.ui.navigation.destinations.AddEditTagSheetSpec
-import dev.ridill.oar.core.ui.navigation.destinations.NavDestination
+import dev.ridill.oar.core.ui.navigation.AddEditTagSheetRoute
+import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.tags.domain.model.Tag
 import dev.ridill.oar.tags.domain.repository.TagsRepository
@@ -24,16 +27,20 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AddEditTagViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = AddEditTagViewModel.Factory::class)
+class AddEditTagViewModel @AssistedInject constructor(
+    @Assisted val route: AddEditTagSheetRoute,
     private val savedStateHandle: SavedStateHandle,
     private val repo: TagsRepository,
     private val eventBus: EventBus<AddEditTagEvent>
 ) : ViewModel(), AddEditTagActions {
 
-    private val tagIdArg = AddEditTagSheetSpec.getTagIdFromSavedStateHandle(savedStateHandle)
+    @AssistedFactory
+    interface Factory {
+        fun create(route: AddEditTagSheetRoute): AddEditTagViewModel
+    }
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading get() = _isLoading.asStateFlow()
 
@@ -56,13 +63,10 @@ class AddEditTagViewModel @Inject constructor(
     }
 
     private fun onInit() = viewModelScope.launch {
-        val tag = repo.getTagById(tagIdArg) ?: Tag.NEW
+        val tag = repo.getTagById(route.tagId) ?: Tag.NEW
         savedStateHandle[TAG_INPUT] = tag
-        if (tagIdArg == NavDestination.ARG_INVALID_ID_LONG) {
-            val prefilledName = AddEditTagSheetSpec
-                .getPrefilledNameFromSavedStateHandle(savedStateHandle)
-                .capitalizeFirstChar()
-            nameInputState.setTextAndPlaceCursorAtEnd(prefilledName)
+        if (route.tagId == INVALID_ID_LONG) {
+            nameInputState.setTextAndPlaceCursorAtEnd(route.prefilledName.capitalizeFirstChar())
         } else {
             nameInputState.setTextAndPlaceCursorAtEnd(tag.name)
         }
@@ -118,7 +122,7 @@ class AddEditTagViewModel @Inject constructor(
 
     override fun onDeleteTagConfirm() {
         viewModelScope.launch {
-            repo.deleteTagById(tagIdArg)
+            repo.deleteTagById(route.tagId)
             savedStateHandle[SHOW_DELETE_TAG_CONFIRMATION] = false
             eventBus.send(AddEditTagEvent.TagDeleted)
         }

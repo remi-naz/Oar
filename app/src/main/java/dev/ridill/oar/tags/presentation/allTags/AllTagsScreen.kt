@@ -43,7 +43,6 @@ import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.SearchField
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
-import dev.ridill.oar.core.ui.navigation.destinations.AllTagsScreenSpec
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
@@ -84,7 +83,7 @@ fun AllTagsScreen(
                     if (state.multiSelectionModeActive) {
                         Text(stringResource(R.string.count_selected, state.selectedIds.size))
                     } else {
-                        Text(stringResource(AllTagsScreenSpec.labelRes))
+                        Text(stringResource(R.string.destination_all_tags))
                     }
                 },
                 navigationIcon = {

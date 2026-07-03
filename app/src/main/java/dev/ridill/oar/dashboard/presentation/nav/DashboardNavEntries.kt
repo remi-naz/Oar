@@ -1,36 +1,31 @@
-package dev.ridill.oar.core.ui.navigation.destinations
+package dev.ridill.oar.dashboard.presentation.nav
 
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
-import dev.ridill.oar.core.ui.components.NavigationResultEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
+import dev.ridill.oar.core.ui.navigation.AddEditTxResult
+import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
+import dev.ridill.oar.core.ui.navigation.AllTransactionsRoute
+import dev.ridill.oar.core.ui.navigation.DashboardRoute
+import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
+import dev.ridill.oar.core.ui.navigation.OarNavigator
+import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.dashboard.presentation.DashboardScreen
 import dev.ridill.oar.dashboard.presentation.DashboardViewModel
 
-data object DashboardScreenSpec : ScreenSpec {
-    override val route: String
-        get() = "dashboard"
-
-    override val labelRes: Int
-        get() = R.string.destination_dashboard
-
-    @Composable
-    override fun Content(
-        windowSizeClass: WindowSizeClass,
-        navController: NavHostController,
-        navBackStackEntry: NavBackStackEntry
-    ) {
-        val viewModel: DashboardViewModel = hiltViewModel(navBackStackEntry)
+// region Dashboard
+fun EntryProviderScope<NavKey>.dashboardEntries(navigator: OarNavigator) {
+    entry<DashboardRoute> {
+        val viewModel: DashboardViewModel = hiltViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
         val recentSpendsLazyPagingItems =
             viewModel.recentSpendsPagingData.collectAsLazyPagingItems()
@@ -38,18 +33,11 @@ data object DashboardScreenSpec : ScreenSpec {
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
-        NavigationResultEffect(
-            resultKey = AddEditTxResult::name.name,
-            navBackStackEntry = navBackStackEntry,
-            viewModel,
-            onResult = viewModel::onNavResult
-        )
+        ResultEffect<AddEditTxResult> { result ->
+            viewModel.onNavResult(result)
+        }
 
-        CollectFlowEffect(
-            flow = viewModel.events,
-            snackbarController,
-            context
-        ) { event ->
+        CollectFlowEffect(flow = viewModel.events, snackbarController, context) { event ->
             when (event) {
                 DashboardViewModel.DashboardEvent.ScheduleSaved -> {
                     snackbarController.showSnackbar(
@@ -57,7 +45,7 @@ data object DashboardScreenSpec : ScreenSpec {
                         actionLabel = context.getString(R.string.action_view),
                         onSnackbarResult = { result ->
                             if (result == SnackbarResult.ActionPerformed) {
-                                navController.navigate(SchedulesGraphSpec.route)
+                                navigator.navigate(AllSchedulesRoute)
                             }
                         }
                     )
@@ -73,20 +61,18 @@ data object DashboardScreenSpec : ScreenSpec {
             snackbarController = snackbarController,
             recentSpends = recentSpendsLazyPagingItems,
             state = state,
-            navigateToAllTransactions = {
-                navController.navigate(AllTransactionsScreenSpec.route)
-            },
+            navigateToAllTransactions = { navigator.navigate(AllTransactionsRoute) },
             navigateToAddEditTransaction = { id, isSchedule ->
-                navController.navigate(
-                    AddEditTransactionScreenSpec.routeWithArg(
-                        transactionId = id,
-                        isScheduleTxMode = isSchedule
+                navigator.navigate(
+                    AddEditTransactionRoute(
+                        transactionId = id ?: INVALID_ID_LONG,
+                        isScheduleMode = isSchedule
                     )
                 )
             },
-            navigateToBottomNavDestination = {
-                navController.navigate(it.route)
-            }
+            navigateTo = { navigator.navigate(it) }
         )
     }
 }
+
+// endregion

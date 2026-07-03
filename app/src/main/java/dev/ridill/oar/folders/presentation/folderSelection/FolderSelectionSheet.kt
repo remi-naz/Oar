@@ -31,7 +31,7 @@ import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.components.ListItemLeadingContentContainer
-import dev.ridill.oar.core.ui.components.ListSearchSheet
+import dev.ridill.oar.core.ui.components.ListSearchSheetContent
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 import dev.ridill.oar.folders.domain.model.Folder
@@ -45,13 +45,11 @@ fun FolderSelectionSheet(
     onCreateNewClick: () -> Unit,
     onClearSelectionClick: () -> Unit,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ListSearchSheet(
+    ListSearchSheetContent(
         title = stringResource(R.string.select_folder),
         inputState = queryState,
-        onDismiss = onDismiss,
         placeholder = stringResource(R.string.search_folder),
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),

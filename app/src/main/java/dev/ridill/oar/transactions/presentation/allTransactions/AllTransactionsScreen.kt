@@ -95,7 +95,6 @@ import dev.ridill.oar.core.ui.components.slideInHorizontallyWithFadeIn
 import dev.ridill.oar.core.ui.components.slideInVerticallyWithFadeIn
 import dev.ridill.oar.core.ui.components.slideOutHorizontallyWithFadeOut
 import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
-import dev.ridill.oar.core.ui.navigation.destinations.AllTransactionsScreenSpec
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
@@ -481,7 +480,7 @@ private fun AllTransactionsTopAppBar(
                                 }
                             }
                         },
-                        placeholder = { Text(stringResource(AllTransactionsScreenSpec.labelRes)) },
+                        placeholder = { Text(stringResource(R.string.destination_all_transactions)) },
                     )
                 },
                 expanded = searchModeActive,

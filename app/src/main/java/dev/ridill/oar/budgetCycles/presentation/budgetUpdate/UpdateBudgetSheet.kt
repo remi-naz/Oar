@@ -9,9 +9,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import dev.ridill.oar.R
-import dev.ridill.oar.core.ui.components.OutlinedTextFieldSheet
+import dev.ridill.oar.core.ui.components.OutlinedTextFieldSheetContent
 import dev.ridill.oar.core.ui.components.rememberAmountOutputTransformation
-import dev.ridill.oar.core.ui.navigation.destinations.UpdateBudgetSheetSpec
 import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.UiText
 
@@ -20,15 +19,13 @@ fun UpdateBudgetSheet(
     placeholder: String,
     inputState: TextFieldState,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
     errorMessage: UiText?,
     modifier: Modifier = Modifier
 ) {
     val localCurrency = LocalCurrencyPreference.current
-    OutlinedTextFieldSheet(
-        titleRes = UpdateBudgetSheetSpec.labelRes,
+    OutlinedTextFieldSheetContent(
+        titleRes = R.string.destination_update_budget,
         inputState = inputState,
-        onDismiss = onDismiss,
         onConfirm = onConfirm,
         placeholder = placeholder,
         modifier = modifier,

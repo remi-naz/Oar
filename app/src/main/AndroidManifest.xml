@@ -25,6 +25,7 @@
         <activity
             android:name=".application.OarActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.Oar.Splash"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>

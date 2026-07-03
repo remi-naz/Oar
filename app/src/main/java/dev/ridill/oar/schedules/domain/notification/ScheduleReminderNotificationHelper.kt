@@ -9,12 +9,10 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationChannelGroupCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import dev.ridill.oar.R
-import dev.ridill.oar.application.OarActivity
+import dev.ridill.oar.application.OarDeepLink
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.UtilConstants
-import dev.ridill.oar.core.ui.navigation.destinations.AllSchedulesScreenSpec
 import dev.ridill.oar.schedules.domain.model.Schedule
 import dev.ridill.oar.schedules.domain.scheduleReminder.MarkScheduleAsPaidActionReceiver
 import dev.ridill.oar.schedules.domain.scheduleReminder.ScheduleReminder
@@ -97,19 +95,13 @@ class ScheduleReminderNotificationHelper(
     }
 
     private fun buildContentIntent(): PendingIntent? {
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            AllSchedulesScreenSpec.buildDeeplink(),
+        val intent = OarDeepLink.allSchedulesIntent(context)
+        return PendingIntent.getActivity(
             context,
-            OarActivity::class.java
+            CONTENT_INTENT_REQUEST_CODE.hashCode(),
+            intent,
+            UtilConstants.pendingIntentFlags
         )
-        return TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(intent)
-            getPendingIntent(
-                CONTENT_INTENT_REQUEST_CODE.hashCode(),
-                UtilConstants.pendingIntentFlags
-            )
-        }
     }
 
     private fun buildMarkPaidAction(id: Long): NotificationCompat.Action {

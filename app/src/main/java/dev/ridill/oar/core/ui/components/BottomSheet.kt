@@ -178,60 +178,161 @@ fun OutlinedTextFieldSheet(
     suffix: @Composable (() -> Unit)? = null,
     contentAfterTextField: @Composable (ColumnScope.() -> Unit)? = null
 ) {
-    val isInputEmpty by remember {
-        derivedStateOf { inputState.text.isEmpty() }
-    }
     OarModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+        OutlinedTextFieldSheetContent(
+            title = title,
+            inputState = inputState,
+            actionButton = actionButton,
+            textFieldModifier = textFieldModifier,
+            text = text,
+            textStyle = textStyle,
+            focusRequester = focusRequester,
+            errorMessage = errorMessage,
+            placeholder = placeholder,
+            label = label,
+            outputTransformation = outputTransformation,
+            keyboardOptions = keyboardOptions,
+            prefix = prefix,
+            suffix = suffix,
+            contentAfterTextField = contentAfterTextField
+        )
+    }
+}
+
+@Composable
+fun OutlinedTextFieldSheetContent(
+    title: @Composable () -> Unit,
+    inputState: TextFieldState,
+    actionButton: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
+    text: @Composable (() -> Unit)? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    errorMessage: UiText? = null,
+    placeholder: String? = null,
+    label: String? = null,
+    outputTransformation: OutputTransformation? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    prefix: @Composable (() -> Unit)? = null,
+    suffix: @Composable (() -> Unit)? = null,
+    contentAfterTextField: @Composable (ColumnScope.() -> Unit)? = null
+) {
+    val isInputEmpty by remember {
+        derivedStateOf { inputState.text.isEmpty() }
+    }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+        modifier = modifier
+    ) {
+        title()
+
+        text?.invoke()
+
+        OarOutlinedTextField(
+            state = inputState,
             modifier = Modifier
-        ) {
-            title()
-
-            text?.invoke()
-
-            OarOutlinedTextField(
-                state = inputState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.spacing.medium)
-                    .focusRequester(focusRequester)
-                    .then(textFieldModifier),
-                keyboardOptions = keyboardOptions,
-                label = label?.let { { Text(it) } },
-                supportingText = { errorMessage?.let { Text(it.asString()) } },
-                isError = errorMessage != null,
-                placeholder = placeholder?.let { { Text(it) } },
-                trailingIcon = {
-                    if (!isInputEmpty) {
-                        IconButton(onClick = inputState::clearText) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = stringResource(R.string.cd_clear)
-                            )
-                        }
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.spacing.medium)
+                .focusRequester(focusRequester)
+                .then(textFieldModifier),
+            keyboardOptions = keyboardOptions,
+            label = label?.let { { Text(it) } },
+            supportingText = { errorMessage?.let { Text(it.asString()) } },
+            isError = errorMessage != null,
+            placeholder = placeholder?.let { { Text(it) } },
+            trailingIcon = {
+                if (!isInputEmpty) {
+                    IconButton(onClick = inputState::clearText) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.cd_clear)
+                        )
                     }
-                },
-                prefix = prefix,
-                suffix = suffix,
-                textStyle = textStyle,
-                outputTransformation = outputTransformation
-            )
+                }
+            },
+            prefix = prefix,
+            suffix = suffix,
+            textStyle = textStyle,
+            outputTransformation = outputTransformation
+        )
 
-            contentAfterTextField?.invoke(this)
+        contentAfterTextField?.invoke(this)
 
-            Box(
-                modifier = Modifier
-                    .align(Alignment.End)
-            ) {
-                actionButton()
-            }
+        Box(
+            modifier = Modifier
+                .align(Alignment.End)
+        ) {
+            actionButton()
         }
     }
 }
+
+@Composable
+fun OutlinedTextFieldSheetContent(
+    @StringRes titleRes: Int,
+    inputState: TextFieldState,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
+    text: String? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    errorMessage: UiText? = null,
+    placeholder: String? = null,
+    label: String? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    @StringRes actionLabel: Int = R.string.action_confirm,
+    outputTransformation: OutputTransformation? = null,
+    prefix: @Composable (() -> Unit)? = null,
+    suffix: @Composable (() -> Unit)? = null,
+    contentAfterTextField: @Composable (ColumnScope.() -> Unit)? = null
+) = OutlinedTextFieldSheetContent(
+    title = {
+        Text(
+            text = stringResource(titleRes),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier
+                .padding(horizontal = MaterialTheme.spacing.medium)
+        )
+    },
+    inputState = inputState,
+    actionButton = {
+        Button(
+            onClick = onConfirm,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.spacing.medium)
+        ) {
+            Text(stringResource(actionLabel))
+        }
+    },
+    modifier = modifier,
+    text = text?.let {
+        {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .padding(horizontal = MaterialTheme.spacing.medium)
+            )
+        }
+    },
+    focusRequester = focusRequester,
+    errorMessage = errorMessage,
+    placeholder = placeholder,
+    label = label,
+    keyboardOptions = keyboardOptions,
+    prefix = prefix,
+    suffix = suffix,
+    textStyle = textStyle,
+    contentAfterTextField = contentAfterTextField,
+    textFieldModifier = textFieldModifier,
+    outputTransformation = outputTransformation
+)
 
 @Composable
 fun OutlinedPasswordFieldSheet(
@@ -376,58 +477,96 @@ fun TextFieldSheet(
     textFieldColors: TextFieldColors = TextFieldDefaults.colors(),
     contentAfterTextField: @Composable (ColumnScope.() -> Unit)? = null
 ) {
-    val isInputEmpty by remember {
-        derivedStateOf { inputState.text.isEmpty() }
-    }
     OarModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+        TextFieldSheetContent(
+            title = title,
+            inputState = inputState,
+            actionButton = actionButton,
+            text = text,
+            textStyle = textStyle,
+            focusRequester = focusRequester,
+            errorMessage = errorMessage,
+            placeholder = placeholder,
+            label = label,
+            showClearOption = showClearOption,
+            keyboardOptions = keyboardOptions,
+            prefix = prefix,
+            suffix = suffix,
+            textFieldColors = textFieldColors,
+            contentAfterTextField = contentAfterTextField
+        )
+    }
+}
+
+@Composable
+fun TextFieldSheetContent(
+    title: @Composable () -> Unit,
+    inputState: TextFieldState,
+    actionButton: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    text: @Composable (() -> Unit)? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    errorMessage: UiText? = null,
+    placeholder: String? = null,
+    label: String? = null,
+    showClearOption: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    prefix: @Composable (() -> Unit)? = null,
+    suffix: @Composable (() -> Unit)? = null,
+    textFieldColors: TextFieldColors = TextFieldDefaults.colors(),
+    contentAfterTextField: @Composable (ColumnScope.() -> Unit)? = null
+) {
+    val isInputEmpty by remember {
+        derivedStateOf { inputState.text.isEmpty() }
+    }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+        modifier = modifier
+            .padding(vertical = MaterialTheme.spacing.medium)
+    ) {
+        title()
+
+        text?.invoke()
+
+        OarTextField(
+            state = inputState,
             modifier = Modifier
-                .padding(vertical = MaterialTheme.spacing.medium)
-        ) {
-            title()
-
-            text?.invoke()
-
-            OarTextField(
-                state = inputState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.spacing.medium)
-                    .focusRequester(focusRequester),
-                keyboardOptions = keyboardOptions,
-                label = label?.let { { Text(it) } },
-                supportingText = { errorMessage?.let { Text(it.asString()) } },
-                isError = errorMessage != null,
-                placeholder = placeholder?.let { { Text(it) } },
-                trailingIcon = {
-                    if (showClearOption && !isInputEmpty) {
-                        IconButton(onClick = inputState::clearText) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = stringResource(R.string.cd_clear)
-                            )
-                        }
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.spacing.medium)
+                .focusRequester(focusRequester),
+            keyboardOptions = keyboardOptions,
+            label = label?.let { { Text(it) } },
+            supportingText = { errorMessage?.let { Text(it.asString()) } },
+            isError = errorMessage != null,
+            placeholder = placeholder?.let { { Text(it) } },
+            trailingIcon = {
+                if (showClearOption && !isInputEmpty) {
+                    IconButton(onClick = inputState::clearText) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.cd_clear)
+                        )
                     }
-                },
-                prefix = prefix,
-                suffix = suffix,
-                textStyle = textStyle,
-                colors = textFieldColors
-            )
+                }
+            },
+            prefix = prefix,
+            suffix = suffix,
+            textStyle = textStyle,
+            colors = textFieldColors
+        )
 
-            contentAfterTextField?.invoke(this)
+        contentAfterTextField?.invoke(this)
 
-            Box(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(horizontal = MaterialTheme.spacing.medium)
-            ) {
-                actionButton()
-            }
+        Box(
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(horizontal = MaterialTheme.spacing.medium)
+        ) {
+            actionButton()
         }
     }
 }
@@ -456,42 +595,77 @@ fun ListSearchSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = MaterialTheme.spacing.medium),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-        ) {
-            if (title != null) {
-                TitleLargeText(
-                    text = title,
-                    modifier = Modifier
-                        .padding(horizontal = MaterialTheme.spacing.medium)
-                )
-            }
-            SearchField(
-                state = inputState,
-                placeholder = placeholder,
+        ListSearchSheetContent(
+            inputState = inputState,
+            title = title,
+            placeholder = placeholder,
+            listState = listState,
+            contentPadding = contentPadding,
+            reverseLayout = reverseLayout,
+            verticalArrangement = verticalArrangement,
+            horizontalAlignment = horizontalAlignment,
+            flingBehavior = flingBehavior,
+            userScrollEnabled = userScrollEnabled,
+            additionalEndContent = additionalEndContent,
+            content = content
+        )
+    }
+}
+
+@Composable
+fun ListSearchSheetContent(
+    inputState: TextFieldState,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+    placeholder: String? = null,
+    listState: LazyListState = rememberLazyListState(),
+    contentPadding: PaddingValues = PaddingValues(
+        top = MaterialTheme.spacing.medium,
+        bottom = PaddingScrollEnd
+    ),
+    reverseLayout: Boolean = false,
+    verticalArrangement: Arrangement.Vertical = if (!reverseLayout) Arrangement.Top else Arrangement.Bottom,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
+    userScrollEnabled: Boolean = true,
+    additionalEndContent: @Composable (ColumnScope.() -> Unit)? = null,
+    content: LazyListScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = MaterialTheme.spacing.medium),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+    ) {
+        if (title != null) {
+            TitleLargeText(
+                text = title,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = MaterialTheme.spacing.medium)
             )
-            LazyColumn(
-                state = listState,
-                contentPadding = contentPadding,
-                reverseLayout = reverseLayout,
-                verticalArrangement = verticalArrangement,
-                horizontalAlignment = horizontalAlignment,
-                flingBehavior = flingBehavior,
-                userScrollEnabled = userScrollEnabled,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(Float.One),
-                content = content
-            )
-
-            additionalEndContent?.invoke(this)
         }
+        SearchField(
+            state = inputState,
+            placeholder = placeholder,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.spacing.medium)
+        )
+        LazyColumn(
+            state = listState,
+            contentPadding = contentPadding,
+            reverseLayout = reverseLayout,
+            verticalArrangement = verticalArrangement,
+            horizontalAlignment = horizontalAlignment,
+            flingBehavior = flingBehavior,
+            userScrollEnabled = userScrollEnabled,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(Float.One),
+            content = content
+        )
+
+        additionalEndContent?.invoke(this)
     }
 }
 
