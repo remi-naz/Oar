@@ -11,6 +11,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
@@ -35,6 +37,9 @@ fun EntryProviderScope<NavKey>.dashboardEntries(navigator: OarNavigator) {
 
         ResultEffect<AddEditTxResult> { result ->
             viewModel.onNavResult(result)
+        }
+        ResultEffect<AddEditScheduleResult> { result ->
+            viewModel.onAddEditScheduleNavResult(result)
         }
 
         CollectFlowEffect(flow = viewModel.events, snackbarController, context) { event ->
@@ -62,13 +67,11 @@ fun EntryProviderScope<NavKey>.dashboardEntries(navigator: OarNavigator) {
             recentSpends = recentSpendsLazyPagingItems,
             state = state,
             navigateToAllTransactions = { navigator.navigate(AllTransactionsRoute) },
-            navigateToAddEditTransaction = { id, isSchedule ->
-                navigator.navigate(
-                    AddEditTransactionRoute(
-                        transactionId = id ?: INVALID_ID_LONG,
-                        isScheduleMode = isSchedule
-                    )
-                )
+            navigateToAddEditTransaction = { id ->
+                navigator.navigate(AddEditTransactionRoute(transactionId = id ?: INVALID_ID_LONG))
+            },
+            navigateToAddEditSchedule = { id ->
+                navigator.navigate(AddEditScheduleRoute(scheduleId = id))
             },
             navigateTo = { navigator.navigate(it) }
         )

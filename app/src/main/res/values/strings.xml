@@ -454,9 +454,7 @@
     <string name="checking_for_backups">Checking for backups</string>
     <string name="you_have_a_payment_of_amount_due_today">You have a payment of %s due today</string>
     <string name="mark_paid">Mark paid</string>
-    <string name="repeat_mode_label_schedule">%s schedule</string>
     <string name="schedule_saved">Schedule Saved</string>
-    <string name="scheduled_transactions_can_be_found_in_corresponding_screen">*This transaction will be available in the \'%s\' screen</string>
     <string name="schedule_marked_as_paid">Schedule marked as paid</string>
     <string name="generic_schedule_title">~Schedule</string>
     <string name="retired">Retired</string>
@@ -493,12 +491,11 @@
     <string name="folder_name">Folder Name</string>
     <string name="new_folder_input_text">Create a folder to group your transactions</string>
     <string name="clear_selection">Clear Selection</string>
-    <string name="select_schedule_repetition">Select Schedule Repetition</string>
     <string name="clear_all">Clear All</string>
     <string name="last_payment_colon_value">Last payment: %s</string>
     <string name="duplicate">Duplicate</string>
     <string name="delete">Delete</string>
-    <string name="convert_to_schedule">Convert to schedule</string>
+    <string name="create_schedule_from_transaction">Create schedule from this transaction</string>
     <string name="convert_to_normal_transaction">Convert to normal transaction</string>
     <string name="value_bracket_copy">%s (Copy)</string>
     <string name="filter">Filter</string>
@@ -533,6 +530,7 @@
     <string name="five_seconds">5 Seconds</string>
     <string name="create_colon_label">Create: %s</string>
     <string name="cd_tap_to_see_cycle_aggregate">Tap to see cycle aggregate</string>
+    <string name="repeats">Repeats</string>
     <plurals name="transaction_deleted">
         <item quantity="one">Transaction Deleted</item>
         <item quantity="other">Transactions Deleted</item>

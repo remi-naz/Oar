@@ -1,8 +1,9 @@
-package dev.ridill.oar.transactions.presentation.addEditTransaction
+package dev.ridill.oar.schedules.presentation.addEditSchedule
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -79,7 +80,6 @@ import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.ConfirmationDialog
-import dev.ridill.oar.core.ui.components.ExcludedIcon
 import dev.ridill.oar.core.ui.components.OarDatePickerDialog
 import dev.ridill.oar.core.ui.components.OarPlainTooltip
 import dev.ridill.oar.core.ui.components.OarScaffold
@@ -96,8 +96,8 @@ import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.PaddingSide
 import dev.ridill.oar.core.ui.util.exclude
+import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.settings.presentation.components.SimplePreference
-import dev.ridill.oar.settings.presentation.components.SwitchPreference
 import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionField
 import dev.ridill.oar.transactions.domain.model.TransactionType
 import dev.ridill.oar.transactions.presentation.components.AmountRecommendationsRow
@@ -109,18 +109,16 @@ import java.util.Currency
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AddEditTransactionScreen(
+fun AddEditScheduleScreen(
     isEditMode: Boolean,
-    isDuplicateMode: Boolean,
     snackbarController: SnackbarController,
     amountInputState: TextFieldState,
     noteInputState: TextFieldState,
-    state: AddEditTransactionState,
-    actions: AddEditTransactionActions,
+    state: AddEditScheduleState,
+    actions: AddEditScheduleActions,
     navigateUp: () -> Unit,
     navigateToAmountTransformation: () -> Unit,
     navigateToCurrencySelection: () -> Unit,
-    navigateToCycleSelection: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
@@ -138,10 +136,10 @@ fun AddEditTransactionScreen(
     val dateNowUtc = remember { DateUtil.dateNow(ZoneId.of(ZoneOffset.UTC.id)) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = DateUtil.toMillis(state.timestampUtc),
-        yearRange = IntRange(DatePickerDefaults.YearRange.first, dateNowUtc.year),
+        yearRange = IntRange(dateNowUtc.year, DatePickerDefaults.YearRange.last),
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                utcTimeMillis < DateUtil.toMillis(
+                utcTimeMillis >= DateUtil.toMillis(
                     date = dateNowUtc.plusDays(1),
                     zoneId = ZoneId.of(ZoneOffset.UTC.id)
                 )
@@ -159,8 +157,8 @@ fun AddEditTransactionScreen(
                 title = {
                     Text(
                         text = stringResource(
-                            id = if (isEditMode) R.string.destination_edit_transaction
-                            else R.string.destination_new_transaction
+                            id = if (isEditMode) R.string.edit_schedule
+                            else R.string.new_schedule
                         )
                     )
                 },
@@ -214,7 +212,6 @@ fun AddEditTransactionScreen(
                 )
 
                 NoteInput(
-                    isDuplicateMode = isDuplicateMode,
                     inputState = noteInputState,
                     modifier = Modifier
                         .padding(horizontal = MaterialTheme.spacing.medium)
@@ -234,7 +231,7 @@ fun AddEditTransactionScreen(
 
                 HorizontalDivider()
 
-                TransactionTimestamp(
+                ScheduleTimestamp(
                     timestamp = state.timestamp,
                     onClick = actions::onTimestampClick,
                     modifier = Modifier
@@ -242,19 +239,12 @@ fun AddEditTransactionScreen(
                         .align(Alignment.End)
                 )
 
-                SimplePreference(
-                    titleRes = R.string.cycle,
-                    summary = state.cycleDescription.orEmpty(),
-                    onClick = navigateToCycleSelection
-                )
-
-                HorizontalDivider()
-
-                SwitchPreference(
-                    titleRes = R.string.exclude_from_expenditure,
-                    value = state.isTransactionExcluded,
-                    onValueChange = actions::onExclusionToggle,
-                    leadingIcon = { ExcludedIcon() }
+                RepetitionSelection(
+                    selectedRepeatMode = state.selectedRepetition,
+                    onSelect = actions::onRepetitionSelect,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(horizontal = MaterialTheme.spacing.medium)
                 )
 
                 HorizontalDivider()
@@ -282,7 +272,7 @@ fun AddEditTransactionScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Save,
-                            contentDescription = stringResource(R.string.cd_save_transaction)
+                            contentDescription = stringResource(R.string.cd_save_schedule)
                         )
                     }
                 },
@@ -312,13 +302,12 @@ fun AddEditTransactionScreen(
     if (state.showDeleteConfirmation) {
         ConfirmationDialog(
             title = pluralStringResource(
-                R.plurals.delete_transactions_confirmation_title,
+                R.plurals.delete_schedules_confirmation_title,
                 Int.One
             ),
             content = stringResource(R.string.action_irreversible_message),
             onConfirm = actions::onDeleteConfirm,
-            onDismiss = actions::onDeleteDismiss,
-            additionalNote = stringResource(R.string.delete_transaction_confirmation_note)
+            onDismiss = actions::onDeleteDismiss
         )
     }
 
@@ -339,7 +328,6 @@ fun AddEditTransactionScreen(
             state = timePickerState
         )
     }
-
 }
 
 @Composable
@@ -426,8 +414,7 @@ private fun AmountInput(
 }
 
 @Composable
-fun NoteInput(
-    isDuplicateMode: Boolean,
+private fun NoteInput(
     inputState: TextFieldState,
     modifier: Modifier = Modifier
 ) {
@@ -437,10 +424,7 @@ fun NoteInput(
             .defaultMinSize(minWidth = InputMinWidth),
         placeholder = {
             Text(
-                text = if (isDuplicateMode) stringResource(
-                    R.string.value_bracket_copy,
-                    stringResource(R.string.add_a_note)
-                ) else stringResource(R.string.add_a_note),
+                text = stringResource(R.string.add_a_note),
                 textAlign = TextAlign.Center,
                 style = LocalTextStyle.current,
                 modifier = Modifier
@@ -470,7 +454,7 @@ private const val TRANSACTION_TYPE_SELECTOR_WIDTH_FRACTION = 0.80f
 private const val AMOUNT_RECOMMENDATION_WIDTH_FRACTION = 0.80f
 
 @Composable
-private fun TransactionTimestamp(
+private fun ScheduleTimestamp(
     timestamp: LocalDateTime,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -573,19 +557,67 @@ private fun TransactionTypeSelector(
     }
 }
 
+@Composable
+private fun RepetitionSelection(
+    selectedRepeatMode: ScheduleRepetition,
+    onSelect: (ScheduleRepetition) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_repeat),
+                contentDescription = stringResource(R.string.cd_transaction_repeat_mode)
+            )
+
+            Text(
+                text = stringResource(R.string.repeats),
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            ScheduleRepetition.entries.forEachIndexed { index, repetition ->
+                ToggleButton(
+                    checked = repetition == selectedRepeatMode,
+                    onCheckedChange = { onSelect(repetition) },
+                    shapes = when (index) {
+                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        ScheduleRepetition.entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    },
+                ) {
+                    Text(stringResource(repetition.labelRes))
+                }
+            }
+        }
+    }
+}
+
 @PreviewLightDark
 @PreviewScreenSizes
 @Composable
 private fun PreviewScreenContent() {
     OarTheme {
-        AddEditTransactionScreen(
+        AddEditScheduleScreen(
             isEditMode = false,
-            isDuplicateMode = false,
             snackbarController = rememberSnackbarController(),
             amountInputState = rememberTextFieldState(),
             noteInputState = rememberTextFieldState(),
-            state = AddEditTransactionState(),
-            actions = object : AddEditTransactionActions {
+            state = AddEditScheduleState(
+                selectedRepetition = ScheduleRepetition.MONTHLY
+            ),
+            actions = object : AddEditScheduleActions {
                 override fun onAmountFocusLost() {}
                 override fun onEvaluateExpressionClick() {}
                 override fun onRecommendedAmountClick(amount: Long) {}
@@ -598,17 +630,16 @@ private fun PreviewScreenContent() {
                 override fun onTimeSelectionDismiss() {}
                 override fun onTimeSelectionConfirm(hour: Int, minute: Int) {}
                 override fun onTypeChange(type: TransactionType) {}
-                override fun onExclusionToggle(excluded: Boolean) {}
                 override fun onDeleteDismiss() {}
                 override fun onDeleteConfirm() {}
                 override fun onSelectFolderClick() {}
-                override fun onOptionClick(option: AddEditTxOption) {}
+                override fun onOptionClick(option: AddEditScheduleOption) {}
+                override fun onRepetitionSelect(repetition: ScheduleRepetition) {}
                 override fun onSaveClick() {}
             },
             navigateUp = {},
             navigateToAmountTransformation = {},
-            navigateToCurrencySelection = {},
-            navigateToCycleSelection = {}
+            navigateToCurrencySelection = {}
         )
     }
 }

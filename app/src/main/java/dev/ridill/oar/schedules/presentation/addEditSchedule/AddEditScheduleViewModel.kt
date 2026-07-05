@@ -1,4 +1,4 @@
-package dev.ridill.oar.transactions.presentation.addEditTransaction
+package dev.ridill.oar.schedules.presentation.addEditSchedule
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -12,7 +12,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
-import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.util.DateUtil
@@ -23,22 +22,21 @@ import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.ifInfinite
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.core.domain.util.textAsFlow
-import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
-import dev.ridill.oar.core.ui.navigation.AddEditTxResult
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
-import dev.ridill.oar.core.ui.navigation.ScheduleInputs
 import dev.ridill.oar.core.ui.navigation.TransformationResult
-import dev.ridill.oar.core.ui.navigation.toScheduleInputs
+import dev.ridill.oar.core.ui.navigation.toSchedule
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
+import dev.ridill.oar.schedules.domain.model.Schedule
+import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
+import dev.ridill.oar.schedules.domain.repository.AddEditScheduleRepository
 import dev.ridill.oar.transactions.domain.model.AmountTransformation
-import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.model.TransactionType
-import dev.ridill.oar.transactions.domain.repository.AddEditTransactionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
@@ -46,28 +44,28 @@ import kotlinx.coroutines.launch
 import java.time.ZoneOffset
 import java.util.Currency
 
-@HiltViewModel(assistedFactory = AddEditTransactionViewModel.Factory::class)
-class AddEditTransactionViewModel @AssistedInject constructor(
-    @Assisted val route: AddEditTransactionRoute,
+@HiltViewModel(assistedFactory = AddEditScheduleViewModel.Factory::class)
+class AddEditScheduleViewModel @AssistedInject constructor(
+    @Assisted val route: AddEditScheduleRoute,
     private val savedStateHandle: SavedStateHandle,
-    private val cycleRepo: BudgetCycleRepository,
-    private val transactionRepo: AddEditTransactionRepository,
+    private val scheduleRepo: AddEditScheduleRepository,
     private val evalService: ExpEvalService,
-    private val eventBus: EventBus<AddEditTransactionEvent>
-) : ViewModel(), AddEditTransactionActions {
+    private val eventBus: EventBus<AddEditScheduleEvent>
+) : ViewModel(), AddEditScheduleActions {
 
     @AssistedFactory
     interface Factory {
-        fun create(route: AddEditTransactionRoute): AddEditTransactionViewModel
+        fun create(route: AddEditScheduleRoute): AddEditScheduleViewModel
     }
 
     private val isLoading = MutableStateFlow(false)
 
     private val coercedIdArg: Long
-        get() = route.transactionId.coerceAtLeast(OarDatabase.DEFAULT_ID_LONG)
+        get() = route.scheduleId.coerceAtLeast(OarDatabase.DEFAULT_ID_LONG)
 
-    private val txInput = savedStateHandle.getStateFlow<Transaction?>(TX_INPUT, null)
-    private val currency = txInput.mapLatest { it?.currency ?: LocaleUtil.defaultCurrency }
+    private val scheduleInput = savedStateHandle.getStateFlow<Schedule?>(SCHEDULE_INPUT, null)
+    private val currency = scheduleInput
+        .mapLatest { it?.currency ?: LocaleUtil.defaultCurrency }
         .distinctUntilChanged()
 
     val amountInputState = savedStateHandle.saveable(
@@ -75,16 +73,6 @@ class AddEditTransactionViewModel @AssistedInject constructor(
         saver = TextFieldState.Saver,
         init = { TextFieldState() }
     )
-
-    private val selectedCycleId = txInput.mapLatest { it?.cycleId }
-        .distinctUntilChanged()
-    private val cycleDescription = selectedCycleId
-        .flatMapLatest { id ->
-            id?.let(cycleRepo::getCycleByIdFlow)
-                ?: flowOf(null)
-        }
-        .mapLatest { it?.description }
-        .distinctUntilChanged()
 
     private val isAmountInputAnExpression = amountInputState.textAsFlow()
         .mapLatest { evalService.isExpression(it) }
@@ -96,34 +84,39 @@ class AddEditTransactionViewModel @AssistedInject constructor(
         init = { TextFieldState() }
     )
 
-    private val selectedTagId = txInput.mapLatest { it?.tagId }
+    private val selectedTagId = scheduleInput
+        .mapLatest { it?.tagId }
         .distinctUntilChanged()
 
-    private val timestamp = txInput.mapLatest { it?.timestamp ?: DateUtil.now() }
+    private val timestamp = scheduleInput
+        .mapLatest { it?.nextPaymentTimestamp ?: DateUtil.now().plusDays(1) }
         .distinctUntilChanged()
 
-    private val transactionFolderId = txInput.mapLatest { it?.folderId }
+    private val scheduleFolderId = scheduleInput
+        .mapLatest { it?.folderId }
         .distinctUntilChanged()
 
-    private val transactionType = txInput.mapLatest { it?.type ?: TransactionType.DEBIT }
+    private val transactionType = scheduleInput
+        .mapLatest { it?.type ?: TransactionType.DEBIT }
         .distinctUntilChanged()
 
-    private val isTransactionExcluded = txInput.mapLatest { it?.excluded == true }
+    private val selectedRepetition = scheduleInput
+        .mapLatest { it?.repetition ?: ScheduleRepetition.NO_REPEAT }
         .distinctUntilChanged()
 
     private val showDeleteConfirmation = savedStateHandle
         .getStateFlow(SHOW_DELETE_CONFIRMATION, false)
 
-    private val amountRecommendations = transactionRepo.getAmountRecommendations()
+    private val amountRecommendations = scheduleRepo.getAmountRecommendations()
 
     private val showDatePicker = savedStateHandle.getStateFlow(SHOW_DATE_PICKER, false)
     private val showTimePicker = savedStateHandle.getStateFlow(SHOW_TIME_PICKER, false)
 
-    private val linkedFolderName = transactionFolderId.flatMapLatest { selectedId ->
-        transactionRepo.getFolderNameForId(selectedId)
+    private val linkedFolderName = scheduleFolderId.flatMapLatest { selectedId ->
+        scheduleRepo.getFolderNameForId(selectedId)
     }.distinctUntilChanged()
 
-    private val menuOptions = MutableStateFlow<Set<AddEditTxOption>>(emptySet())
+    private val menuOptions = MutableStateFlow<Set<AddEditScheduleOption>>(emptySet())
 
     val state = combineTuple(
         isLoading,
@@ -134,12 +127,10 @@ class AddEditTransactionViewModel @AssistedInject constructor(
         timestamp,
         showDatePicker,
         showTimePicker,
-        isTransactionExcluded,
         selectedTagId,
         showDeleteConfirmation,
         linkedFolderName,
-        cycleDescription,
-        selectedCycleId,
+        selectedRepetition,
         menuOptions,
     ).mapLatest { (
                       isLoading,
@@ -150,34 +141,30 @@ class AddEditTransactionViewModel @AssistedInject constructor(
                       timestamp,
                       showDatePicker,
                       showTimePicker,
-                      isTransactionExcluded,
                       selectedTagId,
                       showDeleteConfirmation,
                       linkedFolderName,
-                      cycleDescription,
-                      selectedCycleId,
+                      selectedRepetition,
                       menuOptions,
                   ) ->
-        AddEditTransactionState(
-            isLoading = isLoading,
+        AddEditScheduleState(
+            menuOptions = menuOptions,
             currency = currency,
+            isLoading = isLoading,
             transactionType = transactionType,
             isAmountInputAnExpression = isAmountInputAnExpression,
             amountRecommendations = amountRecommendations,
             timestamp = timestamp,
             showDatePicker = showDatePicker,
             showTimePicker = showTimePicker,
-            isTransactionExcluded = isTransactionExcluded,
             selectedTagId = selectedTagId,
             showDeleteConfirmation = showDeleteConfirmation,
             linkedFolderName = linkedFolderName,
-            cycleDescription = cycleDescription,
-            selectedCycleId = selectedCycleId,
-            menuOptions = menuOptions,
+            selectedRepetition = selectedRepetition,
         )
     }
         .onStart { buildMenuOptions() }
-        .asStateFlow(viewModelScope, AddEditTransactionState())
+        .asStateFlow(viewModelScope, AddEditScheduleState())
 
     val events = eventBus.eventFlow
 
@@ -186,48 +173,51 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     }
 
     private fun onInit() {
-        if (txInput.value != null) return
+        if (scheduleInput.value != null) return
 
         viewModelScope.launch {
-            val activeCycle = cycleRepo.getActiveCycle()
-            var transaction = transactionRepo
-                .getTransactionById(route.transactionId) ?: (txInput.value
-                ?: Transaction.DEFAULT).copy(
-                cycleId = activeCycle?.id ?: OarDatabase.INVALID_ID_LONG,
-                currency = activeCycle?.currency ?: LocaleUtil.defaultCurrency,
-            )
-            if (route.isDuplicateMode) {
-                transaction = transaction.copy(id = OarDatabase.DEFAULT_ID_LONG)
+            val loadedSchedule: Schedule? = when {
+                // ID not invalid means we're editing an existing schedule
+                route.scheduleId != INVALID_ID_LONG -> scheduleRepo.getScheduleById(route.scheduleId)
+
+                // Creating a new with/without prior inputs from a transaction
+                else -> route.inputs?.toSchedule()
             }
 
-            savedStateHandle[TX_INPUT] = transaction.copy(
-                folderId = route.linkFolderId ?: transaction.folderId,
+            val isFreshSchedule = loadedSchedule == null
+            val schedule = loadedSchedule ?: Schedule.DEFAULT
+
+            val dateNow = DateUtil.now()
+            val nextPaymentTimestamp = schedule.nextPaymentTimestamp
+                ?.takeIf { it.isAfter(dateNow) }
+                ?: dateNow.plusDays(1)
+
+            savedStateHandle[SCHEDULE_INPUT] = schedule.copy(
+                nextPaymentTimestamp = nextPaymentTimestamp
             )
-            amountInputState.setTextAndPlaceCursorAtEnd(transaction.amount)
-            noteInputState.setTextAndPlaceCursorAtEnd(transaction.note)
+            amountInputState.setTextAndPlaceCursorAtEnd(
+                if (isFreshSchedule) "" else TextFormat.number(
+                    schedule.amount,
+                    isGroupingUsed = false
+                )
+            )
+            noteInputState.setTextAndPlaceCursorAtEnd(schedule.note.orEmpty())
         }
     }
 
     private fun buildMenuOptions() {
         menuOptions.update {
             when {
-                // New transaction has only schedule option
-                route.transactionId == INVALID_ID_LONG -> setOf(AddEditTxOption.CREATE_SCHEDULE_FROM_TRANSACTION)
-                // Duplicated transaction does not have any actions
-                route.isDuplicateMode -> emptySet()
-                // Existing transaction has all actions
-                else -> AddEditTxOption.entries.toSet()
+                // New schedule has no actions
+                route.scheduleId == INVALID_ID_LONG -> emptySet()
+                // Existing schedule has all actions
+                else -> AddEditScheduleOption.entries.toSet()
             }
         }
     }
 
     fun onCurrencySelect(currency: Currency) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(currency = currency)
-    }
-
-    fun onCycleSelect(id: Long?) {
-        if (id == null) return
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(cycleId = id)
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(currency = currency)
     }
 
     override fun onAmountFocusLost() {
@@ -251,17 +241,14 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     }
 
     override fun onRecommendedAmountClick(amount: Long) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(
-            amount = TextFormat.number(
-                value = amount,
-                isGroupingUsed = false
-            )
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
+            amount = amount.toDouble()
         )
     }
 
     override fun onTagSelect(tagId: Long?) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(
-            tagId = tagId?.takeIf { it != txInput.value?.tagId }
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
+            tagId = tagId?.takeIf { it != scheduleInput.value?.tagId }
         )
     }
 
@@ -274,10 +261,11 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     }
 
     override fun onDateSelectionConfirm(millis: Long) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(
-            timestamp = DateUtil.dateFromMillisWithTime(
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
+            nextPaymentTimestamp = DateUtil.dateFromMillisWithTime(
                 millis = millis,
-                time = txInput.value?.timestamp?.toLocalTime() ?: DateUtil.timeNow(),
+                time = scheduleInput.value?.nextPaymentTimestamp?.toLocalTime()
+                    ?: DateUtil.timeNow(),
                 zoneId = ZoneOffset.UTC
             )
         )
@@ -294,11 +282,11 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     }
 
     override fun onTimeSelectionConfirm(hour: Int, minute: Int) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(
-            timestamp = txInput.value?.timestamp
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
+            nextPaymentTimestamp = scheduleInput.value?.nextPaymentTimestamp
                 ?.withHour(hour)
                 ?.withMinute(minute)
-                ?: DateUtil.now()
+                ?: DateUtil.now().plusDays(1)
         )
         savedStateHandle[SHOW_TIME_PICKER] = false
     }
@@ -309,14 +297,8 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     }
 
     override fun onTypeChange(type: TransactionType) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
             type = type
-        )
-    }
-
-    override fun onExclusionToggle(excluded: Boolean) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(
-            excluded = excluded
         )
     }
 
@@ -340,35 +322,11 @@ class AddEditTransactionViewModel @AssistedInject constructor(
         )
     }
 
-    override fun onOptionClick(option: AddEditTxOption) {
+    override fun onOptionClick(option: AddEditScheduleOption) {
         when (option) {
-            AddEditTxOption.DELETE -> {
+            AddEditScheduleOption.DELETE -> {
                 savedStateHandle[SHOW_DELETE_CONFIRMATION] = true
             }
-
-            AddEditTxOption.CREATE_SCHEDULE_FROM_TRANSACTION -> {
-                onConvertToScheduleOptionClick()
-            }
-
-            AddEditTxOption.DUPLICATE -> {
-                onDuplicateOptionClick()
-            }
-        }
-    }
-
-    private fun onConvertToScheduleOptionClick() = viewModelScope.launch {
-        eventBus.send(
-            AddEditTransactionEvent
-                .NavigateToScheduleConversion(txInput.value?.toScheduleInputs())
-        )
-    }
-
-    private fun onDuplicateOptionClick() = viewModelScope.launch {
-        txInput.value?.id?.let {
-            eventBus.send(
-                AddEditTransactionEvent
-                    .NavigateToDuplicateTransactionCreation(it)
-            )
         }
     }
 
@@ -379,46 +337,52 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     override fun onDeleteConfirm() {
         viewModelScope.launch {
             isLoading.update { true }
-            transactionRepo.deleteTransaction(coercedIdArg)
+            scheduleRepo.deleteSchedule(coercedIdArg)
             isLoading.update { false }
             savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
-            eventBus.send(AddEditTransactionEvent.NavigateUpWithResult(AddEditTxResult.TRANSACTION_DELETED))
+            eventBus.send(AddEditScheduleEvent.NavigateUpWithResult(AddEditScheduleResult.SCHEDULE_DELETED))
         }
     }
 
     override fun onSelectFolderClick() {
         viewModelScope.launch {
-            eventBus.send(AddEditTransactionEvent.LaunchFolderSelection(txInput.value?.folderId))
+            eventBus.send(AddEditScheduleEvent.LaunchFolderSelection(scheduleInput.value?.folderId))
         }
     }
 
     fun onFolderSelectionResult(id: Long) {
-        savedStateHandle[TX_INPUT] = txInput.value?.copy(
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
             folderId = id.takeIf { it != INVALID_ID_LONG }
         )
+    }
+
+    override fun onRepetitionSelect(repetition: ScheduleRepetition) {
+        savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(repetition = repetition)
     }
 
     override fun onSaveClick() {
         viewModelScope.launch {
             val noteInput = noteInputState.text.trim().toString()
-            val txInput = txInput.value?.copy(
-                note = noteInput
+            val input = scheduleInput.value?.copy(
+                note = noteInput.ifEmpty { null }
             ) ?: return@launch
+
             val amountInput = amountInputState.text.trim().toString()
             if (amountInput.isEmpty()) {
                 eventBus.send(
-                    AddEditTransactionEvent.ShowUiMessage(
+                    AddEditScheduleEvent.ShowUiMessage(
                         UiText.StringResource(R.string.error_invalid_amount, true)
                     )
                 )
                 return@launch
             }
+
             val isExp = evalService.isExpression(amountInput)
             val evaluatedAmount = (if (isExp) evalService.evalOrNull(amountInput)
             else TextFormat.parseNumber(amountInput)) ?: -1.0
             if (evaluatedAmount < Double.Zero) {
                 eventBus.send(
-                    AddEditTransactionEvent.ShowUiMessage(
+                    AddEditScheduleEvent.ShowUiMessage(
                         UiText.StringResource(
                             R.string.error_invalid_amount,
                             true
@@ -427,33 +391,22 @@ class AddEditTransactionViewModel @AssistedInject constructor(
                 )
                 return@launch
             }
+
             isLoading.update { true }
-            transactionRepo.saveTransaction(
-                transaction = txInput.copy(
-                    amount = evaluatedAmount.toString(),
-                )
-            )
+            scheduleRepo.saveSchedule(input.copy(amount = evaluatedAmount))
             isLoading.update { false }
-            eventBus.send(AddEditTransactionEvent.NavigateUpWithResult(AddEditTxResult.TRANSACTION_SAVED))
+            eventBus.send(AddEditScheduleEvent.NavigateUpWithResult(AddEditScheduleResult.SCHEDULE_SAVED))
         }
     }
 
-    sealed interface AddEditTransactionEvent {
-        data class ShowUiMessage(val uiText: UiText) : AddEditTransactionEvent
-        data class NavigateUpWithResult(val result: AddEditTxResult) :
-            AddEditTransactionEvent
-
-        data class LaunchFolderSelection(val preselectedId: Long?) : AddEditTransactionEvent
-        data class NavigateToDuplicateTransactionCreation(val id: Long) :
-            AddEditTransactionEvent
-
-        data class NavigateToScheduleConversion(
-            val inputs: ScheduleInputs?,
-        ) : AddEditTransactionEvent
+    sealed interface AddEditScheduleEvent {
+        data class ShowUiMessage(val uiText: UiText) : AddEditScheduleEvent
+        data class NavigateUpWithResult(val result: AddEditScheduleResult) : AddEditScheduleEvent
+        data class LaunchFolderSelection(val preselectedId: Long?) : AddEditScheduleEvent
     }
 }
 
-private const val TX_INPUT = "TX_INPUT"
+private const val SCHEDULE_INPUT = "SCHEDULE_INPUT"
 private const val SHOW_DELETE_CONFIRMATION = "SHOW_DELETE_CONFIRMATION"
 private const val SHOW_DATE_PICKER = "SHOW_DATE_PICKER"
 private const val SHOW_TIME_PICKER = "SHOW_TIME_PICKER"

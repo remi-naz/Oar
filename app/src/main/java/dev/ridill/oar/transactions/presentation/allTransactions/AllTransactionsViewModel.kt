@@ -17,6 +17,7 @@ import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.addOrRemove
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.textAsFlow
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.util.UiText
@@ -347,11 +348,15 @@ class AllTransactionsViewModel @Inject constructor(
 
             AddEditTxResult.TRANSACTION_SAVED ->
                 AllTransactionsEvent.ShowUiMessage(UiText.StringResource(R.string.transaction_saved))
-
-            AddEditTxResult.SCHEDULE_SAVED -> AllTransactionsEvent.ScheduleSaved
         }
 
         eventBus.send(event)
+    }
+
+    fun onAddEditScheduleNavResult(result: AddEditScheduleResult) = viewModelScope.launch {
+        if (result == AddEditScheduleResult.SCHEDULE_SAVED) {
+            eventBus.send(AllTransactionsEvent.ScheduleSaved)
+        }
     }
 
     override fun onDeleteTransactionDismiss() {

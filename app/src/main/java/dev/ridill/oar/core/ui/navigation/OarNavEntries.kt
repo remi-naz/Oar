@@ -20,6 +20,6 @@ fun buildOarEntryProvider(
     transactionEntries(navigator = navigator, motionScheme = motionScheme)
     folderEntries(navigator = navigator)
     tagEntries(navigator = navigator)
-    scheduleEntries(navigator = navigator)
+    scheduleEntries(navigator = navigator, motionScheme = motionScheme)
     settingsEntries(navigator = navigator)
 }
