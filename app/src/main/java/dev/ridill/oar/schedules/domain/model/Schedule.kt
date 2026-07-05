@@ -1,11 +1,15 @@
 package dev.ridill.oar.schedules.domain.model
 
-import dev.ridill.oar.core.domain.util.orZero
-import dev.ridill.oar.transactions.domain.model.Transaction
+import android.os.Parcelable
+import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.util.LocaleUtil
+import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.transactions.domain.model.TransactionType
+import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
 import java.util.Currency
 
+@Parcelize
 data class Schedule(
     val id: Long,
     val amount: Double,
@@ -17,21 +21,18 @@ data class Schedule(
     val repetition: ScheduleRepetition,
     val nextPaymentTimestamp: LocalDateTime?,
     val lastPaymentTimestamp: LocalDateTime?
-) {
+) : Parcelable {
     companion object {
-        fun fromTransaction(
-            transaction: Transaction,
-            repeatMode: ScheduleRepetition,
-        ): Schedule = Schedule(
-            id = transaction.id,
-            amount = transaction.amount.toDoubleOrNull().orZero(),
-            currency = transaction.currency,
-            note = transaction.note.ifEmpty { null },
-            type = transaction.type,
-            repetition = repeatMode,
-            tagId = transaction.tagId,
-            folderId = transaction.folderId,
-            nextPaymentTimestamp = transaction.timestamp,
+        val DEFAULT = Schedule(
+            id = OarDatabase.DEFAULT_ID_LONG,
+            amount = Double.Zero,
+            note = null,
+            currency = LocaleUtil.defaultCurrency,
+            type = TransactionType.DEBIT,
+            tagId = null,
+            folderId = null,
+            repetition = ScheduleRepetition.NO_REPEAT,
+            nextPaymentTimestamp = null,
             lastPaymentTimestamp = null
         )
     }

@@ -2,11 +2,7 @@ package dev.ridill.oar.transactions.data.repository
 
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.Zero
-import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.folders.domain.repository.FolderDetailsRepository
-import dev.ridill.oar.schedules.domain.model.Schedule
-import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
-import dev.ridill.oar.schedules.domain.repository.SchedulesRepository
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.toEntity
 import dev.ridill.oar.transactions.data.toTransaction
@@ -23,7 +19,6 @@ import kotlin.math.roundToLong
 class AddEditTransactionRepositoryImpl(
     private val dao: TransactionDao,
     private val repo: TransactionRepository,
-    private val schedulesRepo: SchedulesRepository,
     private val folderRepo: FolderDetailsRepository
 ) : AddEditTransactionRepository {
     override suspend fun getTransactionById(
@@ -61,44 +56,6 @@ class AddEditTransactionRepositoryImpl(
         withContext(Dispatchers.IO) {
             dao.toggleExclusionByIds(setOf(id), excluded)
         }
-
-    override suspend fun getScheduleById(id: Long): Schedule? = schedulesRepo.getScheduleById(id)
-        ?.let { schedule ->
-            val nextPaymentTimestamp = schedule.nextPaymentTimestamp
-                ?: schedule.lastPaymentTimestamp
-                    ?.let {
-                        schedulesRepo.calculateNextPaymentTimestampFromDate(
-                            it,
-                            schedule.repetition
-                        )
-                    }
-
-            schedule.copy(
-                nextPaymentTimestamp = nextPaymentTimestamp
-            )
-        }
-
-    override suspend fun deleteSchedule(id: Long) =
-        schedulesRepo.deleteScheduleById(id)
-
-    override suspend fun saveAsSchedule(
-        transaction: Transaction,
-        repetition: ScheduleRepetition
-    ) {
-        val schedule = schedulesRepo.getScheduleById(transaction.id)
-            ?.copy(
-                amount = transaction.amount.toDoubleOrNull().orZero(),
-                note = transaction.note.ifEmpty { null },
-                type = transaction.type,
-                repetition = repetition,
-                tagId = transaction.tagId,
-                folderId = transaction.folderId,
-                nextPaymentTimestamp = transaction.timestamp,
-                currency = transaction.currency
-            ) ?: Schedule.fromTransaction(transaction, repetition)
-
-        schedulesRepo.saveScheduleAndSetReminder(schedule)
-    }
 
     override fun getFolderNameForId(id: Long?): Flow<String?> = folderRepo
         .getFolderDetailsById(id ?: OarDatabase.INVALID_ID_LONG)

@@ -8,7 +8,12 @@ import kotlinx.parcelize.Parcelize
 enum class AddEditTxResult {
     TRANSACTION_DELETED,
     TRANSACTION_SAVED,
-    SCHEDULE_SAVED
+}
+
+// Schedule add/edit nav result
+enum class AddEditScheduleResult {
+    SCHEDULE_SAVED,
+    SCHEDULE_DELETED
 }
 
 // Folder nav results

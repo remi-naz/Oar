@@ -26,6 +26,8 @@ import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.components.slideInVerticallyWithFadeIn
 import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.navigation.AddEditFolderSheetRoute
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
@@ -73,6 +75,9 @@ fun EntryProviderScope<NavKey>.transactionEntries(
         }
         ResultEffect<AddEditTxResult> { result ->
             viewModel.onAddEditTxNavResult(result)
+        }
+        ResultEffect<AddEditScheduleResult> { result ->
+            viewModel.onAddEditScheduleNavResult(result)
         }
         ResultEffect<CycleSelectedResult> { result ->
             result.id?.let { viewModel.onCycleSelect(it) }
@@ -135,7 +140,7 @@ fun EntryProviderScope<NavKey>.transactionEntries(
                     )
                 )
             },
-            navigateToCreateSchedule = { navigator.navigate(AddEditTransactionRoute(isScheduleMode = true)) },
+            navigateToCreateSchedule = { navigator.navigate(AddEditScheduleRoute()) },
             navigateToCreateFolder = { navigator.navigate(AddEditFolderSheetRoute()) }
         )
     }
@@ -235,6 +240,15 @@ fun EntryProviderScope<NavKey>.transactionEntries(
                         AddEditTransactionRoute(
                             transactionId = event.id,
                             isDuplicateMode = true
+                        )
+                    )
+                }
+
+                is AddEditTransactionViewModel.AddEditTransactionEvent.NavigateToScheduleConversion -> {
+                    navigator.replaceTop(
+                        AddEditScheduleRoute(
+                            scheduleId = INVALID_ID_LONG,
+                            inputs = event.inputs
                         )
                     )
                 }

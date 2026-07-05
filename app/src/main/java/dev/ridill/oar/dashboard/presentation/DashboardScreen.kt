@@ -101,7 +101,8 @@ fun DashboardScreen(
     recentSpends: LazyPagingItems<TransactionEntry>,
     state: DashboardState,
     navigateToAllTransactions: () -> Unit,
-    navigateToAddEditTransaction: (id: Long?, isSchedule: Boolean) -> Unit,
+    navigateToAddEditTransaction: (id: Long?) -> Unit,
+    navigateToAddEditSchedule: (id: Long) -> Unit,
     navigateTo: (NavKey) -> Unit
 ) {
     val areActiveSchedulesEmpty by remember(state.activeSchedules) {
@@ -145,7 +146,7 @@ fun DashboardScreen(
                 },
                 floatingActionButton = {
                     NewTransactionFab(
-                        onClick = { navigateToAddEditTransaction(null, false) },
+                        onClick = { navigateToAddEditTransaction(null) },
                         elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
                     )
                 }
@@ -168,7 +169,7 @@ fun DashboardScreen(
                     usageFraction = { state.usagePercent },
                     areActiveSchedulesEmpty = areActiveSchedulesEmpty,
                     activeSchedules = state.activeSchedules,
-                    onScheduleClick = { navigateToAddEditTransaction(it.id, true) },
+                    onScheduleClick = { navigateToAddEditSchedule(it.id) },
                     contentPadding = PaddingValues(
                         top = paddingValues.calculateTopPadding()
                     ),
@@ -228,10 +229,7 @@ fun DashboardScreen(
                                         .fillParentMaxWidth()
                                         .clickable(
                                             onClick = {
-                                                navigateToAddEditTransaction(
-                                                    transaction.id,
-                                                    false
-                                                )
+                                                navigateToAddEditTransaction(transaction.id)
                                             },
                                             onClickLabel = stringResource(R.string.cd_tap_to_edit_transaction)
                                         )
@@ -533,7 +531,8 @@ private fun PreviewDashboardScreen() {
                 }
             ),
             navigateToAllTransactions = {},
-            navigateToAddEditTransaction = { _, _ -> },
+            navigateToAddEditTransaction = {},
+            navigateToAddEditSchedule = {},
             snackbarController = rememberSnackbarController(),
             navigateTo = {},
             recentSpends = flowOf(PagingData.empty<TransactionEntry>()).collectAsLazyPagingItems(),

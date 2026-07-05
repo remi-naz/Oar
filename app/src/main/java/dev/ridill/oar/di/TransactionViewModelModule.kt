@@ -10,7 +10,6 @@ import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.folders.domain.repository.FolderDetailsRepository
-import dev.ridill.oar.schedules.domain.repository.SchedulesRepository
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.repository.AddEditTransactionRepositoryImpl
 import dev.ridill.oar.transactions.data.repository.AllTransactionsRepositoryImpl
@@ -28,12 +27,10 @@ object TransactionViewModelModule {
     fun provideAddEditTransactionRepository(
         dao: TransactionDao,
         repo: TransactionRepository,
-        schedulesRepo: SchedulesRepository,
         folderRepo: FolderDetailsRepository
     ): AddEditTransactionRepository = AddEditTransactionRepositoryImpl(
         dao = dao,
         repo = repo,
-        schedulesRepo = schedulesRepo,
         folderRepo = folderRepo
     )
 

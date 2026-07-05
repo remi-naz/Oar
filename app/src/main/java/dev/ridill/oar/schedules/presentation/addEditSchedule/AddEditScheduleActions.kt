@@ -1,8 +1,9 @@
-package dev.ridill.oar.transactions.presentation.addEditTransaction
+package dev.ridill.oar.schedules.presentation.addEditSchedule
 
+import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.transactions.domain.model.TransactionType
 
-interface AddEditTransactionActions {
+interface AddEditScheduleActions {
     fun onAmountFocusLost()
     fun onEvaluateExpressionClick()
     fun onRecommendedAmountClick(amount: Long)
@@ -15,10 +16,10 @@ interface AddEditTransactionActions {
     fun onTimeSelectionConfirm(hour: Int, minute: Int)
     fun onPickDateClick()
     fun onTypeChange(type: TransactionType)
-    fun onExclusionToggle(excluded: Boolean)
-    fun onOptionClick(option: AddEditTxOption)
+    fun onOptionClick(option: AddEditScheduleOption)
     fun onDeleteDismiss()
     fun onDeleteConfirm()
     fun onSelectFolderClick()
+    fun onRepetitionSelect(repetition: ScheduleRepetition)
     fun onSaveClick()
 }

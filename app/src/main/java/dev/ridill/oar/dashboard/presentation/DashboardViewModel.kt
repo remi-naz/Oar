@@ -11,6 +11,7 @@ import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.ifNaN
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.dashboard.domain.repository.DashboardRepository
@@ -105,11 +106,15 @@ class DashboardViewModel @Inject constructor(
 
             AddEditTxResult.TRANSACTION_SAVED ->
                 DashboardEvent.ShowUiMessage(UiText.StringResource(R.string.transaction_saved))
-
-            AddEditTxResult.SCHEDULE_SAVED -> DashboardEvent.ScheduleSaved
         }
 
         eventBus.send(event)
+    }
+
+    fun onAddEditScheduleNavResult(result: AddEditScheduleResult) = viewModelScope.launch {
+        if (result == AddEditScheduleResult.SCHEDULE_SAVED) {
+            eventBus.send(DashboardEvent.ScheduleSaved)
+        }
     }
 
     private fun cancelNotifications() {

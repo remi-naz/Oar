@@ -12,13 +12,9 @@ enum class AddEditTxOption(
         labelRes = R.string.delete,
         iconRes = R.drawable.ic_outlined_delete
     ),
-    CONVERT_TO_SCHEDULE(
-        labelRes = R.string.convert_to_schedule,
-        iconRes = R.drawable.ic_time_schedule
-    ),
-    CONVERT_TO_NORMAL_TRANSACTION(
-        labelRes = R.string.convert_to_normal_transaction,
-        iconRes = R.drawable.ic_outlined_coins
+    CREATE_SCHEDULE_FROM_TRANSACTION(
+        labelRes = R.string.create_schedule_from_transaction,
+        iconRes = R.drawable.ic_rounded_calendar_entries
     ),
     DUPLICATE(
         labelRes = R.string.duplicate,
