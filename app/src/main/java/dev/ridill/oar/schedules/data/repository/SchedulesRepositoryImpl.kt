@@ -4,7 +4,6 @@ import androidx.room.withTransaction
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.util.trySuspend
-import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.schedules.data.local.SchedulesDao
 import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
@@ -18,15 +17,16 @@ import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.Year
 
 class SchedulesRepositoryImpl(
     private val db: OarDatabase,
     private val schedulesDao: SchedulesDao,
     private val transactionDao: TransactionDao,
-    private val scheduler: ScheduleReminder,
-    private val receiverService: ReceiverService,
     private val cycleRepo: BudgetCycleRepository,
+    private val scheduler: ScheduleReminder,
 ) : SchedulesRepository {
     override suspend fun getScheduleById(
         id: Long
@@ -35,52 +35,129 @@ class SchedulesRepositoryImpl(
     }
 
     override fun calculateNextPaymentTimestampFromDate(
-        dateTime: LocalDateTime,
-        repetition: ScheduleRepetition
+        anchor: LocalDateTime,
+        repetition: ScheduleRepetition,
+        expectedTimestamp: LocalDateTime?
     ): LocalDateTime? = when (repetition) {
         ScheduleRepetition.NO_REPEAT -> null
-        ScheduleRepetition.WEEKLY -> dateTime.plusWeeks(1)
-        ScheduleRepetition.MONTHLY -> dateTime.plusMonths(1)
-        ScheduleRepetition.BI_MONTHLY -> dateTime.plusMonths(2)
-        ScheduleRepetition.YEARLY -> dateTime.plusYears(1)
+        ScheduleRepetition.WEEKLY -> {
+            val nextIntervalDateTime = anchor.plusWeeks(1)
+            val dayCount = DayOfWeek.entries.size.toLong()
+            val difference = nextIntervalDateTime.dayOfWeek.value % dayCount
+
+            if (expectedTimestamp == null) return nextIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) nextIntervalDateTime.minusDays(difference)
+            else nextIntervalDateTime.plusDays(difference)
+        }
+
+        ScheduleRepetition.MONTHLY -> {
+            val nextIntervalDateTime = anchor.plusMonths(1)
+            val isLeapYear = Year.isLeap(nextIntervalDateTime.year.toLong())
+            val dayCount = anchor.month.length(isLeapYear)
+            val difference = nextIntervalDateTime.dayOfMonth.toLong() % dayCount
+
+            if (expectedTimestamp == null) return nextIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) nextIntervalDateTime.minusDays(difference)
+            else nextIntervalDateTime.plusDays(difference)
+        }
+
+        ScheduleRepetition.BI_MONTHLY -> {
+            val nextIntervalDateTime = anchor.plusMonths(2)
+            val isLeapYear = Year.isLeap(nextIntervalDateTime.year.toLong())
+            val dayCount = anchor.month.length(isLeapYear) + anchor.month.length(isLeapYear)
+            val difference = nextIntervalDateTime.dayOfMonth.toLong() % dayCount
+
+            if (expectedTimestamp == null) return nextIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) nextIntervalDateTime.minusDays(difference)
+            else nextIntervalDateTime.plusDays(difference)
+        }
+
+        ScheduleRepetition.YEARLY -> {
+            val nextIntervalDateTime = anchor.plusYears(1)
+            val dayCount = Year.of(nextIntervalDateTime.year).length()
+            val difference = nextIntervalDateTime.dayOfYear.toLong() % dayCount
+
+            if (expectedTimestamp == null) return nextIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) nextIntervalDateTime.minusDays(difference)
+            else nextIntervalDateTime.plusDays(difference)
+        }
     }
 
     override fun calculateLastPaymentTimestampFromDate(
-        dateTime: LocalDateTime,
-        repetition: ScheduleRepetition
+        anchor: LocalDateTime,
+        repetition: ScheduleRepetition,
+        expectedTimestamp: LocalDateTime?
     ): LocalDateTime? = when (repetition) {
         ScheduleRepetition.NO_REPEAT -> null
-        ScheduleRepetition.WEEKLY -> dateTime.minusWeeks(1)
-        ScheduleRepetition.MONTHLY -> dateTime.minusMonths(1)
-        ScheduleRepetition.BI_MONTHLY -> dateTime.minusMonths(2)
-        ScheduleRepetition.YEARLY -> dateTime.minusYears(1)
+        ScheduleRepetition.WEEKLY -> {
+            val prevIntervalDateTime = anchor.minusWeeks(1)
+            val dayCount = DayOfWeek.entries.size.toLong()
+            val difference = prevIntervalDateTime.dayOfWeek.value % dayCount
+
+            if (expectedTimestamp == null) return prevIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) prevIntervalDateTime.minusDays(difference)
+            else prevIntervalDateTime.plusDays(difference)
+        }
+
+        ScheduleRepetition.MONTHLY -> {
+            val prevIntervalDateTime = anchor.minusMonths(1)
+            val isLeapYear = Year.isLeap(prevIntervalDateTime.year.toLong())
+            val dayCount = anchor.month.length(isLeapYear)
+            val difference = prevIntervalDateTime.dayOfMonth.toLong() % dayCount
+
+            if (expectedTimestamp == null) return prevIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) prevIntervalDateTime.minusDays(difference)
+            else prevIntervalDateTime.plusDays(difference)
+        }
+
+        ScheduleRepetition.BI_MONTHLY -> {
+            val prevIntervalDateTime = anchor.minusMonths(2)
+            val isLeapYear = Year.isLeap(prevIntervalDateTime.year.toLong())
+            val dayCount = anchor.month.length(isLeapYear) + anchor.month.length(isLeapYear)
+            val difference = prevIntervalDateTime.dayOfMonth.toLong() % dayCount
+
+            if (expectedTimestamp == null) return prevIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) prevIntervalDateTime.minusDays(difference)
+            else prevIntervalDateTime.plusDays(difference)
+            anchor.minusMonths(2)
+        }
+
+        ScheduleRepetition.YEARLY -> {
+            val prevIntervalDateTime = anchor.minusYears(1)
+            val dayCount = Year.of(prevIntervalDateTime.year).length()
+            val difference = prevIntervalDateTime.dayOfYear.toLong() % dayCount
+
+            if (expectedTimestamp == null) return prevIntervalDateTime
+            if (anchor.isAfter(expectedTimestamp)) prevIntervalDateTime.minusDays(difference)
+            else prevIntervalDateTime.plusDays(difference)
+        }
     }
 
-    override suspend fun saveScheduleAndSetReminder(
+    override suspend fun saveSchedule(
+        schedule: Schedule,
+        setReminder: Boolean
+    ) {
+        withContext(Dispatchers.IO) {
+            val insertedId = schedulesDao.upsert(schedule.toEntity()).first()
+                .takeIf { it > OarDatabase.DEFAULT_ID_LONG }
+                ?: schedule.id
+
+            if (setReminder) {
+                scheduler.setReminder(schedule.copy(id = insertedId))
+            }
+        }
+    }
+
+    override suspend fun addPaymentToSchedule(
         schedule: Schedule
     ) = withContext(Dispatchers.IO) {
-        val insertedId = schedulesDao.upsert(schedule.toEntity()).first()
-            .takeIf { it > OarDatabase.DEFAULT_ID_LONG }
-            ?: schedule.id
-        scheduleReminder(schedule.copy(id = insertedId))
-    }
-
-    override fun scheduleReminder(schedule: Schedule) {
-        scheduler.cancel(schedule.id)
-        scheduler.setReminder(schedule)
-        receiverService.toggleBootAndTimeSetReceivers(true)
-    }
-
-    override suspend fun createTransactionFromScheduleAndSetNextReminder(
-        schedule: Schedule,
-        dateTime: LocalDateTime
-    ) = withContext(Dispatchers.IO) {
-        val activeCycle = cycleRepo.getActiveCycle()
         db.withTransaction {
+            val activeCycle = cycleRepo.getActiveCycle()
+            val timestampNow = DateUtil.now()
             val transaction = TransactionEntity(
                 amount = schedule.amount,
                 note = schedule.note.orEmpty(),
-                timestamp = dateTime,
+                timestamp = timestampNow,
                 type = schedule.type,
                 tagId = schedule.tagId,
                 folderId = schedule.folderId,
@@ -90,12 +167,15 @@ class SchedulesRepositoryImpl(
                 cycleId = activeCycle?.id ?: OarDatabase.DEFAULT_ID_LONG
             )
             transactionDao.upsert(transaction)
-            val nextReminderDate = schedule.nextPaymentTimestamp
-                ?.let { calculateNextPaymentTimestampFromDate(it, schedule.repetition) }
-            saveScheduleAndSetReminder(
+            val nextReminderDate = calculateNextPaymentTimestampFromDate(
+                anchor = timestampNow,
+                repetition = schedule.repetition,
+                expectedTimestamp = schedule.nextPaymentTimestamp
+            )
+            saveSchedule(
                 schedule = schedule.copy(
                     nextPaymentTimestamp = nextReminderDate,
-                    lastPaymentTimestamp = dateTime
+                    lastPaymentTimestamp = timestampNow
                 )
             )
         }
@@ -114,13 +194,8 @@ class SchedulesRepositoryImpl(
     }
 
     override suspend fun deleteScheduleById(id: Long) = withContext(Dispatchers.IO) {
-        val entity = schedulesDao.getScheduleById(id) ?: return@withContext
-        cancelSchedule(entity.toSchedule())
-        schedulesDao.delete(entity)
-    }
-
-    override suspend fun cancelSchedule(schedule: Schedule) {
-        scheduler.cancel(schedule.id)
+        scheduler.cancel(id)
+        schedulesDao.deleteSchedulesById(setOf(id))
     }
 
     override suspend fun setAllFutureScheduleReminders() = withContext(Dispatchers.IO) {

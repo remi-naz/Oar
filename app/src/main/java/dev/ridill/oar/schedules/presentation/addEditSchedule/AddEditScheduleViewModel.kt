@@ -393,7 +393,10 @@ class AddEditScheduleViewModel @AssistedInject constructor(
             }
 
             isLoading.update { true }
-            scheduleRepo.saveSchedule(input.copy(amount = evaluatedAmount))
+            scheduleRepo.saveSchedule(
+                schedule = input.copy(amount = evaluatedAmount),
+                setReminder = route.scheduleId != INVALID_ID_LONG
+            )
             isLoading.update { false }
             eventBus.send(AddEditScheduleEvent.NavigateUpWithResult(AddEditScheduleResult.SCHEDULE_SAVED))
         }

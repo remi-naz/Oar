@@ -32,21 +32,23 @@ object SchedulesSingletonModule {
         schedulesDao: SchedulesDao,
         transactionDao: TransactionDao,
         scheduler: ScheduleReminder,
-        receiverService: ReceiverService,
         cycleRepo: BudgetCycleRepository
     ): SchedulesRepository = SchedulesRepositoryImpl(
         db = db,
         schedulesDao = schedulesDao,
         transactionDao = transactionDao,
         scheduler = scheduler,
-        receiverService = receiverService,
         cycleRepo = cycleRepo
     )
 
     @Provides
     fun provideScheduleReminder(
-        @ApplicationContext context: Context
-    ): ScheduleReminder = AlarmManagerScheduleReminder(context)
+        @ApplicationContext context: Context,
+        receiverService: ReceiverService,
+    ): ScheduleReminder = AlarmManagerScheduleReminder(
+        context = context,
+        receiverService = receiverService
+    )
 
     @Provides
     fun provideScheduleReminderNotificationHelper(
