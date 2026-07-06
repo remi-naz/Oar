@@ -48,7 +48,7 @@ import java.util.Currency
 class AddEditScheduleViewModel @AssistedInject constructor(
     @Assisted val route: AddEditScheduleRoute,
     private val savedStateHandle: SavedStateHandle,
-    private val scheduleRepo: AddEditScheduleRepository,
+    private val repo: AddEditScheduleRepository,
     private val evalService: ExpEvalService,
     private val eventBus: EventBus<AddEditScheduleEvent>
 ) : ViewModel(), AddEditScheduleActions {
@@ -107,13 +107,13 @@ class AddEditScheduleViewModel @AssistedInject constructor(
     private val showDeleteConfirmation = savedStateHandle
         .getStateFlow(SHOW_DELETE_CONFIRMATION, false)
 
-    private val amountRecommendations = scheduleRepo.getAmountRecommendations()
+    private val amountRecommendations = repo.getAmountRecommendations()
 
     private val showDatePicker = savedStateHandle.getStateFlow(SHOW_DATE_PICKER, false)
     private val showTimePicker = savedStateHandle.getStateFlow(SHOW_TIME_PICKER, false)
 
     private val linkedFolderName = scheduleFolderId.flatMapLatest { selectedId ->
-        scheduleRepo.getFolderNameForId(selectedId)
+        repo.getFolderNameForId(selectedId)
     }.distinctUntilChanged()
 
     private val menuOptions = MutableStateFlow<Set<AddEditScheduleOption>>(emptySet())
@@ -178,7 +178,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val loadedSchedule: Schedule? = when {
                 // ID not invalid means we're editing an existing schedule
-                route.scheduleId != INVALID_ID_LONG -> scheduleRepo.getScheduleById(route.scheduleId)
+                route.scheduleId != INVALID_ID_LONG -> repo.getScheduleById(route.scheduleId)
 
                 // Creating a new with/without prior inputs from a transaction
                 else -> route.inputs?.toSchedule()
@@ -218,6 +218,10 @@ class AddEditScheduleViewModel @AssistedInject constructor(
 
     fun onCurrencySelect(currency: Currency) {
         savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(currency = currency)
+    }
+
+    override fun refreshCurrentDateTime() {
+        repo.refreshCurrentDateTime()
     }
 
     override fun onAmountFocusLost() {
@@ -337,7 +341,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
     override fun onDeleteConfirm() {
         viewModelScope.launch {
             isLoading.update { true }
-            scheduleRepo.deleteSchedule(coercedIdArg)
+            repo.deleteSchedule(coercedIdArg)
             isLoading.update { false }
             savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
             eventBus.send(AddEditScheduleEvent.NavigateUpWithResult(AddEditScheduleResult.SCHEDULE_DELETED))
@@ -393,10 +397,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
             }
 
             isLoading.update { true }
-            scheduleRepo.saveSchedule(
-                schedule = input.copy(amount = evaluatedAmount),
-                setReminder = route.scheduleId != INVALID_ID_LONG
-            )
+            repo.saveSchedule(input.copy(amount = evaluatedAmount))
             isLoading.update { false }
             eventBus.send(AddEditScheduleEvent.NavigateUpWithResult(AddEditScheduleResult.SCHEDULE_SAVED))
         }
