@@ -30,6 +30,9 @@ class ScheduledPaymentReminderReceiver : BroadcastReceiver() {
     @Inject
     lateinit var notificationHelper: NotificationHelper<Schedule>
 
+    @Inject
+    lateinit var scheduleReminder: ScheduleReminder
+
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action != ScheduleReminder.ACTION) return
         val id = intent.getLongExtra(ScheduleReminder.EXTRA_SCHEDULE_ID, -1L)
@@ -46,7 +49,10 @@ class ScheduledPaymentReminderReceiver : BroadcastReceiver() {
             data = schedule
         )
 
-        val newReminderDate = repo.calculateNextPaymentTimestampFromDate(DateUtil.now(), schedule.repetition)
-        repo.scheduleReminder(schedule.copy(nextPaymentTimestamp = newReminderDate))
+        val newReminderDate = repo.calculateNextPaymentTimestampFromDate(
+            anchor = DateUtil.now(),
+            repetition = schedule.repetition
+        )
+        scheduleReminder.setReminder(schedule.copy(nextPaymentTimestamp = newReminderDate))
     }
 }

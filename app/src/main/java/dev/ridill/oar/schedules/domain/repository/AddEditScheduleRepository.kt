@@ -6,7 +6,11 @@ import kotlinx.coroutines.flow.Flow
 interface AddEditScheduleRepository {
     suspend fun getScheduleById(id: Long): Schedule?
     fun getAmountRecommendations(): Flow<List<Long>>
-    suspend fun saveSchedule(schedule: Schedule)
+    suspend fun saveSchedule(
+        schedule: Schedule,
+        setReminder: Boolean = false
+    )
+
     suspend fun deleteSchedule(id: Long)
     fun getFolderNameForId(id: Long?): Flow<String?>
 }

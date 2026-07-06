@@ -4,13 +4,15 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.schedules.domain.model.Schedule
 
 class AlarmManagerScheduleReminder(
-    private val context: Context
+    private val context: Context,
+    private val receiverService: ReceiverService,
 ) : ScheduleReminder {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
@@ -34,7 +36,10 @@ class AlarmManagerScheduleReminder(
             pendingIntent
         )
 
-        logI { "Set reminder for $schedule on ${schedule.nextPaymentTimestamp}" }
+        cancel(schedule.id)
+        receiverService.toggleBootAndTimeSetReceivers(true)
+
+        logI(ScheduleReminder::class.simpleName) { "Set reminder for $schedule on ${schedule.nextPaymentTimestamp}" }
     }
 
     override fun cancel(id: Long) {
@@ -46,6 +51,7 @@ class AlarmManagerScheduleReminder(
                 UtilConstants.pendingIntentFlags
             )
         )
-        logI { "Schedule ID $id reminder cancelled" }
+
+        logI(ScheduleReminder::class.simpleName) { "Schedule ID $id reminder cancelled" }
     }
 }

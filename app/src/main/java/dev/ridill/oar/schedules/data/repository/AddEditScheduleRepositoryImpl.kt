@@ -20,20 +20,19 @@ class AddEditScheduleRepositoryImpl(
 ) : AddEditScheduleRepository {
 
     override suspend fun getScheduleById(id: Long): Schedule? = withContext(Dispatchers.IO) {
-        schedulesRepo.getScheduleById(id)
-            ?.let { schedule ->
-                val nextPaymentTimestamp = schedule.nextPaymentTimestamp
-                    ?: schedule.lastPaymentTimestamp?.let {
-                        schedulesRepo.calculateNextPaymentTimestampFromDate(
-                            dateTime = it,
-                            repetition = schedule.repetition
-                        )
-                    }
+        schedulesRepo.getScheduleById(id)?.let { schedule ->
+            val nextPaymentTimestamp = schedule.nextPaymentTimestamp
+                ?: schedule.lastPaymentTimestamp?.let {
+                    schedulesRepo.calculateNextPaymentTimestampFromDate(
+                        anchor = it,
+                        repetition = schedule.repetition,
+                    )
+                }
 
-                schedule.copy(
-                    nextPaymentTimestamp = nextPaymentTimestamp
-                )
-            }
+            schedule.copy(
+                nextPaymentTimestamp = nextPaymentTimestamp
+            )
+        }
     }
 
     override fun getAmountRecommendations(): Flow<List<Long>> = transactionDao
@@ -54,8 +53,13 @@ class AddEditScheduleRepositoryImpl(
             else listOf(roundedLower, roundedLower + (range / 2), roundedUpper)
         }
 
-    override suspend fun saveSchedule(schedule: Schedule) =
-        schedulesRepo.saveScheduleAndSetReminder(schedule)
+    override suspend fun saveSchedule(
+        schedule: Schedule,
+        setReminder: Boolean
+    ) = schedulesRepo.saveSchedule(
+        schedule = schedule,
+        setReminder = setReminder
+    )
 
     override suspend fun deleteSchedule(id: Long) = schedulesRepo.deleteScheduleById(id)
 

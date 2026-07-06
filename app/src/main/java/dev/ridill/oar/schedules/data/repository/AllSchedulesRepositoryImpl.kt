@@ -99,7 +99,7 @@ class AllSchedulesRepositoryImpl(
         try {
             val schedule = repo.getScheduleById(id)
                 ?: throw ScheduleNotFoundThrowable()
-            repo.createTransactionFromScheduleAndSetNextReminder(schedule)
+            repo.addPaymentToSchedule(schedule)
             Result.Success(Unit)
         } catch (_: ScheduleNotFoundThrowable) {
             Result.Error(
