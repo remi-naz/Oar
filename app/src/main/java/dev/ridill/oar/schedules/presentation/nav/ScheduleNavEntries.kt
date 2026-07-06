@@ -137,6 +137,8 @@ fun EntryProviderScope<NavKey>.scheduleEntries(
             hiltViewModel<AddEditScheduleViewModel, AddEditScheduleViewModel.Factory>(
                 creationCallback = { it.create(key) }
             )
+
+        OnLifecycleStartEffect(viewModel, block = viewModel::refreshCurrentDateTime)
         val amountInputState = viewModel.amountInputState
         val noteInputState = viewModel.noteInputState
         val state by viewModel.state.collectAsStateWithLifecycle()

@@ -4,6 +4,7 @@ import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.transactions.domain.model.TransactionType
 
 interface AddEditScheduleActions {
+    fun refreshCurrentDateTime()
     fun onAmountFocusLost()
     fun onEvaluateExpressionClick()
     fun onRecommendedAmountClick(amount: Long)

@@ -39,7 +39,7 @@ class AlarmManagerScheduleReminder(
         cancel(schedule.id)
         receiverService.toggleBootAndTimeSetReceivers(true)
 
-        logI(ScheduleReminder::class.simpleName) { "Set reminder for $schedule on ${schedule.nextPaymentTimestamp}" }
+        logI(ScheduleReminder::class.simpleName) { "Set reminder for schedule ID ${schedule.id} on ${schedule.nextPaymentTimestamp}" }
     }
 
     override fun cancel(id: Long) {
