@@ -64,6 +64,10 @@ fun EntryProviderScope<NavKey>.scheduleEntries(
             rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
         else null
 
+        ResultEffect<AddEditScheduleResult> { result ->
+            viewModel.onAddEditScheduleNavResult(result)
+        }
+
         CollectFlowEffect(flow = viewModel.events, snackbarController, context) { event ->
             when (event) {
                 is AllSchedulesViewModel.AllSchedulesEvent.ShowUiMessage -> {
