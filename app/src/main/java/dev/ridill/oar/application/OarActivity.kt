@@ -16,6 +16,7 @@ import androidx.biometric.auth.AuthPromptCallback
 import androidx.biometric.auth.startClass2BiometricOrCredentialAuthentication
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -309,8 +310,19 @@ private fun ScreenContent(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             val motionScheme = MaterialTheme.motionScheme
-            val slideAnimationSpec = motionScheme.slowSpatialSpec<IntOffset>()
-            val scaleAnimation = motionScheme.slowSpatialSpec<Float>()
+            val slideAnimationSpec = motionScheme.defaultSpatialSpec<IntOffset>()
+            val scaleOrFadeAnimationSpec = motionScheme.defaultSpatialSpec<Float>()
+            // Fast, critically-damped spring so the predictive pop transition can be seeked
+            // 1:1 with gesture progress and settle quickly on release, mirroring
+            // NavDisplay's own defaultPredictivePopTransitionSpec()
+            val predictivePopSlideSpec = spring<IntOffset>(
+                dampingRatio = 1.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+                stiffness = 1600.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+            )
+            val predictivePopScaleOrFadeSpec = spring<Float>(
+                dampingRatio = 1.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+                stiffness = 1600.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+            )
             NavDisplay(
                 backStack = navigator.backStack,
                 onBack = navigator::goBack,
@@ -331,26 +343,26 @@ private fun ScreenContent(
                     ContentTransform(
                         targetContentEnter = slideInHorizontallyWithFadeIn(
                             slideAnimationSpec = slideAnimationSpec,
-                            fadeAnimationSpec = scaleAnimation,
+                            fadeAnimationSpec = scaleOrFadeAnimationSpec,
                             initialOffsetX = { it / 2 }
                         ),
                         initialContentExit = scaleOut(
-                            animationSpec = scaleAnimation,
+                            animationSpec = scaleOrFadeAnimationSpec,
                             targetScale = NAV_ANIM_SCALE,
                             transformOrigin = TransformOrigin.Center,
-                        ) + fadeOut(animationSpec = scaleAnimation),
+                        ) + fadeOut(animationSpec = scaleOrFadeAnimationSpec),
                     )
                 },
                 popTransitionSpec = {
                     ContentTransform(
                         targetContentEnter = scaleIn(
-                            animationSpec = scaleAnimation,
+                            animationSpec = scaleOrFadeAnimationSpec,
                             initialScale = NAV_ANIM_SCALE,
                             transformOrigin = TransformOrigin.Center,
-                        ) + fadeIn(animationSpec = scaleAnimation),
+                        ) + fadeIn(animationSpec = scaleOrFadeAnimationSpec),
                         initialContentExit = slideOutHorizontallyWithFadeOut(
                             slideAnimationSpec = slideAnimationSpec,
-                            fadeAnimationSpec = scaleAnimation,
+                            fadeAnimationSpec = scaleOrFadeAnimationSpec,
                             targetOffsetX = { it / 2 }
                         )
                     )
@@ -358,13 +370,13 @@ private fun ScreenContent(
                 predictivePopTransitionSpec = {
                     ContentTransform(
                         targetContentEnter = scaleIn(
-                            animationSpec = scaleAnimation,
+                            animationSpec = predictivePopScaleOrFadeSpec,
                             initialScale = NAV_ANIM_SCALE,
                             transformOrigin = TransformOrigin.Center,
-                        ) + fadeIn(animationSpec = scaleAnimation),
+                        ) + fadeIn(animationSpec = predictivePopScaleOrFadeSpec),
                         initialContentExit = slideOutHorizontallyWithFadeOut(
-                            slideAnimationSpec = slideAnimationSpec,
-                            fadeAnimationSpec = scaleAnimation,
+                            slideAnimationSpec = predictivePopSlideSpec,
+                            fadeAnimationSpec = predictivePopScaleOrFadeSpec,
                             targetOffsetX = { it / 2 }
                         )
                     )
