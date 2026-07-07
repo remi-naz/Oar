@@ -1,11 +1,14 @@
 package dev.ridill.oar.dashboard.presentation
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,17 +16,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scrim
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -45,6 +55,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -57,11 +68,11 @@ import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.domain.util.PartOfDay
 import dev.ridill.oar.core.domain.util.WhiteSpace
+import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.ui.components.BodyMediumText
 import dev.ridill.oar.core.ui.components.DisplaySmallText
 import dev.ridill.oar.core.ui.components.ListLabel
 import dev.ridill.oar.core.ui.components.OarImage
-import dev.ridill.oar.core.ui.components.OarPlainTooltip
 import dev.ridill.oar.core.ui.components.OarProgressBar
 import dev.ridill.oar.core.ui.components.OarRichTooltip
 import dev.ridill.oar.core.ui.components.OarScaffold
@@ -75,7 +86,6 @@ import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.components.scrollableLayout.ScrollableHeaderLayout
 import dev.ridill.oar.core.ui.components.scrollableLayout.ScrollableLayoutDefaults
-import androidx.navigation3.runtime.NavKey
 import dev.ridill.oar.core.ui.navigation.AllFoldersRoute
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.SettingsRoute
@@ -112,133 +122,213 @@ fun DashboardScreen(
         derivedStateOf { recentSpends.isEmpty() }
     }
 
-    OarScaffold(
+    Box(
         modifier = Modifier
-            .fillMaxSize(),
-        bottomBar = {
-            BottomAppBar(
-                actions = {
-                    val bottomNavItems = remember {
-                        listOf(
-                            Triple(SettingsRoute, R.drawable.ic_outlined_settings, R.string.destination_settings),
-                            Triple(AllSchedulesRoute, R.drawable.ic_outlined_alarm_clock, R.string.destination_schedules_graph),
-                            Triple(AllFoldersRoute, R.drawable.ic_outlined_folder, R.string.destination_folders_graph),
-                        )
-                    }
-                    bottomNavItems.forEach { (route, iconRes, labelRes) ->
-                        OarPlainTooltip(
-                            tooltipText = stringResource(labelRes),
-                            focusable = false
-                        ) {
-                            IconButton(
-                                onClick = { navigateTo(route) },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(iconRes),
-                                    contentDescription = stringResource(labelRes)
-                                )
-                            }
-                        }
-                    }
-                },
-                floatingActionButton = {
-                    NewTransactionFab(
-                        onClick = { navigateToAddEditTransaction(null) },
-                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                    )
-                }
-            )
-        },
-        snackbarController = snackbarController,
-    ) { paddingValues ->
-        val scrollableLayoutBehaviour = ScrollableLayoutDefaults.exitUntilCollapsedScrollBehavior(
-            parallaxFactor = 2f
-        )
-        ScrollableHeaderLayout(
+            .fillMaxSize()
+    ) {
+        OarScaffold(
             modifier = Modifier
                 .fillMaxSize(),
-            scrollBehavior = scrollableLayoutBehaviour,
-            header = {
-                DashboardHeader(
-                    signedInUser = state.signedInUser,
-                    balance = state.balance,
-                    budget = state.monthlyBudgetInclCredits,
-                    usageFraction = { state.usagePercent },
-                    areActiveSchedulesEmpty = areActiveSchedulesEmpty,
-                    activeSchedules = state.activeSchedules,
-                    onScheduleClick = { navigateToAddEditSchedule(it.id) },
-                    contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding()
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = MaterialTheme.spacing.small)
-                        .padding(bottom = MaterialTheme.spacing.small)
+            bottomBar = {
+                BottomAppBar(
+                    actions = {},
+                    floatingActionButton = {
+                        NewTransactionFab(
+                            onClick = { navigateToAddEditTransaction(null) },
+                            elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                        )
+                    }
                 )
-            }
-        ) {
-            Surface {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    SpacerSmall()
-                    RecentSpendsHeader(
-                        amount = state.spentAmount,
-                        onAllTransactionsClick = navigateToAllTransactions,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                horizontal = MaterialTheme.spacing.medium,
-                                vertical = MaterialTheme.spacing.medium
-                            )
-                    )
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(Float.One),
+            },
+            snackbarController = snackbarController,
+        ) { paddingValues ->
+            val scrollableLayoutBehaviour = ScrollableLayoutDefaults
+                .exitUntilCollapsedScrollBehavior(parallaxFactor = 2f)
+            ScrollableHeaderLayout(
+                modifier = Modifier
+                    .fillMaxSize(),
+                scrollBehavior = scrollableLayoutBehaviour,
+                header = {
+                    DashboardHeader(
+                        signedInUser = state.signedInUser,
+                        balance = state.balance,
+                        budget = state.monthlyBudgetInclCredits,
+                        usageFraction = { state.usagePercent },
+                        areActiveSchedulesEmpty = areActiveSchedulesEmpty,
+                        activeSchedules = state.activeSchedules,
+                        onScheduleClick = { navigateToAddEditSchedule(it.id) },
                         contentPadding = PaddingValues(
-                            bottom = paddingValues.calculateBottomPadding() + PaddingScrollEnd
-                        )
+                            top = paddingValues.calculateTopPadding()
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = MaterialTheme.spacing.small)
+                            .padding(bottom = MaterialTheme.spacing.small)
+                    )
+                }
+            ) {
+                Surface {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
                     ) {
-                        listEmptyIndicator(
-                            isListEmpty = areRecentSpendsEmpty,
-                            messageRes = R.string.recent_spends_list_empty_message
+                        SpacerSmall()
+                        RecentSpendsHeader(
+                            amount = state.spentAmount,
+                            onAllTransactionsClick = navigateToAllTransactions,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = MaterialTheme.spacing.medium,
+                                    vertical = MaterialTheme.spacing.medium
+                                )
                         )
 
-                        items(
-                            count = recentSpends.itemCount,
-                            key = recentSpends.itemKey { it.id },
-                            contentType = recentSpends.itemContentType { "RecentSpendCard" }
-                        ) { index ->
-                            recentSpends[index]?.let { transaction ->
-                                TransactionListItem(
-                                    note = transaction.note,
-                                    amount = transaction.amountFormatted,
-                                    timeStamp = transaction.timestamp,
-                                    leadingContentLine1 = transaction.timestamp.format(DateUtil.Formatters.ddth),
-                                    leadingContentLine2 = transaction.timestamp.format(DateUtil.Formatters.EEE),
-                                    type = transaction.type,
-                                    tag = transaction.tag,
-                                    folder = transaction.folder,
-                                    modifier = Modifier
-                                        .fillParentMaxWidth()
-                                        .clickable(
-                                            onClick = {
-                                                navigateToAddEditTransaction(transaction.id)
-                                            },
-                                            onClickLabel = stringResource(R.string.cd_tap_to_edit_transaction)
-                                        )
-                                        .animateItem(),
-                                )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(Float.One),
+                            contentPadding = PaddingValues(
+                                bottom = paddingValues.calculateBottomPadding() + PaddingScrollEnd
+                            )
+                        ) {
+                            listEmptyIndicator(
+                                isListEmpty = areRecentSpendsEmpty,
+                                messageRes = R.string.recent_spends_list_empty_message
+                            )
+
+                            items(
+                                count = recentSpends.itemCount,
+                                key = recentSpends.itemKey { it.id },
+                                contentType = recentSpends.itemContentType { "RecentSpendCard" }
+                            ) { index ->
+                                recentSpends[index]?.let { transaction ->
+                                    TransactionListItem(
+                                        note = transaction.note,
+                                        amount = transaction.amountFormatted,
+                                        timeStamp = transaction.timestamp,
+                                        leadingContentLine1 = transaction.timestamp.format(DateUtil.Formatters.ddth),
+                                        leadingContentLine2 = transaction.timestamp.format(DateUtil.Formatters.EEE),
+                                        type = transaction.type,
+                                        tag = transaction.tag,
+                                        folder = transaction.folder,
+                                        modifier = Modifier
+                                            .fillParentMaxWidth()
+                                            .clickable(
+                                                onClick = {
+                                                    navigateToAddEditTransaction(transaction.id)
+                                                },
+                                                onClickLabel = stringResource(R.string.cd_tap_to_edit_transaction)
+                                            )
+                                            .animateItem(),
+                                    )
+                                }
                             }
                         }
                     }
                 }
+            }
+        }
+
+        var expanded by remember { mutableStateOf(false) }
+        FeatureMenu(
+            expanded = expanded,
+            onExpandedChange = { expanded = it },
+            navigateToRoute = navigateTo,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+        )
+    }
+}
+
+@Composable
+private fun FeatureMenu(
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    navigateToRoute: (NavKey) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val bottomNavItems = remember {
+        listOf(
+            Triple(
+                AllSchedulesRoute,
+                R.drawable.ic_outlined_calendar_days,
+                R.string.destination_schedules_graph
+            ),
+            Triple(
+                AllFoldersRoute,
+                R.drawable.ic_outlined_folder,
+                R.string.destination_folders_graph
+            ),
+            Triple(
+                SettingsRoute,
+                R.drawable.ic_outlined_settings,
+                R.string.destination_settings
+            ),
+        )
+    }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.BottomStart,
+    ) {
+        val scrimAlpha = animateFloatAsState(
+            targetValue = if (expanded) Float.One else Float.Zero,
+            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            label = "ScrimAlphaAnimation",
+        )
+
+        if (expanded) {
+            Scrim(
+                contentDescription = null,
+                onClick = { onExpandedChange(false) },
+                alpha = { scrimAlpha.value },
+            )
+        }
+
+        FloatingActionButtonMenu(
+            expanded = expanded,
+            button = {
+                FilledTonalIconToggleButton(
+                    checked = expanded,
+                    onCheckedChange = onExpandedChange,
+                    shapes = IconButtonDefaults.toggleableShapes(),
+                    colors = IconButtonDefaults.filledTonalIconToggleButtonColors(
+                        containerColor = BottomAppBarDefaults.containerColor,
+                    ),
+                ) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.Close
+                        else ImageVector.vectorResource(R.drawable.ic_rounded_menu_grid),
+                        contentDescription = null,
+                    )
+                }
+            },
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .padding(BottomAppBarDefaults.windowInsets.asPaddingValues())
+        ) {
+            val menuItemContainerColor = MaterialTheme.colorScheme.surface
+            bottomNavItems.forEach { (route, iconRes, labelRes) ->
+                FloatingActionButtonMenuItem(
+                    onClick = { navigateToRoute(route) },
+                    text = {
+                        Text(
+                            text = stringResource(id = labelRes),
+                            fontWeight = FontWeight.Medium
+                        )
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(iconRes),
+                            contentDescription = stringResource(labelRes),
+                        )
+                    },
+                    containerColor = menuItemContainerColor,
+                    contentColor = contentColorFor(menuItemContainerColor),
+                    modifier = Modifier
+                        .padding(vertical = 2.dp)
+                )
             }
         }
     }
