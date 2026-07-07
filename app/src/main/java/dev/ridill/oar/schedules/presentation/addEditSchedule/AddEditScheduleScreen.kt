@@ -618,6 +618,7 @@ private fun PreviewScreenContent() {
                 selectedRepetition = ScheduleRepetition.MONTHLY
             ),
             actions = object : AddEditScheduleActions {
+                override fun refreshCurrentDateTime() {}
                 override fun onAmountFocusLost() {}
                 override fun onEvaluateExpressionClick() {}
                 override fun onRecommendedAmountClick(amount: Long) {}
