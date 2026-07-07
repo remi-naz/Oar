@@ -1,7 +1,6 @@
 package dev.ridill.oar.di
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -9,13 +8,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.ridill.oar.account.domain.service.AccessTokenKeystoreService
 import dev.ridill.oar.application.OarViewModel
 import dev.ridill.oar.core.data.db.MIGRATION_5_6
 import dev.ridill.oar.core.data.db.OarDatabase
@@ -31,6 +29,8 @@ import dev.ridill.oar.core.domain.crashlytics.CrashlyticsManager
 import dev.ridill.oar.core.domain.crashlytics.FirebaseCrashlyticsManager
 import dev.ridill.oar.core.domain.crypto.CryptoManager
 import dev.ridill.oar.core.domain.crypto.DefaultCryptoManager
+import dev.ridill.oar.core.domain.crypto.DefaultKeystoreCryptoManager
+import dev.ridill.oar.core.domain.crypto.KeystoreCryptoManager
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.service.ReceiverService
@@ -121,23 +121,18 @@ object AppModule {
     @Provides
     fun provideCryptoManager(): CryptoManager = DefaultCryptoManager()
 
-    @Encrypted
     @Provides
-    fun provideEncryptedSharedPref(
-        @ApplicationContext context: Context
-    ): SharedPreferences {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+    fun provideKeystoreCryptoManager(): KeystoreCryptoManager = DefaultKeystoreCryptoManager()
 
-        return EncryptedSharedPreferences.create(
-            context,
-            "encrypted_shared_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    }
+    @AccessTokenPreferences
+    @Singleton
+    @Provides
+    fun provideAccessTokenPrefDataStoreInstance(
+        @ApplicationContext context: Context
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+        produceFile = { context.preferencesDataStoreFile(AccessTokenKeystoreService.NAME) }
+    )
 
     @Provides
     fun provideRemoteConfigService(): FirebaseRemoteConfigService = FirebaseRemoteConfigService()
@@ -157,7 +152,7 @@ annotation class ApplicationScope
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class Encrypted
+annotation class AccessTokenPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

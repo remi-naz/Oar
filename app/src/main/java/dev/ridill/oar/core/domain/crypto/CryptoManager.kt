@@ -50,3 +50,15 @@ data class EncryptionResult(
         return result
     }
 }
+
+interface KeystoreCryptoManager {
+    fun encrypt(rawData: ByteArray): EncryptionResult
+    fun decrypt(encryptedData: ByteArray, iv: ByteArray): ByteArray
+
+    companion object {
+        const val KEY_ALIAS = "oar_access_token_key"
+        const val ANDROID_KEYSTORE = "AndroidKeyStore"
+        const val TRANSFORMATION = "AES/GCM/NoPadding"
+        const val GCM_TAG_LENGTH = 128
+    }
+}
