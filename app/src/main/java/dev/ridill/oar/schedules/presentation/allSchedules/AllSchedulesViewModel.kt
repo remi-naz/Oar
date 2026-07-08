@@ -10,6 +10,7 @@ import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.core.ui.util.UiText.StringResource
 import dev.ridill.oar.schedules.domain.repository.AllSchedulesRepository
@@ -71,6 +72,12 @@ class AllSchedulesViewModel @Inject constructor(
     val events = eventBus.eventFlow
 
     fun refreshCurrentDate() = repo.refreshCurrentDate()
+
+    fun onAddEditScheduleNavResult(result: AddEditScheduleResult) = viewModelScope.launch {
+        if (result == AddEditScheduleResult.SCHEDULE_SAVED) {
+            eventBus.send(ShowUiMessage(StringResource(R.string.schedule_saved)))
+        }
+    }
 
     override fun onNotificationWarningClick() {
         savedStateHandle[SHOW_NOTIFICATION_RATIONALE] = true
