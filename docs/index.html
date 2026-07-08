@@ -1,70 +1,104 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Oar — Track and manage your expenses</title>
-<meta name="description" content="Oar is an Android app for tracking expenses and managing budgets, with local-first storage and optional encrypted Google Drive backup.">
-<link rel="icon" href="assets/icon.png">
-<link rel="stylesheet" href="assets/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Oar — Track and manage your expenses</title>
+    <meta name="description"
+          content="Oar is an Android app for tracking expenses and managing budgets, with local-first storage and optional encrypted Google Drive backup.">
+    <link rel="icon" href="assets/icon.png">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body class="home">
 
 <section class="hero">
-  <p class="eyebrow">Android · Expense &amp; Budget Tracker</p>
-  <img class="feature" src="assets/feature.png" alt="Oar app preview showing balance, transactions, and folders screens">
-  <p class="tagline">
-    Track and manage your expenses effectively. Oar keeps your financial data
-    local to your device by default, with an optional encrypted backup to your
-    own Google Drive.
-  </p>
-  <div class="btn-row">
-    <a class="btn btn-primary" href="https://github.com/remi-naz/Oar">View on GitHub</a>
-    <a class="btn btn-secondary" href="https://github.com/remi-naz/Oar/issues">Report Bug / Request Feature</a>
-  </div>
+    <p class="eyebrow">Android · Expense &amp; Budget Tracker</p>
+    <img class="feature" src="assets/feature.png"
+         alt="Oar app preview showing balance, transactions, and folders screens">
+    <p class="tagline">
+        Track and manage your expenses effectively. Oar keeps your financial data
+        local to your device by default, with an optional encrypted backup to your
+        own Google Drive.
+    </p>
+    <div class="btn-row">
+        <a class="btn btn-primary"
+           href="https://play.google.com/store/apps/details?id=dev.ridill.oar">Get it on Google
+            Play</a>
+        <a class="btn btn-secondary" href="https://github.com/remi-naz/Oar">View on GitHub</a>
+        <a class="btn btn-secondary" href="https://github.com/remi-naz/Oar/issues">Report Bug /
+            Request Feature</a>
+    </div>
 </section>
 
 <div class="wrap">
 
-<h2 style="margin-top:2.5rem;">See it in action</h2>
-<div class="gallery">
-  <img src="assets/screenshots/screenshot-1.jpg" alt="Screenshot: Easily view your recent spends and balance" loading="lazy">
-  <img src="assets/screenshots/screenshot-2.jpg" alt="Screenshot: Track and manage your spending efficiently" loading="lazy">
-  <img src="assets/screenshots/screenshot-3.jpg" alt="Screenshot: Schedule reminders for repeated transactions" loading="lazy">
-  <img src="assets/screenshots/screenshot-4.jpg" alt="Screenshot: Group and tag your transactions to manage it better" loading="lazy">
-  <img src="assets/screenshots/screenshot-5.jpg" alt="Screenshot: Get on top of your finances with ease" loading="lazy">
-</div>
+    <h2 style="margin-top:2.5rem;">See it in action</h2>
+    <div class="gallery">
+        <img src="assets/screenshots/screenshot-1.jpg"
+             alt="Screenshot: Easily view your recent spends and balance" loading="lazy">
+        <img src="assets/screenshots/screenshot-2.jpg"
+             alt="Screenshot: Track and manage your spending efficiently" loading="lazy">
+        <img src="assets/screenshots/screenshot-3.jpg"
+             alt="Screenshot: Schedule reminders for repeated transactions" loading="lazy">
+        <img src="assets/screenshots/screenshot-4.jpg"
+             alt="Screenshot: Group and tag your transactions to manage it better" loading="lazy">
+        <img src="assets/screenshots/screenshot-5.jpg"
+             alt="Screenshot: Get on top of your finances with ease" loading="lazy">
+    </div>
 
-<h2>About</h2>
-<p>
-  Oar is a user-friendly Android application designed to empower individuals
-  in managing their finances effectively. With Oar, users can effortlessly
-  track and control their expenses, helping them maintain financial
-  discipline and achieve their financial goals.
-</p>
-<ul class="badges">
-  <li>Kotlin</li>
-  <li>Jetpack Compose</li>
-  <li>Room / SQLite (local-first)</li>
-  <li>Optional Google Drive backup</li>
-</ul>
+    <h2>About</h2>
+    <p>
+        Oar is a user-friendly Android application designed to empower individuals
+        in managing their finances effectively. With Oar, users can effortlessly
+        track and control their expenses, helping them maintain financial
+        discipline and achieve their financial goals.
+    </p>
 
-<h2>Legal &amp; Privacy</h2>
-<div class="legal-grid">
-  <div class="card">
-    <strong><a href="privacy-policy.html">Privacy Policy</a></strong>
-    <p style="margin:0.4rem 0 0;">What data Oar collects, how it's stored, and your privacy rights.</p>
-  </div>
-  <div class="card">
-    <strong><a href="data-deletion.html">Delete My Data</a></strong>
-    <p style="margin:0.4rem 0 0;">How to delete your local data, account, and any Google Drive backup.</p>
-  </div>
-</div>
+    <h2>Features</h2>
+    <ul>
+        <li><strong>Transactions</strong> — log income and expenses, and browse them in a paged,
+            filterable list.
+        </li>
+        <li><strong>Folders</strong> — group related transactions together and track their combined
+            total.
+        </li>
+        <li><strong>Tags</strong> — categorize spending and filter your history by tag.</li>
+        <li><strong>Budget Cycles</strong> — set a monthly budget and track your balance against it.
+        </li>
+        <li><strong>Schedules</strong> — recurring transactions with reminder notifications.</li>
+        <li><strong>Encrypted Google Drive backup</strong> — optional, off by default, encrypted
+            before upload.
+        </li>
+        <li><strong>Biometric app lock</strong> — lock the app behind device biometrics.</li>
+    </ul>
 
-<footer class="site">
-  Oar · Built by <a href="https://github.com/RemijiusBrian">Ridill</a> ·
-  <a href="https://github.com/remi-naz/Oar">github.com/remi-naz/Oar</a>
-</footer>
+    <ul class="badges">
+        <li>Kotlin</li>
+        <li>Jetpack Compose</li>
+        <li>Navigation 3</li>
+        <li>Room / SQLite (local-first)</li>
+        <li>WorkManager</li>
+        <li>Optional Google Drive backup</li>
+    </ul>
+
+    <h2>Legal &amp; Privacy</h2>
+    <div class="legal-grid">
+        <div class="card">
+            <strong><a href="privacy-policy.html">Privacy Policy</a></strong>
+            <p style="margin:0.4rem 0 0;">What data Oar collects, how it's stored, and your privacy
+                rights.</p>
+        </div>
+        <div class="card">
+            <strong><a href="data-deletion.html">Delete My Data</a></strong>
+            <p style="margin:0.4rem 0 0;">How to delete your local data, account, and any Google
+                Drive backup.</p>
+        </div>
+    </div>
+
+    <footer class="site">
+        Oar · Built by <a href="https://github.com/RemijiusBrian">Ridill</a> ·
+        <a href="https://github.com/remi-naz/Oar">github.com/remi-naz/Oar</a>
+    </footer>
 
 </div>
 </body>
