@@ -12,6 +12,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
+import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.util.DateUtil
@@ -48,6 +49,7 @@ import java.util.Currency
 class AddEditScheduleViewModel @AssistedInject constructor(
     @Assisted val route: AddEditScheduleRoute,
     private val savedStateHandle: SavedStateHandle,
+    private val cycleRepo: BudgetCycleRepository,
     private val repo: AddEditScheduleRepository,
     private val evalService: ExpEvalService,
     private val eventBus: EventBus<AddEditScheduleEvent>
@@ -176,6 +178,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
         if (scheduleInput.value != null) return
 
         viewModelScope.launch {
+            val activeCycle = cycleRepo.getActiveCycle()
             val loadedSchedule: Schedule? = when {
                 // ID not invalid means we're editing an existing schedule
                 route.scheduleId != INVALID_ID_LONG -> repo.getScheduleById(route.scheduleId)
@@ -185,7 +188,9 @@ class AddEditScheduleViewModel @AssistedInject constructor(
             }
 
             val isFreshSchedule = loadedSchedule == null
-            val schedule = loadedSchedule ?: Schedule.DEFAULT
+            val schedule = loadedSchedule ?: Schedule.DEFAULT.copy(
+                currency = activeCycle?.currency ?: LocaleUtil.defaultCurrency
+            )
 
             val dateNow = DateUtil.now()
             val nextPaymentTimestamp = schedule.nextPaymentTimestamp
