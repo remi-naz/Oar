@@ -7,99 +7,281 @@
     <meta name="description"
           content="Oar is an Android app for tracking expenses and managing budgets, with local-first storage and optional encrypted Google Drive backup.">
     <link rel="icon" href="assets/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
     <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="home">
+<body>
 
-<section class="hero">
-    <p class="eyebrow">Android · Expense &amp; Budget Tracker</p>
-    <img class="feature" src="assets/feature.png"
-         alt="Oar app preview showing balance, transactions, and folders screens">
-    <p class="tagline">
-        Track and manage your expenses effectively. Oar keeps your financial data
-        local to your device by default, with an optional encrypted backup to your
-        own Google Drive.
-    </p>
-    <div class="btn-row">
-        <a class="btn btn-primary"
-           href="https://play.google.com/store/apps/details?id=dev.ridill.oar">Get it on Google
-            Play</a>
-        <a class="btn btn-secondary" href="https://github.com/remi-naz/Oar">View on GitHub</a>
-        <a class="btn btn-secondary" href="https://github.com/remi-naz/Oar/issues">Report Bug /
-            Request Feature</a>
+<nav class="site-nav">
+    <div class="nav-inner">
+        <a class="nav-brand" href="#top">
+            <img src="assets/icon.png" alt="Oar">
+            <span>Oar</span>
+        </a>
+    </div>
+</nav>
+
+<header id="top" class="hero">
+    <div class="hero-inner">
+        <div>
+            <div class="pill">
+                <span style="width:7px;height:7px;border-radius:50%;background:#1F7A5C;display:inline-block;"></span>
+                Android · Expense &amp; Budget Tracker
+            </div>
+            <h1 class="hero-title">Track your money.<br>Keep it yours.</h1>
+            <p class="hero-lede">
+                Oar is a calm, local-first expense &amp; budget tracker. Your financial data
+                stays on your device by default — with optional encrypted backup to
+                <em>your own</em> Google Drive.
+            </p>
+            <div class="btn-row">
+                <a class="btn btn-primary"
+                   href="https://play.google.com/store/apps/details?id=dev.ridill.oar">Get it on Google Play</a>
+                <a class="btn btn-secondary" href="https://github.com/remi-naz/Oar">View on GitHub</a>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Local-first</div>
+                </div>
+                <div class="divider"></div>
+                <div>
+                    <div class="stat-value">Kotlin</div>
+                    <div class="stat-label">&amp; Jetpack Compose</div>
+                </div>
+                <div class="divider"></div>
+                <div>
+                    <div class="stat-value">Free</div>
+                    <div class="stat-label">&amp; open source</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-art">
+            <div class="hero-art-frame">
+                <img src="assets/feature.png"
+                     alt="Oar app preview showing balance, transactions, and folders screens">
+            </div>
+        </div>
+    </div>
+</header>
+
+<section id="screens" class="section-dark">
+    <div class="wrap-1140">
+        <div class="section-dark-head">
+            <div class="section-eyebrow-dark">See it in action</div>
+            <h2 class="section-title-dark">Everything you need, nothing you don't</h2>
+        </div>
+        <div class="shots-row">
+            <figure class="shot-card">
+                <div class="shot-frame">
+                    <img src="assets/screenshots/screenshot-1.jpg"
+                         alt="Screenshot: Easily view your recent spends and balance" loading="lazy">
+                </div>
+                <figcaption>Easily view your recent spends and balance</figcaption>
+            </figure>
+            <figure class="shot-card">
+                <div class="shot-frame">
+                    <img src="assets/screenshots/screenshot-2.jpg"
+                         alt="Screenshot: Track and manage your spending efficiently" loading="lazy">
+                </div>
+                <figcaption>Track and manage your spending efficiently</figcaption>
+            </figure>
+            <figure class="shot-card">
+                <div class="shot-frame">
+                    <img src="assets/screenshots/screenshot-3.jpg"
+                         alt="Screenshot: Schedule reminders for repeated transactions" loading="lazy">
+                </div>
+                <figcaption>Schedule reminders for repeated transactions</figcaption>
+            </figure>
+            <figure class="shot-card">
+                <div class="shot-frame">
+                    <img src="assets/screenshots/screenshot-4.jpg"
+                         alt="Screenshot: Group and tag your transactions to manage it better" loading="lazy">
+                </div>
+                <figcaption>Group and tag your transactions to manage them</figcaption>
+            </figure>
+            <figure class="shot-card">
+                <div class="shot-frame">
+                    <img src="assets/screenshots/screenshot-5.jpg"
+                         alt="Screenshot: Get on top of your finances with ease" loading="lazy">
+                </div>
+                <figcaption>Get on top of your finances with ease</figcaption>
+            </figure>
+        </div>
     </div>
 </section>
 
-<div class="wrap">
-
-    <h2 style="margin-top:2.5rem;">See it in action</h2>
-    <div class="gallery">
-        <img src="assets/screenshots/screenshot-1.jpg"
-             alt="Screenshot: Easily view your recent spends and balance" loading="lazy">
-        <img src="assets/screenshots/screenshot-2.jpg"
-             alt="Screenshot: Track and manage your spending efficiently" loading="lazy">
-        <img src="assets/screenshots/screenshot-3.jpg"
-             alt="Screenshot: Schedule reminders for repeated transactions" loading="lazy">
-        <img src="assets/screenshots/screenshot-4.jpg"
-             alt="Screenshot: Group and tag your transactions to manage it better" loading="lazy">
-        <img src="assets/screenshots/screenshot-5.jpg"
-             alt="Screenshot: Get on top of your finances with ease" loading="lazy">
+<section id="features" class="wrap-1140 features">
+    <div class="section-head">
+        <div class="section-eyebrow">Features</div>
+        <h2 class="section-title">Built to keep money simple</h2>
+        <p class="section-lede">Log it, group it, budget it, and get gently reminded — all in a clean,
+            distraction-free interface.</p>
     </div>
-
-    <h2>About</h2>
-    <p>
-        Oar is a user-friendly Android application designed to empower individuals
-        in managing their finances effectively. With Oar, users can effortlessly
-        track and control their expenses, helping them maintain financial
-        discipline and achieve their financial goals.
-    </p>
-
-    <h2>Features</h2>
-    <ul>
-        <li><strong>Transactions</strong> — log income and expenses, and browse them in a paged,
-            filterable list.
-        </li>
-        <li><strong>Folders</strong> — group related transactions together and track their combined
-            total.
-        </li>
-        <li><strong>Tags</strong> — categorize spending and filter your history by tag.</li>
-        <li><strong>Budget Cycles</strong> — set a monthly budget and track your balance against it.
-        </li>
-        <li><strong>Schedules</strong> — recurring transactions with reminder notifications.</li>
-        <li><strong>Encrypted Google Drive backup</strong> — optional, off by default, encrypted
-            before upload.
-        </li>
-        <li><strong>Biometric app lock</strong> — lock the app behind device biometrics.</li>
-    </ul>
-
-    <ul class="badges">
-        <li>Kotlin</li>
-        <li>Jetpack Compose</li>
-        <li>Navigation 3</li>
-        <li>Room / SQLite (local-first)</li>
-        <li>WorkManager</li>
-        <li>Optional Google Drive backup</li>
-    </ul>
-
-    <h2>Legal &amp; Privacy</h2>
-    <div class="legal-grid">
-        <div class="card">
-            <strong><a href="privacy-policy.html">Privacy Policy</a></strong>
-            <p style="margin:0.4rem 0 0;">What data Oar collects, how it's stored, and your privacy
-                rights.</p>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+            </div>
+            <h3>Transactions</h3>
+            <p>Log income and expenses, then browse them in a paged, filterable list.</p>
         </div>
-        <div class="card">
-            <strong><a href="data-deletion.html">Delete My Data</a></strong>
-            <p style="margin:0.4rem 0 0;">How to delete your local data, account, and any Google
-                Drive backup.</p>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <h3>Folders</h3>
+            <p>Group related transactions — a trip, a project — and track their combined total.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                    <line x1="7" y1="7" x2="7.01" y2="7"/>
+                </svg>
+            </div>
+            <h3>Tags</h3>
+            <p>Categorize spending and filter your history by the tags that matter to you.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+            </div>
+            <h3>Budget Cycles</h3>
+            <p>Set a monthly budget and track your balance against it across cycles.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <polyline points="12 7 12 12 15 14"/>
+                </svg>
+            </div>
+            <h3>Schedules</h3>
+            <p>Set up recurring transactions with reminder notifications so nothing slips.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+                </svg>
+            </div>
+            <h3>Encrypted Backup</h3>
+            <p>Optionally back up and restore to your own Google Drive — encrypted before upload.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <h3>Biometric Lock</h3>
+            <p>Lock the app behind device biometrics for an extra layer of privacy.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2"/>
+                    <line x1="12" y1="18" x2="12.01" y2="18"/>
+                </svg>
+            </div>
+            <h3>Local-First Storage</h3>
+            <p>All data lives on-device by default; nothing is sent anywhere unless you enable backup.</p>
         </div>
     </div>
+</section>
 
-    <footer class="site">
-        Oar · Built by <a href="https://github.com/RemijiusBrian">Ridill</a> ·
-        <a href="https://github.com/remi-naz/Oar">github.com/remi-naz/Oar</a>
-    </footer>
+<section id="privacy" class="privacy-section">
+    <div class="privacy-callout">
+        <div class="privacy-callout-inner">
+            <div class="privacy-callout-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+            </div>
+            <h2>Local-first, private by default</h2>
+            <p>No account required. Nothing leaves your phone unless you say so. If you want a
+                safety net, back up to your own Google Drive — encrypted before it ever leaves the
+                device — and lock the whole app behind your biometrics.</p>
+            <div class="tag-row">
+                <span class="tag-pill">On-device storage</span>
+                <span class="tag-pill">Encrypted backup</span>
+                <span class="tag-pill">Biometric app lock</span>
+            </div>
+            <div class="callout-actions">
+                <a class="callout-btn callout-btn-solid" href="privacy-policy.html">
+                    Read the Privacy Policy
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+                <a class="callout-btn callout-btn-outline" href="data-deletion.html">
+                    Delete My Data
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 
-</div>
+<section class="stack-section">
+    <div class="section-eyebrow">Built With</div>
+    <h2 class="section-title">Modern, open Android stack</h2>
+    <div class="stack-tags">
+        <span class="stack-tag">Kotlin</span>
+        <span class="stack-tag">Jetpack Compose</span>
+        <span class="stack-tag">Navigation 3</span>
+        <span class="stack-tag">Room / SQLite</span>
+        <span class="stack-tag">Hilt</span>
+        <span class="stack-tag">WorkManager</span>
+        <span class="stack-tag">DataStore</span>
+        <span class="stack-tag">Biometric</span>
+        <span class="stack-tag">Firebase</span>
+    </div>
+</section>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img src="assets/icon.png" alt="Oar">
+            <div>
+                <div class="footer-name">Oar</div>
+                <div class="footer-by">Built by <a href="https://github.com/RemijiusBrian">Ridill</a></div>
+            </div>
+        </div>
+        <div class="footer-copy">© 2026 Oar · Local-first expense tracking</div>
+    </div>
+</footer>
+
 </body>
 </html>

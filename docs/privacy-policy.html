@@ -6,242 +6,319 @@
 <title>Oar — Privacy Policy</title>
 <meta name="description" content="Privacy Policy for the Oar expense tracking app.">
 <link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<div class="wrap">
 
-<header class="site">
-  <img src="assets/icon.png" alt="Oar app icon">
-  <div class="titles">
-    <h1>Oar</h1>
-    <p>Expense &amp; budget tracker for Android</p>
-  </div>
-</header>
-
-<nav class="pages">
-  <a href="index.html">Home</a>
-  <a href="privacy-policy.html" aria-current="page">Privacy Policy</a>
-  <a href="data-deletion.html">Delete My Data</a>
+<nav class="site-nav">
+    <div class="nav-inner">
+        <a class="nav-brand" href="index.html">
+            <img src="assets/icon.png" alt="Oar">
+            <span>Oar</span>
+        </a>
+    </div>
 </nav>
 
-<h1 class="doc-title">Privacy Policy</h1>
-<p class="meta">Effective date: July 8, 2026</p>
+<header class="doc-header">
+    <div class="doc-header-inner">
+        <div class="pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Your data, your device
+        </div>
+        <h1 class="doc-title">Privacy Policy</h1>
+        <p class="doc-meta">Effective date: July 8, 2026</p>
+    </div>
+</header>
 
-<p>
-  This Privacy Policy explains how Oar ("Oar", "the app", "we", "us") handles
-  information when you use the Oar Android application. Oar is developed and
-  maintained by an independent developer, Ridill.
-</p>
+<main class="doc-main">
 
-<p>
-  Oar is built around a simple principle: <strong>your financial data stays on
-  your device by default.</strong> The sections below describe exactly what
-  data exists, where it lives, and what — if anything — ever leaves your
-  phone.
-</p>
+<p>This Privacy Policy explains how Oar ("Oar", "the app", "we", "us") handles
+information when you use the Oar Android application. Oar is developed and
+maintained by an independent developer, Ridill.</p>
 
-<div class="callout">
-  <strong>Quick summary:</strong> Oar does not require an account, does not
-  show ads, has no in-app purchases, and does not sell or share your personal
-  data. All of your transactions, budgets, and other financial records are
-  stored only in a local database on your device unless you explicitly turn on
-  Google Drive backup.
+<p>Oar is built around a simple principle: <strong>your financial data stays on
+your device by default.</strong> The sections below describe exactly what
+data exists, where it lives, and what — if anything — ever leaves your
+phone.</p>
+
+<div class="summary-callout">
+    <div class="summary-label">Quick summary</div>
+    <p>Oar does not require an account, does not show ads, has no in-app purchases,
+    and does not sell or share your personal data. All of your transactions,
+    budgets, and other financial records are stored only in a local database on
+    your device unless you explicitly turn on Google Drive backup.</p>
 </div>
 
-<h2>1. Data Oar Stores Locally, On Your Device</h2>
-<p>Oar stores the information you enter to use the app in a local database on your device. This includes:</p>
-<ul>
-  <li>Transactions (amount, currency, note, date/time, type, tags, folders)</li>
-  <li>Budget cycles and spending limits</li>
-  <li>Scheduled/recurring payments and reminders</li>
-  <li>Tags, folders, and currency preferences</li>
-</ul>
-<p>
-  This data never leaves your device unless you turn on the optional Google
-  Drive backup feature described in Section 3. Android's own automatic device
-  backup is also disabled for Oar, so this data is not silently copied
-  anywhere by the operating system either. Uninstalling the app permanently
-  deletes this data from your device.
-</p>
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">1</span>
+        <h2>Data Oar Stores Locally, On Your Device</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Oar stores the information you enter to use the app in a local database on your device. This includes:</p>
+        <ul>
+            <li>Transactions (amount, currency, note, date/time, type, tags, folders)</li>
+            <li>Budget cycles and spending limits</li>
+            <li>Scheduled/recurring payments and reminders</li>
+            <li>Tags, folders, and currency preferences</li>
+        </ul>
+        <p>This data never leaves your device unless you turn on the optional Google
+        Drive backup feature described in Section 3. Android's own automatic device
+        backup is also disabled for Oar, so this data is not silently copied
+        anywhere by the operating system either. Uninstalling the app permanently
+        deletes this data from your device.</p>
+    </div>
+</section>
 
-<h2>2. Optional: Sign in with Google</h2>
-<p>
-  Signing in is <strong>never required</strong> to use Oar — you can skip it
-  entirely during setup and use every core feature of the app without an
-  account. Signing in exists solely to authorize the Google Drive backup
-  feature described below.
-</p>
-<p>If you choose to sign in with your Google account, Oar receives:</p>
-<ul>
-  <li>Your email address</li>
-  <li>Your display name</li>
-  <li>Your profile photo URL</li>
-</ul>
-<p>
-  This information is used only to identify your backup file in Google Drive
-  and is not sent to any server other than Google's own (via Firebase
-  Authentication). You can sign out, or delete your linked account, at any
-  time from Oar's Settings screen.
-</p>
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">2</span>
+        <h2>Optional: Sign in with Google</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Signing in is <strong>never required</strong> to use Oar — you can skip it
+        entirely during setup and use every core feature of the app without an
+        account. Signing in exists solely to authorize the Google Drive backup
+        feature described below.</p>
+        <p>If you choose to sign in with your Google account, Oar receives:</p>
+        <ul>
+            <li>Your email address</li>
+            <li>Your display name</li>
+            <li>Your profile photo URL</li>
+        </ul>
+        <p>This information is used only to identify your backup file in Google Drive
+        and is not sent to any server other than Google's own (via Firebase
+        Authentication). You can sign out, or delete your linked account, at any
+        time from Oar's Settings screen.</p>
+    </div>
+</section>
 
-<h2>3. Optional: Google Drive Backup</h2>
-<p>
-  Oar includes an optional backup feature. If you turn it on and choose a
-  backup password:
-</p>
-<ul>
-  <li>Oar creates an encrypted copy of your local database, protected with the password you choose.</li>
-  <li>Only a cryptographic salt used to verify your password is stored alongside the backup — your password itself is never stored or transmitted anywhere.</li>
-  <li>The encrypted file is uploaded to a private, hidden storage area of <strong>your own</strong> Google Drive account called the "app data folder." This space is invisible in your normal Drive file list and cannot be accessed by any app other than Oar, including by the Oar developer.</li>
-  <li>Restoring a backup downloads that same file from your Drive and decrypts it locally, on your device, using the password you provide.</li>
-</ul>
-<p>
-  Nobody other than you — not even the Oar developer — can read the contents
-  of your backup without your backup password. See
-  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>
-  for how Google Drive and Google Sign-In handle data on their end.
-</p>
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">3</span>
+        <h2>Optional: Google Drive Backup</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Oar includes an optional backup feature. If you turn it on and choose a
+        backup password:</p>
+        <ul>
+            <li>Oar creates an encrypted copy of your local database, protected with the password you choose.</li>
+            <li>Only a cryptographic salt used to verify your password is stored alongside the backup — your password itself is never stored or transmitted anywhere.</li>
+            <li>The encrypted file is uploaded to a private, hidden storage area of <strong>your own</strong> Google Drive account called the "app data folder." This space is invisible in your normal Drive file list and cannot be accessed by any app other than Oar, including by the Oar developer.</li>
+            <li>Restoring a backup downloads that same file from your Drive and decrypts it locally, on your device, using the password you provide.</li>
+        </ul>
+        <p>Nobody other than you — not even the Oar developer — can read the contents
+        of your backup without your backup password. See
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>
+        for how Google Drive and Google Sign-In handle data on their end.</p>
+    </div>
+</section>
 
-<h2>4. Optional: Automatic Transaction Detection from SMS</h2>
-<p>
-  Oar can optionally read incoming SMS messages to automatically detect and
-  pre-fill bank transaction alerts. This feature is:
-</p>
-<ul>
-  <li><strong>Off by default.</strong> It is only activated if you explicitly grant SMS permission and enable it during onboarding or in Settings.</li>
-  <li><strong>Processed entirely on your device.</strong> When enabled, Oar inspects incoming messages from recognized bank/payment senders, extracts the transaction amount, type, and note using on-device pattern matching, and discards the raw message text immediately afterward.</li>
-  <li><strong>Never transmitted or stored as raw text.</strong> Only the extracted transaction fields (amount, note, date, type) are saved to your local database, in the same way as a transaction you enter manually. The original SMS content is not saved to Oar's database, not uploaded to Drive, and not sent to us or any third party.</li>
-</ul>
-<p>You can disable this feature at any time from Settings, which also revokes the app's use of the SMS permission going forward.</p>
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">4</span>
+        <h2>Optional: Automatic Transaction Detection from SMS</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Oar can optionally read incoming SMS messages to automatically detect and
+        pre-fill bank transaction alerts. This feature is:</p>
+        <ul>
+            <li><strong>Off by default.</strong> It is only activated if you explicitly grant SMS permission and enable it during onboarding or in Settings.</li>
+            <li><strong>Processed entirely on your device.</strong> When enabled, Oar inspects incoming messages from recognized bank/payment senders, extracts the transaction amount, type, and note using on-device pattern matching, and discards the raw message text immediately afterward.</li>
+            <li><strong>Never transmitted or stored as raw text.</strong> Only the extracted transaction fields (amount, note, date, type) are saved to your local database, in the same way as a transaction you enter manually. The original SMS content is not saved to Oar's database, not uploaded to Drive, and not sent to us or any third party.</li>
+        </ul>
+        <p>You can disable this feature at any time from Settings, which also revokes the app's use of the SMS permission going forward.</p>
+    </div>
+</section>
 
-<h2>5. Diagnostic Data (Crash Reporting)</h2>
-<p>
-  Oar uses Firebase Crashlytics to help us find and fix bugs. If the app
-  crashes or encounters an unexpected error, technical diagnostic information
-  is sent to Firebase, including:
-</p>
-<ul>
-  <li>The error/exception type and stack trace</li>
-  <li>Device model, OS version, and app version</li>
-  <li>An anonymous, randomly generated installation identifier (not linked to your name, email, or Google account)</li>
-</ul>
-<p>
-  This diagnostic data does not include your transactions, budgets, backup
-  password, or other financial information you've entered into the app.
-</p>
-<p>
-  Oar also uses Firebase Remote Config to remotely toggle features (for
-  example, temporarily disabling the SMS auto-detection feature) and to
-  update the text-matching patterns used for SMS parsing described in Section
-  4. This only sends configuration <em>to</em> your device — it does not
-  transmit any of your personal or financial data.
-</p>
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">5</span>
+        <h2>Diagnostic Data (Crash Reporting)</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Oar uses Firebase Crashlytics to help us find and fix bugs. If the app
+        crashes or encounters an unexpected error, technical diagnostic information
+        is sent to Firebase, including:</p>
+        <ul>
+            <li>The error/exception type and stack trace</li>
+            <li>Device model, OS version, and app version</li>
+            <li>An anonymous, randomly generated installation identifier (not linked to your name, email, or Google account)</li>
+        </ul>
+        <p>This diagnostic data does not include your transactions, budgets, backup
+        password, or other financial information you've entered into the app.</p>
+        <p>Oar also uses Firebase Remote Config to remotely toggle features (for
+        example, temporarily disabling the SMS auto-detection feature) and to
+        update the text-matching patterns used for SMS parsing described in Section
+        4. This only sends configuration <em>to</em> your device — it does not
+        transmit any of your personal or financial data.</p>
+    </div>
+</section>
 
-<h2>6. Data We Do Not Collect</h2>
-<p>To be explicit about what Oar does <strong>not</strong> do:</p>
-<ul>
-  <li>No advertising or ad-tracking SDKs of any kind</li>
-  <li>No in-app purchases or payment processing</li>
-  <li>No access to your contacts, call log, location, camera, or microphone</li>
-  <li>No behavioral analytics, no event tracking, no third-party marketing pixels</li>
-  <li>No sale or sharing of personal information to third parties for advertising purposes</li>
-</ul>
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">6</span>
+        <h2>Data We Do Not Collect</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>To be explicit about what Oar does <strong>not</strong> do:</p>
+        <ul>
+            <li>No advertising or ad-tracking SDKs of any kind</li>
+            <li>No in-app purchases or payment processing</li>
+            <li>No access to your contacts, call log, location, camera, or microphone</li>
+            <li>No behavioral analytics, no event tracking, no third-party marketing pixels</li>
+            <li>No sale or sharing of personal information to third parties for advertising purposes</li>
+        </ul>
+    </div>
+</section>
 
-<h2>7. Third-Party Services</h2>
-<p>Oar relies on the following third-party infrastructure providers, all operated by Google:</p>
-<div class="table-scroll">
-<table>
-  <tr><th>Service</th><th>Purpose</th><th>Data involved</th></tr>
-  <tr><td>Firebase Authentication</td><td>Optional Google Sign-In</td><td>Email, name, profile photo (only if you sign in)</td></tr>
-  <tr><td>Google Drive API</td><td>Optional encrypted backup/restore</td><td>Your encrypted backup file (only if you enable backup)</td></tr>
-  <tr><td>Firebase Crashlytics</td><td>Crash &amp; error diagnostics</td><td>Stack traces, device/app info, anonymous install ID</td></tr>
-  <tr><td>Firebase Remote Config</td><td>Feature flags &amp; SMS parsing patterns</td><td>None (config is delivered to the device, not collected from it)</td></tr>
-</table>
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">7</span>
+        <h2>Third-Party Services</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Oar relies on the following third-party infrastructure providers, all operated by Google:</p>
+        <div class="table-scroll">
+        <table>
+            <tr><th>Service</th><th>Purpose</th><th>Data involved</th></tr>
+            <tr><td><strong>Firebase Authentication</strong></td><td>Optional Google Sign-In</td><td>Email, name, profile photo (only if you sign in)</td></tr>
+            <tr><td><strong>Google Drive API</strong></td><td>Optional encrypted backup/restore</td><td>Your encrypted backup file (only if you enable backup)</td></tr>
+            <tr><td><strong>Firebase Crashlytics</strong></td><td>Crash &amp; error diagnostics</td><td>Stack traces, device/app info, anonymous install ID</td></tr>
+            <tr><td><strong>Firebase Remote Config</strong></td><td>Feature flags &amp; SMS parsing patterns</td><td>None (config is delivered to the device, not collected from it)</td></tr>
+        </table>
+        </div>
+        <p>These providers act as data processors on our behalf and are bound by Google's own privacy and security commitments. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a> and <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase's data processing terms</a> for details.</p>
+    </div>
+</section>
+
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">8</span>
+        <h2>International Data Transfers</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Because Firebase and Google Drive are operated by Google, diagnostic data
+        and any backup you choose to create may be processed on servers located in
+        the United States or other countries where Google operates infrastructure.
+        Google maintains its own safeguards for cross-border transfers (including
+        standard contractual clauses), described in
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</p>
+    </div>
+</section>
+
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">9</span>
+        <h2>Data Retention</h2>
+    </div>
+    <div class="doc-section-body">
+        <ul>
+            <li><strong>Local app data</strong> is retained on your device until you delete it in-app or uninstall Oar.</li>
+            <li><strong>Google Drive backups</strong> are retained in your Drive account until you delete them (see <a href="data-deletion.html">Delete My Data</a>) or revoke Oar's Drive access.</li>
+            <li><strong>Crash diagnostic data</strong> is retained by Firebase Crashlytics per Google's standard retention window (currently up to 90 days), after which it is automatically deleted.</li>
+        </ul>
+    </div>
+</section>
+
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">10</span>
+        <h2>Your Privacy Rights</h2>
+    </div>
+    <div class="doc-section-body">
+        <h3>If you are in the European Economic Area or United Kingdom (GDPR)</h3>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Access the personal data we (via our service providers) hold about you</li>
+            <li>Correct inaccurate data</li>
+            <li>Request erasure of your data</li>
+            <li>Restrict or object to certain processing</li>
+            <li>Receive a copy of your data in a portable format</li>
+            <li>Withdraw consent at any time, without affecting processing carried out before withdrawal</li>
+            <li>Lodge a complaint with your local data protection supervisory authority</li>
+        </ul>
+        <p>Where Oar processes data based on your consent (Google Sign-In, Drive
+        backup, SMS auto-detection), that consent is optional and can be withdrawn
+        at any time from within the app. Diagnostic crash data is processed under
+        our legitimate interest in keeping the app reliable and secure.</p>
+
+        <h3>If you are a California resident (CCPA/CPRA)</h3>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Know what personal information is collected, used, and disclosed</li>
+            <li>Request deletion of your personal information</li>
+            <li>Correct inaccurate personal information</li>
+            <li>Opt out of the sale or sharing of personal information — <strong>Oar does not sell or share personal information</strong>, so there is nothing to opt out of</li>
+            <li>Not be discriminated against for exercising any of these rights</li>
+        </ul>
+        <p>To exercise any of the rights above, see <a href="data-deletion.html">Delete My Data</a> or contact us using the details in Section 13.</p>
+    </div>
+</section>
+
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">11</span>
+        <h2>Children's Privacy</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>Oar is a general-purpose personal finance tool and is not specifically
+        directed at children. We do not knowingly collect personal information from
+        children. If you believe a child has provided us with personal information
+        (for example, by signing in with a Google account), please contact us and
+        we will delete it.</p>
+    </div>
+</section>
+
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">12</span>
+        <h2>Changes to This Policy</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>We may update this Privacy Policy from time to time to reflect changes to
+        the app or applicable law. The "Effective date" at the top of this page
+        will always reflect the latest revision. Material changes will be noted in
+        the app's release notes where practical.</p>
+    </div>
+</section>
+
+<section class="doc-section">
+    <div class="doc-section-head">
+        <span class="doc-section-num">13</span>
+        <h2>Contact Us</h2>
+    </div>
+    <div class="doc-section-body">
+        <p>If you have questions about this Privacy Policy, or want to exercise any of
+        the rights described above, contact the developer using the details below.</p>
+    </div>
+</section>
+
+<div class="contact-card">
+    <h3>Contact the developer</h3>
+    <p><strong>Ridill</strong> — Oar developer</p>
+    <p>Email: <a href="mailto:ridillperson+oarsupport@gmail.com">ridillperson+oarsupport@gmail.com</a></p>
+    <p>Source code: <a href="https://github.com/remi-naz/Oar" target="_blank" rel="noopener">github.com/remi-naz/Oar</a></p>
 </div>
-<p>These providers act as data processors on our behalf and are bound by Google's own privacy and security commitments. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a> and <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase's data processing terms</a> for details.</p>
 
-<h2>8. International Data Transfers</h2>
-<p>
-  Because Firebase and Google Drive are operated by Google, diagnostic data
-  and any backup you choose to create may be processed on servers located in
-  the United States or other countries where Google operates infrastructure.
-  Google maintains its own safeguards for cross-border transfers (including
-  standard contractual clauses), described in
-  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.
-</p>
+</main>
 
-<h2>9. Data Retention</h2>
-<ul>
-  <li><strong>Local app data</strong> is retained on your device until you delete it in-app or uninstall Oar.</li>
-  <li><strong>Google Drive backups</strong> are retained in your Drive account until you delete them (see <a href="data-deletion.html">Delete My Data</a>) or revoke Oar's Drive access.</li>
-  <li><strong>Crash diagnostic data</strong> is retained by Firebase Crashlytics per Google's standard retention window (currently up to 90 days), after which it is automatically deleted.</li>
-</ul>
-
-<h2>10. Your Privacy Rights</h2>
-
-<h3>If you are in the European Economic Area or United Kingdom (GDPR)</h3>
-<p>You have the right to:</p>
-<ul>
-  <li>Access the personal data we (via our service providers) hold about you</li>
-  <li>Correct inaccurate data</li>
-  <li>Request erasure of your data</li>
-  <li>Restrict or object to certain processing</li>
-  <li>Receive a copy of your data in a portable format</li>
-  <li>Withdraw consent at any time, without affecting processing carried out before withdrawal</li>
-  <li>Lodge a complaint with your local data protection supervisory authority</li>
-</ul>
-<p>
-  Where Oar processes data based on your consent (Google Sign-In, Drive
-  backup, SMS auto-detection), that consent is optional and can be withdrawn
-  at any time from within the app. Diagnostic crash data is processed under
-  our legitimate interest in keeping the app reliable and secure.
-</p>
-
-<h3>If you are a California resident (CCPA/CPRA)</h3>
-<p>You have the right to:</p>
-<ul>
-  <li>Know what personal information is collected, used, and disclosed</li>
-  <li>Request deletion of your personal information</li>
-  <li>Correct inaccurate personal information</li>
-  <li>Opt out of the sale or sharing of personal information — <strong>Oar does not sell or share personal information</strong>, so there is nothing to opt out of</li>
-  <li>Not be discriminated against for exercising any of these rights</li>
-</ul>
-
-<p>To exercise any of the rights above, see <a href="data-deletion.html">Delete My Data</a> or contact us using the details in Section 13.</p>
-
-<h2>11. Children's Privacy</h2>
-<p>
-  Oar is a general-purpose personal finance tool and is not specifically
-  directed at children. We do not knowingly collect personal information from
-  children. If you believe a child has provided us with personal information
-  (for example, by signing in with a Google account), please contact us and
-  we will delete it.
-</p>
-
-<h2>12. Changes to This Policy</h2>
-<p>
-  We may update this Privacy Policy from time to time to reflect changes to
-  the app or applicable law. The "Effective date" at the top of this page
-  will always reflect the latest revision. Material changes will be noted in
-  the app's release notes where practical.
-</p>
-
-<h2>13. Contact Us</h2>
-<p>
-  If you have questions about this Privacy Policy, or want to exercise any of
-  the rights described above, contact:
-</p>
-<div class="card">
-  <strong>Ridill</strong> (Oar developer)<br>
-  Email: <a href="mailto:ridillperson+oarsupport@gmail.com">ridillperson+oarsupport@gmail.com</a><br>
-  Source code: <a href="https://github.com/remi-naz/Oar" target="_blank" rel="noopener">github.com/remi-naz/Oar</a>
-</div>
-
-<footer class="site">
-  Oar Privacy Policy — hosted on GitHub Pages · <a href="https://github.com/remi-naz/Oar">remi-naz/Oar</a>
+<footer class="doc-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img src="assets/icon.png" alt="Oar">
+            <span>Oar Privacy Policy · hosted on GitHub Pages</span>
+        </div>
+        <a class="footer-link" href="data-deletion.html">Delete My Data →</a>
+    </div>
 </footer>
 
-</div>
 </body>
 </html>
