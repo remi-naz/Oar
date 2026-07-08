@@ -1,22 +1,18 @@
 package dev.ridill.oar.settings.data.remote.dto
 
-import com.google.errorprone.annotations.Keep
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
+import androidx.annotation.Keep
 import dev.ridill.oar.settings.data.repository.APP_DATA_SPACE
 import dev.ridill.oar.settings.data.repository.G_DRIVE_FOLDER_MIME_TYPE
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Keep
+@Serializable
 data class CreateGDriveFolderRequestDto(
-    @Expose
-    @SerializedName("name")
+    @SerialName("name")
     val name: String,
-
-    @Expose
-    @SerializedName("parents")
+    @SerialName("parents")
     val parents: List<String> = listOf(APP_DATA_SPACE),
-
-    @Expose
-    @SerializedName("mimeType")
+    @SerialName("mimeType")
     val mimeType: String = G_DRIVE_FOLDER_MIME_TYPE
 )

@@ -1,7 +1,6 @@
 package dev.ridill.oar.di
 
 import android.content.Context
-import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,6 +18,7 @@ import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.remote.GDriveApi
 import dev.ridill.oar.settings.data.remote.interceptors.GoogleAccessTokenInterceptor
 import dev.ridill.oar.settings.data.repository.BackupRepositoryImpl
+import dev.ridill.oar.settings.data.repository.JSON_MIME_TYPE
 import dev.ridill.oar.settings.domain.appInit.AppInitWorkManager
 import dev.ridill.oar.settings.domain.appLock.AppLockServiceManager
 import dev.ridill.oar.settings.domain.backup.BackupService
@@ -26,10 +26,12 @@ import dev.ridill.oar.settings.domain.backup.BackupWorkManager
 import dev.ridill.oar.settings.domain.notification.AppInitNotificationHelper
 import dev.ridill.oar.settings.domain.notification.BackupNotificationHelper
 import dev.ridill.oar.settings.domain.repositoty.BackupRepository
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -67,14 +69,11 @@ object SettingsSingletonModule {
     @Singleton
     @Provides
     fun provideGoogleApisRetrofit(
-        @GoogleApis client: OkHttpClient
+        @GoogleApis client: OkHttpClient,
+        json: Json
     ): Retrofit = Retrofit.Builder()
         .addConverterFactory(
-            GsonConverterFactory.create(
-                GsonBuilder()
-                    .excludeFieldsWithoutExposeAnnotation()
-                    .create()
-            )
+            json.asConverterFactory(JSON_MIME_TYPE.toMediaType())
         )
         .baseUrl(BuildConfig.GOOGLE_APIS_BASE_URL)
         .client(client)
@@ -106,6 +105,7 @@ object SettingsSingletonModule {
         backupWorkManager: BackupWorkManager,
         authRepository: AuthRepository,
         cryptoManager: CryptoManager,
+        json: Json,
     ): BackupRepository = BackupRepositoryImpl(
         context = context,
         backupService = backupService,
@@ -116,6 +116,7 @@ object SettingsSingletonModule {
         backupWorkManager = backupWorkManager,
         authRepo = authRepository,
         cryptoManager = cryptoManager,
+        json = json,
     )
 
     @Provides

@@ -3,7 +3,6 @@ package dev.ridill.oar.settings.data.repository
 import android.content.Context
 import com.google.android.gms.auth.GoogleAuthException
 import com.google.android.gms.auth.UserRecoverableAuthException
-import com.google.gson.Gson
 import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
@@ -19,6 +18,7 @@ import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.remote.GDriveApi
 import dev.ridill.oar.settings.data.remote.MEDIA_PART_KEY
 import dev.ridill.oar.settings.data.remote.dto.CreateGDriveFolderRequestDto
+import dev.ridill.oar.settings.data.remote.dto.GDriveFileMetadataDto
 import dev.ridill.oar.settings.data.toBackupDetails
 import dev.ridill.oar.settings.domain.backup.BackupCachingFailedThrowable
 import dev.ridill.oar.settings.domain.backup.BackupService
@@ -33,6 +33,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -51,7 +52,8 @@ class BackupRepositoryImpl(
     private val securityPreferencesManager: SecurityPreferencesManager,
     private val configDao: ConfigDao,
     private val backupWorkManager: BackupWorkManager,
-    private val authRepo: AuthRepository
+    private val authRepo: AuthRepository,
+    private val json: Json
 ) : BackupRepository {
     override suspend fun checkForBackup(): Result<BackupDetails, DataError> =
         tryNetworkCall {
@@ -107,7 +109,7 @@ class BackupRepositoryImpl(
         logD { "Received backup folder - $backupFolder" }
         if (backupFolder == null) {
             val createBackupFolderRequest = CreateGDriveFolderRequestDto(backupFolderName(email))
-            val createBackupFolderMetadataPart = Gson().toJson(createBackupFolderRequest)
+            val createBackupFolderMetadataPart = json.encodeToString(createBackupFolderRequest)
                 .toRequestBody(JSON_MIME_TYPE.toMediaTypeOrNull())
             logD { "Create backup folder request - $createBackupFolderRequest" }
             backupFolder = gDriveApi.createFolder(createBackupFolderMetadataPart)
@@ -116,16 +118,16 @@ class BackupRepositoryImpl(
             password = passwordHash,
             passwordSalt = passwordHashSalt
         )
-        val metadataMap = mapOf(
-            "name" to backupFile.name,
-            "parents" to listOf(backupFolder.id),
-            "appProperties" to mapOf(
+        val metadataDto = GDriveFileMetadataDto(
+            name = backupFile.name,
+            parents = listOf(backupFolder.id),
+            appProperties = mapOf(
                 GDriveApi.APP_PROPERTIES_KEY_HASH_SALT to passwordHashSalt,
                 GDriveApi.APP_PROPERTIES_KEY_BACKUP_TIMESTAMP to DateUtil.now()
                     .format(DateUtil.Formatters.isoLocalDateTime)
             )
         )
-        val metadataJson = Gson().toJson(metadataMap)
+        val metadataJson = json.encodeToString(metadataDto)
         val metadataPart = metadataJson.toRequestBody(JSON_MIME_TYPE.toMediaTypeOrNull())
 
         val fileBody = backupFile.asRequestBody(BACKUP_MIME_TYPE.toMediaTypeOrNull())

@@ -3,22 +3,23 @@ package dev.ridill.oar.core.domain.remoteConfig
 import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
-import com.google.gson.Gson
 import dev.ridill.oar.core.data.util.tryNetworkCall
 import dev.ridill.oar.core.domain.model.DataError
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.tryOrNull
 import kotlinx.coroutines.tasks.await
+import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
 private const val TAG = "FirebaseRemoteConfigService"
 
-class FirebaseRemoteConfigService {
+class FirebaseRemoteConfigService(
+    private val json: Json
+) {
 
     private val remoteConfig = Firebase.remoteConfig
-    private val gson = Gson()
 
     fun init() {
         val configSettings = remoteConfigSettings {
@@ -52,7 +53,7 @@ class FirebaseRemoteConfigService {
             remoteConfig.getBoolean(Keys.DELETE_ACCOUNT_FEATURE_ENABLED)
         val txAutoDetectPatterns = tryOrNull {
             val patternsJson = remoteConfig.getString(Keys.TX_AUTO_DETECT_PATTERNS)
-            gson.fromJson(patternsJson, AutoDetectTransactionRegexPatterns::class.java)
+            json.decodeFromString<AutoDetectTransactionRegexPatterns>(patternsJson)
         }
 
         val remoteConfig = RemoteConfig(

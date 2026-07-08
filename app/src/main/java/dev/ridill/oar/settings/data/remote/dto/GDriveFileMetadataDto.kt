@@ -6,13 +6,11 @@ import kotlinx.serialization.Serializable
 
 @Keep
 @Serializable
-data class GDriveFileDto(
-    @SerialName("id")
-    val id: String,
+data class GDriveFileMetadataDto(
     @SerialName("name")
     val name: String,
     @SerialName("parents")
     val parents: List<String>,
     @SerialName("appProperties")
-    val appProperties: Map<String, String> = emptyMap(),
+    val appProperties: Map<String, String>
 )

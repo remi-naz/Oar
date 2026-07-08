@@ -1,36 +1,32 @@
 package dev.ridill.oar.settings.data.remote.dto
 
 import androidx.annotation.Keep
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Keep
+@Serializable
 data class GDriveErrorDto(
-    @Expose
-    @SerializedName("error")
+    @SerialName("error")
     val data: ErrorData
 )
 
+@Serializable
 data class ErrorData(
-    @Expose
-    @SerializedName("errors")
+    @SerialName("errors")
     val reasons: List<ErrorReason>,
-    @Expose
-    @SerializedName("code")
+    @SerialName("code")
     val code: Int,
-    @Expose
-    @SerializedName("message")
+    @SerialName("message")
     val message: String
 )
 
+@Serializable
 data class ErrorReason(
-    @Expose
-    @SerializedName("domain")
+    @SerialName("domain")
     val domain: String,
-    @Expose
-    @SerializedName("reason")
+    @SerialName("reason")
     val reason: String,
-    @Expose
-    @SerializedName("message")
+    @SerialName("message")
     val message: String
 )
