@@ -73,4 +73,11 @@ class FolderDetailsRepositoryImpl(
 
     override suspend fun disableActionPreview() =
         animPreferencesManager.disableTxInFolderItemActionPreview()
+
+    override suspend fun getTransactionIdsInFolder(
+        cycleId: Long,
+        folderId: Long
+    ): List<Long> = withContext(Dispatchers.IO) {
+        transactionDao.getTransactionIdsInFolder(cycleId = cycleId, folderId = folderId)
+    }
 }
