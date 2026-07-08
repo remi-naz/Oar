@@ -1,5 +1,6 @@
 package dev.ridill.oar.dashboard.presentation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
@@ -268,6 +269,11 @@ private fun FeatureMenu(
         )
     }
 
+    BackHandler(
+        enabled = expanded,
+        onBack = { onExpandedChange(false) }
+    )
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.BottomStart,
@@ -308,7 +314,7 @@ private fun FeatureMenu(
             modifier = Modifier
                 .padding(BottomAppBarDefaults.windowInsets.asPaddingValues())
         ) {
-            val menuItemContainerColor = MaterialTheme.colorScheme.surface
+            val menuItemContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             bottomNavItems.forEach { (route, iconRes, labelRes) ->
                 FloatingActionButtonMenuItem(
                     onClick = { navigateToRoute(route) },
