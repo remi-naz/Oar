@@ -7,7 +7,6 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.android.gms.auth.GoogleAuthException
 import com.google.android.gms.auth.UserRecoverableAuthException
-import com.google.gson.Gson
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dev.ridill.oar.R
@@ -24,6 +23,7 @@ import dev.ridill.oar.settings.domain.repositoty.BackupRepository
 import dev.ridill.oar.settings.domain.repositoty.FatalBackupError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 
 @HiltWorker
@@ -32,7 +32,8 @@ class GDriveDataBackupWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val repo: BackupRepository,
     @BackupFeature private val notificationHelper: NotificationHelper<String>,
-    private val workManager: BackupWorkManager
+    private val workManager: BackupWorkManager,
+    private val json: Json
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -89,7 +90,7 @@ class GDriveDataBackupWorker @AssistedInject constructor(
         } catch (e: HttpException) {
             logE(e, GDriveDataBackupWorker::class.simpleName) { "HttpException" }
             val errorBody = e.response()?.errorBody()?.charStream()?.let {
-                Gson().fromJson(it, GDriveErrorDto::class.java)
+                json.decodeFromString<GDriveErrorDto>(it.readText())
             }
 
             val error = when (errorBody?.data?.reasons?.first()?.reason) {

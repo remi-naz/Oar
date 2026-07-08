@@ -138,7 +138,7 @@ com-google-identity-googleId = { group = "com.google.android.libraries.identity.
 
 # Retrofit
 com-squareup-retrofit2-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-com-squareup-retrofit2-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+com-squareup-retrofit2-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 com-squareup-okhhtp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "logging-interceptor" }
 
 io-coil-kt-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil-compose" }

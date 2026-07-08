@@ -201,7 +201,7 @@ dependencies {
 
     // Retrofit
     implementation(libs.com.squareup.retrofit2.retrofit)
-    implementation(libs.com.squareup.retrofit2.converter.gson)
+    implementation(libs.com.squareup.retrofit2.converter.kotlinx.serialization)
     implementation(libs.com.squareup.okhhtp3.logging.interceptor)
 
     implementation(libs.io.coil.kt.compose)

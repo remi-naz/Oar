@@ -1,7 +1,7 @@
 package dev.ridill.oar.core.domain.remoteConfig
 
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 data class RemoteConfig(
     val sourceCodeUrl: String,
@@ -10,26 +10,20 @@ data class RemoteConfig(
     val autoDetectTransactionRegexPatterns: AutoDetectTransactionRegexPatterns?
 )
 
+@Serializable
 data class AutoDetectTransactionRegexPatterns(
-    @Expose
-    @SerializedName("originating_address")
+    @SerialName("originating_address")
     val originatingAddress: String,
-    @Expose
-    @SerializedName("credit")
+    @SerialName("credit")
     val credit: String,
-    @Expose
-    @SerializedName("debit")
+    @SerialName("debit")
     val debit: String,
-    @Expose
-    @SerializedName("timestamp")
+    @SerialName("timestamp")
     val timestamp: String,
-    @Expose
-    @SerializedName("second_party_start")
+    @SerialName("second_party_start")
     val secondPartyStart: String,
-    @Expose
-    @SerializedName("second_party_end")
+    @SerialName("second_party_end")
     val secondPartyEnd: String,
-    @Expose
-    @SerializedName("misc_payment")
+    @SerialName("misc_payment")
     val miscPayment: String,
 )

@@ -37,6 +37,7 @@ import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.EventBus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.serialization.json.Json
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -135,7 +136,15 @@ object AppModule {
     )
 
     @Provides
-    fun provideRemoteConfigService(): FirebaseRemoteConfigService = FirebaseRemoteConfigService()
+    @Singleton
+    fun provideJson(): Json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
+
+    @Provides
+    fun provideRemoteConfigService(json: Json): FirebaseRemoteConfigService =
+        FirebaseRemoteConfigService(json = json)
 
     @Provides
     fun provideConnectivityObserver(
