@@ -374,7 +374,8 @@ a:hover {
 }
 
 .features {
-    padding: 96px 0 20px;
+    padding-top: 96px;
+    padding-bottom: 20px;
 }
 
 .feature-grid {
@@ -1019,9 +1020,7 @@ td strong {
         font-size: 15px;
     }
 
-    .privacy-section,
-    .stack-section,
-    .features {
+    .privacy-section {
         padding-left: 0;
         padding-right: 0;
     }
