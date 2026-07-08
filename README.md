@@ -9,6 +9,8 @@
     <a href="https://github.com/RemijiusBrian/Oar/issues">Report Bug</a>
     .
     <a href="https://github.com/RemijiusBrian/Oar/issues">Request Feature</a>
+    .
+    <a href="https://remi-naz.github.io/Oar/privacy-policy.html">Privacy Policy</a>
   </p>
 
 ## About The Project
