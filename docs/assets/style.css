@@ -136,6 +136,7 @@ a:hover {
 
 .hero {
     position: relative;
+    overflow: hidden;
 }
 
 .hero::before {
@@ -625,6 +626,7 @@ a:hover {
 .doc-header {
     position: relative;
     border-bottom: 1px solid var(--border-soft);
+    overflow: hidden;
 }
 
 .doc-header::before {
