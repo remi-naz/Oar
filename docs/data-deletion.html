@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oar — Delete My Data</title>
+<meta name="description" content="How to delete your account and data from the Oar app.">
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <img src="assets/icon.png" alt="Oar app icon">
+  <div class="titles">
+    <h1>Oar</h1>
+    <p>Expense &amp; budget tracker for Android</p>
+  </div>
+</header>
+
+<nav class="pages">
+  <a href="index.html">Home</a>
+  <a href="privacy-policy.html">Privacy Policy</a>
+  <a href="data-deletion.html" aria-current="page">Delete My Data</a>
+</nav>
+
+<h1 class="doc-title">Delete My Account &amp; Data</h1>
+<p class="meta">Last updated: July 8, 2026</p>
+
+<p>
+  Oar stores almost all of your data locally, on your own device — so in most
+  cases, deleting your data is entirely in your control and doesn't require
+  contacting anyone. This page covers every case: local data, your optional
+  Google Sign-In, and any Google Drive backup you may have created.
+</p>
+
+<h2>1. Delete local app data (transactions, budgets, everything)</h2>
+<p>Since this data lives only on your device, either option below fully removes it:</p>
+<ul>
+  <li><strong>Uninstall Oar</strong> from your device. This immediately and permanently erases the local database, as Oar does not use Android's automatic device backup.</li>
+  <li><strong>Or</strong>, from your device's system settings, go to <em>Settings → Apps → Oar → Storage</em> and tap <em>Clear data</em>.</li>
+</ul>
+
+<h2>2. Delete your linked Google account / sign-in</h2>
+<p>If you signed in with Google to use the backup feature:</p>
+<ol>
+  <li>Open Oar and go to <strong>Settings → Account</strong>.</li>
+  <li>Tap <strong>Delete Account</strong>.</li>
+</ol>
+<p>
+  This removes your sign-in record from our authentication provider (Firebase
+  Authentication) so it is no longer linked to your Google identity.
+</p>
+
+<h2>3. Delete a Google Drive backup</h2>
+<p>
+  Backup files are stored in a private, hidden area of your own Google Drive
+  account (the "app data folder"), which only Oar can access — not even the
+  developer can see or manage it directly. To remove it:
+</p>
+<ol>
+  <li>On your Android device or at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>, find <strong>Oar</strong> under apps with account access.</li>
+  <li>Remove/revoke Oar's access.</li>
+  <li>Revoking access removes Oar's permission to your Drive and results in Google deleting the associated app data folder contents for Oar.</li>
+</ol>
+
+<h2>4. Request assisted deletion</h2>
+<p>
+  If you'd prefer we handle any of the above for you, or you run into any
+  issue completing the steps yourself, email us and we'll help:
+</p>
+<div class="card">
+  <strong>Email:</strong> <a href="mailto:ridillperson+oarsupport@gmail.com?subject=Oar%20Data%20Deletion%20Request">ridillperson+oarsupport@gmail.com</a><br>
+  Please include the email address associated with your Google Sign-In (if any) so we can confirm and process your request.
+</div>
+<p>
+  Because Oar does not operate its own backend server, the developer does not
+  hold a copy of your transactions, budgets, or backup contents outside of
+  what's described above — we cannot delete data we do not have. Requests
+  submitted this way are acknowledged, and any account records still held by
+  our authentication provider (Section 2) will be removed, generally within
+  30 days.
+</p>
+
+<p>See the <a href="privacy-policy.html">Privacy Policy</a> for full details on what data Oar collects and how it's used.</p>
+
+<footer class="site">
+  Oar Data Deletion Instructions — hosted on GitHub Pages · <a href="https://github.com/remi-naz/Oar">remi-naz/Oar</a>
+</footer>
+
+</div>
+</body>
+</html>
