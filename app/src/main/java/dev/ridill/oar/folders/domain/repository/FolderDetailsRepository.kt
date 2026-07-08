@@ -19,4 +19,8 @@ interface FolderDetailsRepository {
     suspend fun addTransactionToFolder(txId: Long, folderId: Long)
     fun shouldShowActionPreview(): Flow<Boolean>
     suspend fun disableActionPreview()
+    suspend fun getTransactionIdsInFolder(
+        cycleId: Long,
+        folderId: Long
+    ): List<Long>
 }

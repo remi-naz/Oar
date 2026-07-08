@@ -19,9 +19,7 @@ import dev.ridill.oar.core.ui.navigation.FolderDetailsRoute
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.folders.domain.model.FolderTransactionsMultiSelectionOption
 import dev.ridill.oar.folders.domain.repository.FolderDetailsRepository
-import dev.ridill.oar.transactions.domain.repository.AllTransactionsRepository
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -34,7 +32,6 @@ class FolderDetailsViewModel @AssistedInject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repo: FolderDetailsRepository,
     private val aggRepo: AggregationsRepository,
-    private val transactionsRepo: AllTransactionsRepository,
     private val eventBus: EventBus<FolderDetailsEvent>
 ) : ViewModel(), FolderDetailsActions {
 
@@ -139,7 +136,8 @@ class FolderDetailsViewModel @AssistedInject constructor(
 
     override fun onCycleSelect(id: Long) {
         viewModelScope.launch {
-            val cycleTransactionIds = transactionsRepo.getTransactionIdsForCycle(id)
+            val cycleTransactionIds = repo
+                .getTransactionIdsInFolder(cycleId = id, folderId = route.folderId)
             savedStateHandle[SELECTED_TRANSACTION_IDS] = cycleTransactionIds.toSet()
         }
     }
