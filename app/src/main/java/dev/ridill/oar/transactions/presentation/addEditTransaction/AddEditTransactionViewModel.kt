@@ -12,9 +12,10 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
+import dev.ridill.oar.arithmetic.domain.ArithmeticInputProcessor
+import dev.ridill.oar.arithmetic.domain.NumpadAction
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
-import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.LocaleUtil
@@ -52,7 +53,7 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val cycleRepo: BudgetCycleRepository,
     private val transactionRepo: AddEditTransactionRepository,
-    private val evalService: ExpEvalService,
+    private val arithmeticInputProcessor: ArithmeticInputProcessor,
     private val eventBus: EventBus<AddEditTransactionEvent>
 ) : ViewModel(), AddEditTransactionActions {
 
@@ -87,7 +88,7 @@ class AddEditTransactionViewModel @AssistedInject constructor(
         .distinctUntilChanged()
 
     private val isAmountInputAnExpression = amountInputState.textAsFlow()
-        .mapLatest { evalService.isExpression(it) }
+        .mapLatest { arithmeticInputProcessor.isExpression(it) }
         .distinctUntilChanged()
 
     val noteInputState = savedStateHandle.saveable(
@@ -231,23 +232,11 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     }
 
     override fun onAmountFocusLost() {
-        evaluateAmountInput()
+        arithmeticInputProcessor.onAction(NumpadAction.Equals, amountInputState)
     }
 
-    override fun onEvaluateExpressionClick() {
-        evaluateAmountInput()
-    }
-
-    private fun evaluateAmountInput() {
-        val amountInput = amountInputState.text
-            .trim()
-            .ifEmpty { return }
-            .toString()
-
-        val isExpression = evalService.isExpression(amountInput)
-        val result = if (isExpression) evalService.evalOrNull(amountInput)
-        else TextFormat.parseNumber(amountInput)
-        amountInputState.setTextAndPlaceCursorAtEnd(result.orZero().toString())
+    override fun onAmountNumpadAction(action: NumpadAction) {
+        arithmeticInputProcessor.onAction(action, amountInputState)
     }
 
     override fun onRecommendedAmountClick(amount: Long) {
@@ -413,9 +402,7 @@ class AddEditTransactionViewModel @AssistedInject constructor(
                 )
                 return@launch
             }
-            val isExp = evalService.isExpression(amountInput)
-            val evaluatedAmount = (if (isExp) evalService.evalOrNull(amountInput)
-            else TextFormat.parseNumber(amountInput)) ?: -1.0
+            val evaluatedAmount = TextFormat.parseNumber(amountInput) ?: -1.0
             if (evaluatedAmount < Double.Zero) {
                 eventBus.send(
                     AddEditTransactionEvent.ShowUiMessage(

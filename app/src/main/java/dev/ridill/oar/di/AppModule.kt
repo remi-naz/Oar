@@ -32,7 +32,6 @@ import dev.ridill.oar.core.domain.crypto.DefaultCryptoManager
 import dev.ridill.oar.core.domain.crypto.DefaultKeystoreCryptoManager
 import dev.ridill.oar.core.domain.crypto.KeystoreCryptoManager
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
-import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.EventBus
 import kotlinx.coroutines.CoroutineScope
@@ -103,9 +102,6 @@ object AppModule {
     fun provideSecurityPreferencesManager(
         @SecurityPreferences dataStore: DataStore<Preferences>
     ): SecurityPreferencesManager = SecurityPreferencesManagerImpl(dataStore)
-
-    @Provides
-    fun provideExpressionEvaluationService(): ExpEvalService = ExpEvalService()
 
     @ApplicationScope
     @Provides

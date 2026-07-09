@@ -90,6 +90,7 @@
     <string name="cd_tap_tag_to_assign_to_transactions">Tap to assign tag to transactions</string>
     <string name="cd_long_press_tag_to_edit">Long press to edit tag</string>
     <string name="cd_clear">Clear</string>
+    <string name="cd_backspace">Backspace</string>
     <string name="cd_transform_amount">Transform Amount</string>
     <string name="cd_click_to_change_folder">Click to change folder</string>
     <string name="cd_total_transaction_sum">%1$s amounts to %2$s</string>
@@ -105,6 +106,12 @@
     <string name="cd_tap_to_edit_schedule">Tap to edit schedule</string>
     <string name="cd_tap_to_toggle_selection">Tap to edit schedule</string>
     <string name="cd_evaluate_expression">Evaluate expression</string>
+    <string name="cd_done">Done</string>
+    <string name="cd_parenthesis">Parenthesis</string>
+    <string name="cd_operation_add">Add</string>
+    <string name="cd_operation_subtract">Subtract</string>
+    <string name="cd_operation_multiply">Multiply</string>
+    <string name="cd_operation_divide">Divide</string>
     <string name="cd_tap_to_edit_tag">Tap to edit tag</string>
     <string name="cd_clear_tag_selection">Clear tag selection</string>
     <string name="cd_delete_selected_tags">Delete selected tags</string>
@@ -166,6 +173,7 @@
     <string name="action_next">Next</string>
     <string name="action_acknowledge">I understand</string>
     <string name="action_dismiss">Dismiss</string>
+    <string name="action_done">Done</string>
 
     <!-- Permission Rationales -->
     <string name="permission_notification">Notifications</string>

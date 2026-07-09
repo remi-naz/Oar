@@ -52,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -65,13 +64,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
+import dev.ridill.oar.arithmetic.domain.NumpadAction
+import dev.ridill.oar.arithmetic.presentation.inputfield.ArithmeticInputField
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.One
@@ -87,9 +87,7 @@ import dev.ridill.oar.core.ui.components.OarTextField
 import dev.ridill.oar.core.ui.components.OarTimePickerDialog
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.Spacer
-import dev.ridill.oar.core.ui.components.rememberAmountOutputTransformation
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
-import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.IconSizeSmall
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -105,7 +103,6 @@ import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.util.Currency
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -151,6 +148,7 @@ fun AddEditScheduleScreen(
     )
 
     var toolbarExpanded by remember { mutableStateOf(true) }
+    var arithmeticNumpadHeight by remember { mutableStateOf(0.dp) }
     OarScaffold(
         topBar = {
             MediumFlexibleTopAppBar(
@@ -174,6 +172,11 @@ fun AddEditScheduleScreen(
                 onCollapse = { toolbarExpanded = false }
             )
             .imePadding()
+            // ArithmeticInputField's popup numpad isn't a real IME, so WindowInsets.ime
+            // (and imePadding() above) doesn't know about it. Reserve the same space
+            // manually so the scaffold shrinks the same way it would for the real keyboard,
+            // keeping the floating toolbar/FAB clear of the popup.
+            .padding(bottom = arithmeticNumpadHeight)
             .then(modifier),
         snackbarController = snackbarController
     ) { paddingValues ->
@@ -198,14 +201,47 @@ fun AddEditScheduleScreen(
                         .align(Alignment.CenterHorizontally)
                 )
 
-                AmountInput(
-                    currency = state.currency,
-                    onCurrencyClick = navigateToCurrencySelection,
+                val showTransformButton by remember {
+                    derivedStateOf {
+                        amountInputState.text.toString()
+                            .toDoubleOrNull().orZero() > Double.Zero
+                    }
+                }
+                ArithmeticInputField(
                     inputState = amountInputState,
-                    isInputAnExpression = state.isAmountInputAnExpression,
-                    onExpressionEvalClick = actions::onEvaluateExpressionClick,
-                    onTransformClick = navigateToAmountTransformation,
-                    onFocusLost = actions::onAmountFocusLost,
+                    onAction = actions::onAmountNumpadAction,
+                    onNumpadHeightChanged = { arithmeticNumpadHeight = it },
+                    doneForEquals = state.isAmountInputAnExpression.not(),
+                    leadingIcon = {
+                        FilledTonalIconButton(
+                            onClick = navigateToCurrencySelection,
+                        ) {
+                            Text(state.currency.symbol)
+                        }
+                    },
+                    textStyle = MaterialTheme.typography.headlineMedium.copy(
+                        textAlign = TextAlign.Center
+                    ),
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.amount_zero),
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier
+                                .defaultMinSize(minWidth = InputMinWidth),
+                            textAlign = TextAlign.Center
+                        )
+                    },
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    trailingIcon = {
+                        if (showTransformButton) {
+                            IconButton(onClick = navigateToAmountTransformation) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_gears),
+                                    contentDescription = stringResource(R.string.cd_transform_amount)
+                                )
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .padding(horizontal = MaterialTheme.spacing.medium)
                         .focusRequester(amountFocusRequester)
@@ -328,89 +364,6 @@ fun AddEditScheduleScreen(
             state = timePickerState
         )
     }
-}
-
-@Composable
-private fun AmountInput(
-    currency: Currency,
-    onCurrencyClick: () -> Unit,
-    inputState: TextFieldState,
-    isInputAnExpression: Boolean,
-    onFocusLost: () -> Unit,
-    onExpressionEvalClick: () -> Unit,
-    onTransformClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val showTransformButton by remember {
-        derivedStateOf {
-            inputState.text.toString()
-                .toDoubleOrNull().orZero() > Double.Zero
-        }
-    }
-    val focusManager = LocalFocusManager.current
-    OarTextField(
-        state = inputState,
-        modifier = modifier
-            .defaultMinSize(minWidth = InputMinWidth)
-            .onFocusChanged { focusState ->
-                if (!focusState.isFocused) onFocusLost()
-            },
-        leadingIcon = {
-            FilledTonalIconButton(
-                onClick = onCurrencyClick,
-            ) {
-                Text(currency.symbol)
-            }
-        },
-        textStyle = MaterialTheme.typography.headlineMedium.copy(
-            textAlign = TextAlign.Center
-        ),
-        placeholder = {
-            Text(
-                text = stringResource(R.string.amount_zero),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier
-                    .defaultMinSize(minWidth = InputMinWidth),
-                textAlign = TextAlign.Center
-            )
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Next
-        ),
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-        ),
-        onKeyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
-        lineLimits = TextFieldLineLimits.SingleLine,
-        outputTransformation = rememberAmountOutputTransformation(),
-        trailingIcon = {
-            when {
-                isInputAnExpression -> {
-                    IconButton(onClick = onExpressionEvalClick) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_equals),
-                            contentDescription = stringResource(R.string.cd_evaluate_expression),
-                            modifier = Modifier
-                                .size(IconSizeMedium)
-                        )
-                    }
-                }
-
-                showTransformButton -> {
-                    IconButton(onClick = onTransformClick) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_gears),
-                            contentDescription = stringResource(R.string.cd_transform_amount)
-                        )
-                    }
-                }
-            }
-        }
-    )
 }
 
 @Composable
@@ -620,7 +573,7 @@ private fun PreviewScreenContent() {
             actions = object : AddEditScheduleActions {
                 override fun refreshCurrentDateTime() {}
                 override fun onAmountFocusLost() {}
-                override fun onEvaluateExpressionClick() {}
+                override fun onAmountNumpadAction(action: NumpadAction) {}
                 override fun onRecommendedAmountClick(amount: Long) {}
                 override fun onTagSelect(tagId: Long?) {}
                 override fun onTimestampClick() {}

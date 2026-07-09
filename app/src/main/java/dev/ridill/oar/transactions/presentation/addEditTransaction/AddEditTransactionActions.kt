@@ -1,10 +1,11 @@
 package dev.ridill.oar.transactions.presentation.addEditTransaction
 
+import dev.ridill.oar.arithmetic.domain.NumpadAction
 import dev.ridill.oar.transactions.domain.model.TransactionType
 
 interface AddEditTransactionActions {
     fun onAmountFocusLost()
-    fun onEvaluateExpressionClick()
+    fun onAmountNumpadAction(action: NumpadAction)
     fun onRecommendedAmountClick(amount: Long)
     fun onTagSelect(tagId: Long?)
     fun onTimestampClick()

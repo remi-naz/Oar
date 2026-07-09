@@ -1,12 +1,13 @@
 package dev.ridill.oar.schedules.presentation.addEditSchedule
 
+import dev.ridill.oar.arithmetic.domain.NumpadAction
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.transactions.domain.model.TransactionType
 
 interface AddEditScheduleActions {
     fun refreshCurrentDateTime()
     fun onAmountFocusLost()
-    fun onEvaluateExpressionClick()
+    fun onAmountNumpadAction(action: NumpadAction)
     fun onRecommendedAmountClick(amount: Long)
     fun onTagSelect(tagId: Long?)
     fun onTimestampClick()
