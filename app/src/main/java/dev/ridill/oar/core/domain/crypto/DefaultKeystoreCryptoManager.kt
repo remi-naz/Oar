@@ -13,15 +13,15 @@ class DefaultKeystoreCryptoManager : KeystoreCryptoManager {
     private val keyStore: KeyStore = KeyStore.getInstance(KeystoreCryptoManager.ANDROID_KEYSTORE)
         .apply { load(null) }
 
-    private fun getOrCreateKey(): SecretKey {
-        keyStore.getKey(KeystoreCryptoManager.KEY_ALIAS, null)?.let { return it as SecretKey }
+    private fun getOrCreateKey(alias: String): SecretKey {
+        keyStore.getKey(alias, null)?.let { return it as SecretKey }
 
         val keyGenerator = KeyGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_AES,
             KeystoreCryptoManager.ANDROID_KEYSTORE
         )
         val keyGenParameterSpec = KeyGenParameterSpec.Builder(
-            KeystoreCryptoManager.KEY_ALIAS,
+            alias,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
         )
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -31,9 +31,9 @@ class DefaultKeystoreCryptoManager : KeystoreCryptoManager {
         return keyGenerator.generateKey()
     }
 
-    override fun encrypt(rawData: ByteArray): EncryptionResult {
+    override fun encrypt(rawData: ByteArray, alias: String): EncryptionResult {
         val cipher = Cipher.getInstance(KeystoreCryptoManager.TRANSFORMATION).apply {
-            init(Cipher.ENCRYPT_MODE, getOrCreateKey())
+            init(Cipher.ENCRYPT_MODE, getOrCreateKey(alias))
         }
         val encryptedData = cipher.doFinal(rawData)
         return EncryptionResult(
@@ -42,11 +42,11 @@ class DefaultKeystoreCryptoManager : KeystoreCryptoManager {
         )
     }
 
-    override fun decrypt(encryptedData: ByteArray, iv: ByteArray): ByteArray {
+    override fun decrypt(encryptedData: ByteArray, iv: ByteArray, alias: String): ByteArray {
         val cipher = Cipher.getInstance(KeystoreCryptoManager.TRANSFORMATION).apply {
             init(
                 Cipher.DECRYPT_MODE,
-                getOrCreateKey(),
+                getOrCreateKey(alias),
                 GCMParameterSpec(KeystoreCryptoManager.GCM_TAG_LENGTH, iv)
             )
         }

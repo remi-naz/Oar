@@ -21,6 +21,7 @@ interface GDriveApi {
     companion object {
         const val APP_PROPERTIES_KEY_HASH_SALT = "hashSalt"
         const val APP_PROPERTIES_KEY_BACKUP_TIMESTAMP = "backupTimestamp"
+        const val APP_PROPERTIES_KEY_ENCRYPTION_SCHEME = "encryptionScheme"
     }
 
     @Multipart

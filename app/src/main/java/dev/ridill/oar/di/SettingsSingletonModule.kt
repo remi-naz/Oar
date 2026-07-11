@@ -12,7 +12,7 @@ import dev.ridill.oar.account.domain.service.AccessTokenService
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
-import dev.ridill.oar.core.domain.crypto.CryptoManager
+import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.remote.GDriveApi
@@ -87,11 +87,13 @@ object SettingsSingletonModule {
     fun provideBackupService(
         @ApplicationContext context: Context,
         database: OarDatabase,
-        cryptoManager: CryptoManager
+        @Argon2PasswordBasedCryptoManager cryptoManager: PasswordBasedCryptoManager,
+        legacyCryptoManager: PasswordBasedCryptoManager
     ): BackupService = BackupService(
         context = context,
         database = database,
-        cryptoManager = cryptoManager
+        argon2CryptoManager = cryptoManager,
+        legacyCryptoManager = legacyCryptoManager
     )
 
     @Provides
@@ -104,7 +106,8 @@ object SettingsSingletonModule {
         configDao: ConfigDao,
         backupWorkManager: BackupWorkManager,
         authRepository: AuthRepository,
-        cryptoManager: CryptoManager,
+        @Argon2PasswordBasedCryptoManager cryptoManager: PasswordBasedCryptoManager,
+        legacyCryptoManager: PasswordBasedCryptoManager,
         json: Json,
     ): BackupRepository = BackupRepositoryImpl(
         context = context,
@@ -115,7 +118,8 @@ object SettingsSingletonModule {
         configDao = configDao,
         backupWorkManager = backupWorkManager,
         authRepo = authRepository,
-        cryptoManager = cryptoManager,
+        argon2CryptoManager = cryptoManager,
+        defaultCryptoManager = legacyCryptoManager,
         json = json,
     )
 

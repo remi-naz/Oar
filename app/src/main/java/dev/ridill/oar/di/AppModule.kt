@@ -27,10 +27,11 @@ import dev.ridill.oar.core.data.util.AndroidConnectivityObserver
 import dev.ridill.oar.core.data.util.ConnectivityObserver
 import dev.ridill.oar.core.domain.crashlytics.CrashlyticsManager
 import dev.ridill.oar.core.domain.crashlytics.FirebaseCrashlyticsManager
-import dev.ridill.oar.core.domain.crypto.CryptoManager
+import dev.ridill.oar.core.domain.crypto.Argon2CryptoManager
 import dev.ridill.oar.core.domain.crypto.DefaultCryptoManager
 import dev.ridill.oar.core.domain.crypto.DefaultKeystoreCryptoManager
 import dev.ridill.oar.core.domain.crypto.KeystoreCryptoManager
+import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.service.ReceiverService
@@ -101,8 +102,12 @@ object AppModule {
 
     @Provides
     fun provideSecurityPreferencesManager(
-        @SecurityPreferences dataStore: DataStore<Preferences>
-    ): SecurityPreferencesManager = SecurityPreferencesManagerImpl(dataStore)
+        @SecurityPreferences dataStore: DataStore<Preferences>,
+        cryptoManager: KeystoreCryptoManager
+    ): SecurityPreferencesManager = SecurityPreferencesManagerImpl(
+        dataStore = dataStore,
+        cryptoManager = cryptoManager
+    )
 
     @Provides
     fun provideExpressionEvaluationService(): ExpEvalService = ExpEvalService()
@@ -120,7 +125,13 @@ object AppModule {
     fun provideOarEventBus(): EventBus<OarViewModel.OarEvent> = EventBus()
 
     @Provides
-    fun provideCryptoManager(): CryptoManager = DefaultCryptoManager()
+    fun provideDefaultPasswordBasedCryptoManager(): PasswordBasedCryptoManager =
+        DefaultCryptoManager()
+
+    @Argon2PasswordBasedCryptoManager
+    @Provides
+    fun provideArgon2PasswordBasedCryptoManager(): PasswordBasedCryptoManager =
+        Argon2CryptoManager()
 
     @Provides
     fun provideKeystoreCryptoManager(): KeystoreCryptoManager = DefaultKeystoreCryptoManager()
@@ -174,3 +185,7 @@ annotation class AnimPreferences
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class SecurityPreferences
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Argon2PasswordBasedCryptoManager

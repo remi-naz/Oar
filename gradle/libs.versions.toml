@@ -53,6 +53,7 @@ flow-combinetuple-kt = "1.3.0"
 timber-logging = "5.0.1"
 keval = "2.0.0"
 bcrypt = "0.4"
+argon2kt = "1.6.0"
 
 com-google-truth = "1.4.5"
 
@@ -147,6 +148,7 @@ com-github-zhuinden-flow-combinetuple-kt = { group = "com.github.Zhuinden", name
 com-jakewharton-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber-logging" }
 com-notkamui-keval = { group = "com.notkamui.libs", name = "keval", version.ref = "keval" }
 org-mindrot-jbcrypt = { group = "org.mindrot", name = "jbcrypt", version.ref = "bcrypt" }
+com-lambdapioneer-argon2kt = { group = "com.lambdapioneer.argon2kt", name = "argon2kt", version.ref = "argon2kt" }
 
 # Test
 com-google-truth = { group = "com.google.truth", name = "truth", version.ref = "com-google-truth" }
