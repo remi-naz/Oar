@@ -129,8 +129,6 @@
     <string name="error_unknown_credential_type">Unknown credential type</string>
     <string name="error_no_backup_found">Unable to locate a backup in your Google Drive</string>
     <string name="error_download_backup_failed">Failed to download backup</string>
-    <string name="error_invalid_encryption_password">Invalid encryption password</string>
-    <string name="error_incorrect_encryption_password">Incorrect encryption password</string>
     <string name="error_backup_creation_failed">Failed to create backup</string>
     <string name="error_invalid_folder_name">Please enter a valid name</string>
     <string name="error_biometric_hw_unavailable">Biometric features are currently unavailable</string>
@@ -147,7 +145,6 @@
     <string name="error_illegal_cycle_action">Illegal cycle action</string>
     <string name="error_cycle_not_active">This cycle is not active right now</string>
     <string name="error_cycle_not_found">Unable find cycle</string>
-    <string name="error_backup_job_restore_failed">Failed to restore backup jobs.</string>
     <string name="error_schedule_reminders_restore_failed">Failed to restore schedule reminders.</string>
     <string name="error_app_data_restore_failed">Failed to restore app data.</string>
     <string name="error_failed_to_schedule_cycle">Failed to schedule cycle</string>

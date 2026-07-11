@@ -210,6 +210,7 @@ dependencies {
     implementation(libs.com.jakewharton.timber)
     implementation(libs.com.notkamui.keval)
     implementation(libs.org.mindrot.jbcrypt)
+    implementation(libs.com.lambdapioneer.argon2kt)
 
     // Test
     testImplementation(libs.com.google.truth)

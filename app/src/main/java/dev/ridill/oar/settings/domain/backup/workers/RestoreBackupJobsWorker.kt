@@ -39,7 +39,7 @@ class RestoreBackupJobsWorker @AssistedInject constructor(
             logE(t, RestoreBackupJobsWorker::class.simpleName) { "Throwable" }
             Result.failure(
                 workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_backup_job_restore_failed)
+                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_app_data_restore_failed)
                 )
             )
         }

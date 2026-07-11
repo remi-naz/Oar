@@ -1,5 +1,6 @@
 package dev.ridill.oar.core.data.preferences.security
 
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
 import dev.ridill.oar.core.domain.model.SecurityPreferences
 import kotlinx.coroutines.flow.Flow
 
@@ -10,5 +11,5 @@ interface SecurityPreferencesManager {
 
     val preferences: Flow<SecurityPreferences>
 
-    suspend fun updateBackupEncryptionHash(hash: String?, salt: String?)
+    suspend fun updateBackupEncryptionHash(hash: String?, salt: String?, scheme: EncryptionScheme)
 }

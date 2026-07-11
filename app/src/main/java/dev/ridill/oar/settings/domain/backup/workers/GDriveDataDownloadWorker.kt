@@ -49,15 +49,7 @@ class GDriveDataDownloadWorker @AssistedInject constructor(
                     BackupWorkManager.KEY_BACKUP_TIMESTAMP to timestamp.toString()
                 )
             )
-        } /*catch (t: RestoreCacheAlreadyExistsThrowable) {
-            logE(t) { "RestoreCacheAlreadyExistsThrowable" }
-            logI { "Backup data already exists, so moving forward with restore" }
-            Result.success(
-                workDataOf(
-                    BackupWorkManager.KEY_BACKUP_TIMESTAMP to timestamp.toString()
-                )
-            )
-        }*/ catch (t: BackupDownloadFailedThrowable) {
+        } catch (t: BackupDownloadFailedThrowable) {
             logE(t, GDriveDataDownloadWorker::class.simpleName) { "BackupDownloadFailedThrowable" }
             Result.failure(
                 workDataOf(

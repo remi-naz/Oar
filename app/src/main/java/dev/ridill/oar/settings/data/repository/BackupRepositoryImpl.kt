@@ -8,12 +8,14 @@ import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
 import dev.ridill.oar.core.data.util.tryNetworkCall
 import dev.ridill.oar.core.data.util.trySuspend
-import dev.ridill.oar.core.domain.crypto.CryptoManager
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
+import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.model.DataError
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.logD
 import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.di.Argon2PasswordBasedCryptoManager
 import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.remote.GDriveApi
 import dev.ridill.oar.settings.data.remote.MEDIA_PART_KEY
@@ -48,7 +50,8 @@ class BackupRepositoryImpl(
     private val backupService: BackupService,
     private val gDriveApi: GDriveApi,
     private val preferencesManager: PreferencesManager,
-    private val cryptoManager: CryptoManager,
+    @Argon2PasswordBasedCryptoManager private val argon2CryptoManager: PasswordBasedCryptoManager,
+    private val defaultCryptoManager: PasswordBasedCryptoManager,
     private val securityPreferencesManager: SecurityPreferencesManager,
     private val configDao: ConfigDao,
     private val backupWorkManager: BackupWorkManager,
@@ -123,6 +126,7 @@ class BackupRepositoryImpl(
             parents = listOf(backupFolder.id),
             appProperties = mapOf(
                 GDriveApi.APP_PROPERTIES_KEY_HASH_SALT to passwordHashSalt,
+                GDriveApi.APP_PROPERTIES_KEY_ENCRYPTION_SCHEME to EncryptionScheme.ARGON2_GCM.name,
                 GDriveApi.APP_PROPERTIES_KEY_BACKUP_TIMESTAMP to DateUtil.now()
                     .format(DateUtil.Formatters.isoLocalDateTime)
             )
@@ -197,18 +201,33 @@ class BackupRepositoryImpl(
     override suspend fun performAppDataRestoreFromCache(
         password: String,
         passwordSalt: String,
+        scheme: EncryptionScheme,
         timestamp: LocalDateTime
     ) = withContext(Dispatchers.IO) {
         logI { "Restoring Backup from cache" }
-        val (passwordHash, hashSalt) = cryptoManager.saltedHash(password, passwordSalt)
+        val effectivePasswordHash = when (scheme) {
+            EncryptionScheme.ARGON2_GCM -> argon2CryptoManager
+                .hash(password, passwordSalt)
+
+            EncryptionScheme.LEGACY_BCRYPT_PBKDF2_CBC -> defaultCryptoManager
+                .hash(password, passwordSalt)
+        }
         backupService.restoreBackupFromCache(
-            passwordHash = passwordHash,
+            passwordHash = effectivePasswordHash.first,
             passwordSalt = passwordSalt,
+            scheme = scheme,
             timestamp = timestamp
         )
+
+        // Decrypt succeeding proves the password is correct — safe to (re)persist as the
+        // current scheme regardless of which scheme was just used to restore. This lazily
+        // migrates legacy-scheme local storage to Argon2 on every successful restore.
+        val newSalt = argon2CryptoManager.generateSalt()
+        val (newHash, _) = argon2CryptoManager.hash(password, newSalt)
         securityPreferencesManager.updateBackupEncryptionHash(
-            hash = passwordHash,
-            salt = hashSalt
+            hash = newHash,
+            salt = newSalt,
+            scheme = EncryptionScheme.ARGON2_GCM
         )
         preferencesManager.updateLastBackupTimestamp(timestamp)
         logI { "Updated last backup timestamp" }
