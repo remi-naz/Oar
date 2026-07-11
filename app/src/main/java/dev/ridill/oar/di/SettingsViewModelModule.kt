@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
-import dev.ridill.oar.core.domain.crypto.CryptoManager
+import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.repository.BackupSettingsRepositoryImpl
@@ -43,13 +43,15 @@ object SettingsViewModelModule {
         preferencesManager: PreferencesManager,
         securityPreferencesManager: SecurityPreferencesManager,
         backupWorkManager: BackupWorkManager,
-        cryptoManager: CryptoManager
+        @Argon2PasswordBasedCryptoManager cryptoManager: PasswordBasedCryptoManager,
+        legacyCryptoManager: PasswordBasedCryptoManager
     ): BackupSettingsRepository = BackupSettingsRepositoryImpl(
         dao = dao,
         preferencesManager = preferencesManager,
         backupWorkManager = backupWorkManager,
         securityPreferencesManager = securityPreferencesManager,
-        cryptoManager = cryptoManager
+        argon2CryptoManager = cryptoManager,
+        legacyCryptoManager = legacyCryptoManager
     )
 
     @Provides

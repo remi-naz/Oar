@@ -1,5 +1,6 @@
 package dev.ridill.oar.settings.domain.repositoty
 
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
 import dev.ridill.oar.core.domain.model.DataError
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.settings.domain.modal.BackupDetails
@@ -12,6 +13,7 @@ interface BackupRepository {
     suspend fun performAppDataRestoreFromCache(
         password: String,
         passwordSalt: String,
+        scheme: EncryptionScheme,
         timestamp: LocalDateTime
     )
 

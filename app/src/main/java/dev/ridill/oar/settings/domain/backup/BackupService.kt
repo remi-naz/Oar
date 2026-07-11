@@ -3,12 +3,14 @@ package dev.ridill.oar.settings.domain.backup
 import android.content.Context
 import dev.ridill.oar.R
 import dev.ridill.oar.core.data.db.OarDatabase
-import dev.ridill.oar.core.domain.crypto.CryptoManager
-import dev.ridill.oar.core.domain.crypto.HashSaltString
-import dev.ridill.oar.core.domain.crypto.HashString
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
+import dev.ridill.oar.core.domain.crypto.Hash
+import dev.ridill.oar.core.domain.crypto.HashSalt
+import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.toByteArray
 import dev.ridill.oar.core.domain.util.toInt
+import dev.ridill.oar.di.Argon2PasswordBasedCryptoManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -24,7 +26,8 @@ import javax.crypto.IllegalBlockSizeException
 class BackupService(
     private val context: Context,
     private val database: OarDatabase,
-    private val cryptoManager: CryptoManager
+    @Argon2PasswordBasedCryptoManager private val argon2CryptoManager: PasswordBasedCryptoManager,
+    private val legacyCryptoManager: PasswordBasedCryptoManager
 ) {
 
     companion object {
@@ -39,8 +42,9 @@ class BackupService(
         BadPaddingException::class
     )
     suspend fun restoreBackupFromCache(
-        passwordHash: HashString,
-        passwordSalt: HashSaltString,
+        passwordHash: Hash,
+        passwordSalt: HashSalt,
+        scheme: EncryptionScheme,
         timestamp: LocalDateTime
     ) = withContext(Dispatchers.IO) {
         val dbPath = database.openHelper.readableDatabase.path
@@ -51,7 +55,6 @@ class BackupService(
         val cachePath = context.externalCacheDir ?: throw BackupCachingFailedThrowable()
         logI { "Create decrypted cache" }
         val decryptedDataCache = File(cachePath, DB_TEMP_CACHE_FILENAME)
-
         val encryptedDataCache = File(cachePath, buildRestoreCacheFileName(timestamp))
         if (!encryptedDataCache.exists()) throw RestoreFailedThrowable()
 
@@ -75,17 +78,27 @@ class BackupService(
                 logI { "Read encrypted data" }
                 val dataBytes = readSafely(inputStream)
                 logI { "Decrypt data" }
-                val decryptedBytes = cryptoManager.decrypt(
-                    encryptedData = dataBytes,
-                    iv = ivBytes,
-                    password = passwordHash,
-                    salt = passwordSalt
-                )
+                val decryptedBytes = when (scheme) {
+                    EncryptionScheme.ARGON2_GCM -> argon2CryptoManager.decrypt(
+                        encryptedData = dataBytes,
+                        iv = ivBytes,
+                        password = passwordHash,
+                        salt = passwordSalt
+                    )
+
+                    EncryptionScheme.LEGACY_BCRYPT_PBKDF2_CBC -> legacyCryptoManager.decrypt(
+                        encryptedData = dataBytes,
+                        iv = ivBytes,
+                        password = passwordHash,
+                        salt = passwordSalt
+                    )
+                }
 
                 logI { "Write decrypted data to decrypted cache" }
-                decryptedDataCache.outputStream().buffered().use decryptedDataCacheOutputStream@{
-                    writeSafely(decryptedBytes, it)
-                }
+                decryptedDataCache.outputStream().buffered()
+                    .use decryptedDataCacheOutputStream@{
+                        writeSafely(decryptedBytes, it)
+                    }
             }
 
         logI { "Write decrypted cache to DB files" }
@@ -142,6 +155,7 @@ class BackupService(
                 }
             }
         checkpointDb()
+
     }
 
     @Throws(
@@ -151,7 +165,7 @@ class BackupService(
     )
     suspend fun buildBackupFile(
         password: String,
-        passwordSalt: HashSaltString,
+        passwordSalt: HashSalt,
     ): File = withContext(Dispatchers.IO) {
         val dbFile = context.getDatabasePath(OarDatabase.NAME)
         val dbWalFile = File(dbFile.path + SQLITE_WAL_FILE_SUFFIX)
@@ -194,7 +208,7 @@ class BackupService(
         dbCache.inputStream().buffered().use dbCacheInputStream@{
             val rawBytes = readSafely(it)
             logI { "Encrypt temp backup cache data" }
-            val encryptionResult = cryptoManager.encrypt(
+            val encryptionResult = argon2CryptoManager.encrypt(
                 rawData = rawBytes,
                 password = password,
                 salt = passwordSalt
@@ -213,7 +227,7 @@ class BackupService(
 
     suspend fun clearCache() = withContext(Dispatchers.IO) {
         val cacheDir = context.externalCacheDir
-        cacheDir?.delete()
+        cacheDir?.deleteRecursively()
         logI { "Cleared local cacheDir" }
     }
 

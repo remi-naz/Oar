@@ -24,7 +24,13 @@ class AccessTokenKeystoreService(
         try {
             val data = Base64.decode(encodedData, Base64.NO_WRAP)
             val iv = Base64.decode(encodedIv, Base64.NO_WRAP)
-            String(cryptoManager.decrypt(data, iv))
+            String(
+                cryptoManager.decrypt(
+                    encryptedData = data,
+                    iv = iv,
+                    alias = ALIAS
+                )
+            )
         } catch (e: Exception) {
             logE(e) { "Failed to decrypt access token" }
             null
@@ -40,15 +46,18 @@ class AccessTokenKeystoreService(
             return@withContext
         }
 
-        val encryptionResult = cryptoManager.encrypt(token.toByteArray())
+        val encryptionResult = cryptoManager.encrypt(token.toByteArray(), alias = ALIAS)
         dataStore.edit { preferences ->
-            preferences[Keys.ENC_ACCESS_TOKEN] = Base64.encodeToString(encryptionResult.data, Base64.NO_WRAP)
-            preferences[Keys.ENC_ACCESS_TOKEN_IV] = Base64.encodeToString(encryptionResult.iv, Base64.NO_WRAP)
+            preferences[Keys.ENC_ACCESS_TOKEN] =
+                Base64.encodeToString(encryptionResult.data, Base64.NO_WRAP)
+            preferences[Keys.ENC_ACCESS_TOKEN_IV] =
+                Base64.encodeToString(encryptionResult.iv, Base64.NO_WRAP)
         }
     }
 
     companion object {
         const val NAME = "access_token_preferences"
+        const val ALIAS = "oar_access_token_key"
     }
 
     private object Keys {

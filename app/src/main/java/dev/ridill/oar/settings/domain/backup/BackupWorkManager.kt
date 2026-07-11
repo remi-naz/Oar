@@ -31,6 +31,7 @@ class BackupWorkManager(
         const val KEY_BACKUP_TIMESTAMP = "KEY_BACKUP_DATE"
         const val KEY_PASSWORD = "KEY_PASSWORD_HASH"
         const val KEY_PASSWORD_HASH_SALT = "KEY_PASSWORD_HASH_SALT"
+        const val KEY_ENCRYPTION_SCHEME = "KEY_ENCRYPTION_SCHEME"
 
         const val BACKUP_WORKER_NOTIFICATION_ID = "BACKUP_WORKER_NOTIFICATION"
 
@@ -130,6 +131,7 @@ class BackupWorkManager(
                 workDataOf(
                     KEY_PASSWORD to password,
                     KEY_PASSWORD_HASH_SALT to backupDetails.hashSalt,
+                    KEY_ENCRYPTION_SCHEME to backupDetails.scheme.name,
                 )
             )
             .setConstraints(

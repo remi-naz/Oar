@@ -9,6 +9,7 @@ import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.ui.util.UiText
@@ -74,7 +75,11 @@ class BackupEncryptionViewModel @Inject constructor(
     }
 
     fun onBiometricAuthSucceeded() = viewModelScope.launch {
-        securityPreferencesManager.updateBackupEncryptionHash(null, null)
+        securityPreferencesManager.updateBackupEncryptionHash(
+            hash = null,
+            salt = null,
+            scheme = EncryptionScheme.ARGON2_GCM
+        )
     }
 
     override fun onPasswordInputDismiss() {
@@ -142,7 +147,6 @@ class BackupEncryptionViewModel @Inject constructor(
     }
 }
 
-const val ACTION_ENCRYPTION_PASSWORD = "ACTION_ENCRYPTION_PASSWORD"
 const val ENCRYPTION_PASSWORD_UPDATED = "ENCRYPTION_PASSWORD_UPDATED"
 
 private const val SHOW_PASSWORD_INPUT = "SHOW_PASSWORD_INPUT"

@@ -53,12 +53,12 @@ class GDriveDataBackupWorker @AssistedInject constructor(
             repo.setBackupError(FatalBackupError.PASSWORD_CORRUPTED)
             notificationHelper.postNotification(
                 BackupWorkManager.BACKUP_WORKER_NOTIFICATION_ID.hashCode(),
-                appContext.getString(R.string.error_invalid_encryption_password)
+                appContext.getString(R.string.error_download_backup_failed)
             )
             workManager.cancelPeriodicBackupWork()
             Result.failure(
                 workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_invalid_encryption_password)
+                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_download_backup_failed)
                 )
             )
         } catch (e: UserRecoverableAuthException) {
