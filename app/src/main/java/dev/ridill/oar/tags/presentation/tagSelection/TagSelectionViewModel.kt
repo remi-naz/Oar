@@ -63,7 +63,7 @@ class TagSelectionViewModel @Inject constructor(
                         if (query.isNotBlank()
                             && before == null
                             && after == null
-                        ) TagSelectionEntry.NewTagIndicator(query)
+                        ) TagSelectionEntry.NewTagIndicator(query.trim())
                         else null
                     }
             }
@@ -114,7 +114,7 @@ class TagSelectionViewModel @Inject constructor(
     fun onNewTagClick(label: String, singleSelection: Boolean) = viewModelScope.launch {
         val savedId = repo.saveTag(
             id = OarDatabase.DEFAULT_ID_LONG,
-            name = label,
+            name = label.trim(),
             colorCode = SelectableColorsList.random().toArgb(),
             excluded = false,
             timestamp = DateUtil.now(),
