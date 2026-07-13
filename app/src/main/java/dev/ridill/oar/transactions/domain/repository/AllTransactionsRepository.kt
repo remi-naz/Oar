@@ -3,7 +3,7 @@ package dev.ridill.oar.transactions.domain.repository
 import androidx.paging.PagingData
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
 import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import java.util.Currency
@@ -11,7 +11,7 @@ import java.util.Currency
 interface AllTransactionsRepository {
     fun getAllTransactionsPaged(
         cycleIds: Set<Long>? = null,
-        transactionType: TransactionType? = null,
+        fundMovement: FundMovement? = null,
         showExcluded: Boolean = true,
         tagIds: Set<Long>? = null,
         folderId: Long? = null,

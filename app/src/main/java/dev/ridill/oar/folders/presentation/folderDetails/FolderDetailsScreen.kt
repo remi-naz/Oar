@@ -26,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Text
@@ -55,6 +56,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.aggregations.presentation.AmountAggregatesList
 import dev.ridill.oar.budgetCycles.domain.model.CycleIndicator
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.ui.components.BackArrowButton
@@ -83,7 +85,6 @@ import dev.ridill.oar.folders.domain.model.FolderTransactionsMultiSelectionOptio
 import dev.ridill.oar.transactions.domain.model.TagIndicator
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
 import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.transactions.domain.model.TransactionType
 import dev.ridill.oar.transactions.presentation.components.NewTransactionFab
 import dev.ridill.oar.transactions.presentation.components.TransactionListItem
 import kotlinx.coroutines.flow.flowOf
@@ -409,7 +410,7 @@ private fun TransactionInFolderItem(
     note: String,
     amount: String,
     timestamp: LocalDateTime,
-    type: TransactionType,
+    type: FundMovement,
     tag: TagIndicator?,
     excluded: Boolean,
     multiSelectionActive: Boolean,
@@ -529,7 +530,7 @@ private fun PreviewFolderDetailsScreen() {
                     amount = 100.0,
                     currency = java.util.Currency.getInstance("INR"),
                     timestamp = LocalDateTime.now(),
-                    type = TransactionType.DEBIT,
+                    type = FundMovement.OUT,
                     excluded = false,
                     cycleEntry = CycleIndicator(1L, "August 2023"),
                     tag = null,

@@ -75,7 +75,7 @@ class AllTransactionsViewModel @Inject constructor(
                       ) ->
         transactionRepo.getAllTransactionsPaged(
             cycleIds = cycleIds,
-            transactionType = TransactionTypeFilter.mapToTransactionType(typeFilter),
+            fundMovement = TransactionTypeFilter.mapToTransactionType(typeFilter),
             showExcluded = showExcluded,
             tagIds = tagIds
         )

@@ -1,6 +1,6 @@
 package dev.ridill.oar.transactions.presentation.addEditTransaction
 
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 
 interface AddEditTransactionActions {
     fun onAmountFocusLost()
@@ -14,7 +14,7 @@ interface AddEditTransactionActions {
     fun onTimeSelectionDismiss()
     fun onTimeSelectionConfirm(hour: Int, minute: Int)
     fun onPickDateClick()
-    fun onTypeChange(type: TransactionType)
+    fun onTypeChange(type: FundMovement)
     fun onExclusionToggle(excluded: Boolean)
     fun onOptionClick(option: AddEditTxOption)
     fun onDeleteDismiss()

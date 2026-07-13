@@ -6,14 +6,14 @@ import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.schedules.domain.model.Schedule
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.transactions.domain.model.Transaction
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ScheduleInputs(
     val amount: Double,
     val note: String,
-    val type: TransactionType,
+    val type: FundMovement,
     val currencyCode: String,
     val folderId: Long?,
     val tagId: Long?,

@@ -9,7 +9,7 @@ import dev.ridill.oar.core.data.db.BaseDao
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import dev.ridill.oar.transactions.data.local.views.TransactionDetailsView
 import dev.ridill.oar.transactions.domain.model.TransactionAmountLimits
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -33,7 +33,7 @@ interface TransactionDao : BaseDao<TransactionEntity> {
         SELECT * FROM transaction_details_view
         WHERE (:query IS NOT NULL AND (transactionAmount LIKE :query || '%' OR transactionNote LIKE '%' || :query || '%' OR tagName LIKE '%' || :query || '%' OR folderName LIKE '%' || :query || '%'))
             AND (COALESCE(:cycleIds, 0) = 0 OR cycleId IN (:cycleIds))
-            AND (:type IS NULL OR transactionType = :type)
+            AND (:type IS NULL OR fundMovement = :type)
             AND (COALESCE(:tagIds, 0) = 0 OR tagId IN (:tagIds))
             AND (:folderId IS NULL OR folderId = :folderId)
             AND (:showExcluded = 1 OR excluded = 0)
@@ -44,7 +44,7 @@ interface TransactionDao : BaseDao<TransactionEntity> {
     fun getTransactionsPaged(
         query: String?,
         cycleIds: Set<Long>?,
-        type: TransactionType?,
+        type: FundMovement?,
         showExcluded: Boolean,
         tagIds: Set<Long>?,
         folderId: Long?,

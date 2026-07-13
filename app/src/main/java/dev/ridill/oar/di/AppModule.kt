@@ -16,6 +16,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.ridill.oar.account.domain.service.AccessTokenKeystoreService
 import dev.ridill.oar.application.OarViewModel
 import dev.ridill.oar.core.data.db.MIGRATION_5_6
+import dev.ridill.oar.core.data.db.MIGRATION_6_7
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.PreferencesManagerImpl
@@ -54,7 +55,7 @@ object AppModule {
             klass = OarDatabase::class.java,
             name = OarDatabase.NAME
         )
-        .addMigrations(MIGRATION_5_6)
+        .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
         .fallbackToDestructiveMigration(dropAllTables = false)
         .build()
 

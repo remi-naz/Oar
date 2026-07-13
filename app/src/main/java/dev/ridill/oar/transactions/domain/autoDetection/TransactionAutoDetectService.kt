@@ -40,7 +40,7 @@ class TransactionAutoDetectService(
                         amount = data.amount,
                         timestamp = data.paymentTimestamp,
                         note = data.note.orEmpty(),
-                        type = data.transactionType
+                        type = data.fundMovement
                     )
                     val parsedAmount = TextFormat.parseNumber(insertedTx.amount).orZero()
 

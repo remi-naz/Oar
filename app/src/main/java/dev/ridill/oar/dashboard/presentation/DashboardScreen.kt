@@ -101,7 +101,7 @@ import dev.ridill.oar.core.ui.util.mergedContentDescription
 import dev.ridill.oar.schedules.domain.model.ActiveSchedule
 import dev.ridill.oar.schedules.presentation.components.ActiveScheduleItem
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.presentation.components.NewTransactionFab
 import dev.ridill.oar.transactions.presentation.components.TransactionListItem
 import kotlinx.coroutines.flow.flowOf
@@ -621,7 +621,7 @@ private fun PreviewDashboardScreen() {
                         note = null, // "Really long transaction note",
                         amount = 200.0,
                         currency = LocaleUtil.defaultCurrency,
-                        type = TransactionType.DEBIT,
+                        type = FundMovement.OUT,
                         nextPaymentDateTime = DateUtil.now()
                     )
                 }

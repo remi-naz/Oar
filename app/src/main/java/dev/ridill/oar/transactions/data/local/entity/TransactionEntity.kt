@@ -10,7 +10,7 @@ import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
 import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
 import dev.ridill.oar.tags.data.local.entity.TagEntity
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 
 @Entity(
@@ -64,7 +64,7 @@ data class TransactionEntity(
     val timestamp: LocalDateTime,
 
     @ColumnInfo(name = "type")
-    val type: TransactionType,
+    val type: FundMovement,
 
     @ColumnInfo(name = "is_excluded")
     val isExcluded: Boolean,

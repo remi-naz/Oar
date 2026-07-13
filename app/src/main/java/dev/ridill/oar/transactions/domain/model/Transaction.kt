@@ -2,6 +2,7 @@ package dev.ridill.oar.transactions.domain.model
 
 import android.os.Parcelable
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.domain.util.LocaleUtil
@@ -16,7 +17,7 @@ data class Transaction(
     val note: String,
     val currency: Currency,
     val timestamp: LocalDateTime,
-    val type: TransactionType,
+    val type: FundMovement,
     val tagId: Long?,
     val folderId: Long?,
     val scheduleId: Long?,
@@ -29,7 +30,7 @@ data class Transaction(
             amount = String.Empty,
             note = String.Empty,
             timestamp = DateUtil.now(),
-            type = TransactionType.DEBIT,
+            type = FundMovement.OUT,
             currency = LocaleUtil.defaultCurrency,
             tagId = null,
             folderId = null,

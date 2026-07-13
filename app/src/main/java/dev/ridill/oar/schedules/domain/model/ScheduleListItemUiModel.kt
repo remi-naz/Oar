@@ -4,7 +4,7 @@ import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 import java.util.Currency
 
@@ -13,7 +13,7 @@ sealed class ScheduleListItemUiModel {
         val id: Long,
         val amount: Double,
         val note: String?,
-        val type: TransactionType,
+        val type: FundMovement,
         val currency: Currency,
         val repetition: ScheduleRepetition,
         val lastPaymentTimestamp: LocalDateTime?,

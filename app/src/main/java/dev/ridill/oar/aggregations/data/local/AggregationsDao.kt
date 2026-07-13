@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -13,8 +13,8 @@ interface AggregationsDao {
         """
         SELECT currencyCode, IFNULL(SUM(
             CASE
-                WHEN transactionType = 'DEBIT' THEN transactionAmount
-                WHEN transactionType = 'CREDIT' THEN -transactionAmount
+                WHEN fundMovement = 'OUT' THEN transactionAmount
+                WHEN fundMovement = 'IN' THEN -transactionAmount
             END
         ), 0) as amount
         FROM transaction_details_view
@@ -33,13 +33,13 @@ interface AggregationsDao {
         """
         SELECT currencyCode, IFNULL(SUM(
             CASE
-                WHEN transactionType = 'DEBIT' THEN transactionAmount
-                WHEN transactionType = 'CREDIT' THEN -transactionAmount
+                WHEN fundMovement = 'OUT' THEN transactionAmount
+                WHEN fundMovement = 'IN' THEN -transactionAmount
             END
         ), 0) as amount
         FROM transaction_details_view
         WHERE (cycleId = :cycleId)
-            AND (:type IS NULL OR transactionType = :type)
+            AND (:type IS NULL OR fundMovement = :type)
             AND (:currencyCode IS NULL OR currencyCode = :currencyCode)
             AND (:addExcluded = 1 OR excluded = 0)
         GROUP BY currencyCode
@@ -48,7 +48,7 @@ interface AggregationsDao {
     @RewriteQueriesToDropUnusedColumns
     fun getAggregatesForCycle(
         cycleId: Long,
-        type: TransactionType?,
+        type: FundMovement?,
         currencyCode: String?,
         addExcluded: Boolean
     ): Flow<List<AmountAndCurrencyRelation>>
@@ -57,8 +57,8 @@ interface AggregationsDao {
         """
          SELECT IFNULL(SUM(
             CASE
-                WHEN type = 'DEBIT' THEN amount
-                WHEN type = 'CREDIT' THEN -amount
+                WHEN type = 'OUT' THEN amount
+                WHEN type = 'IN' THEN -amount
             END
         ), 0) as amount
         FROM transaction_table WHERE cycle_id = :cycleId

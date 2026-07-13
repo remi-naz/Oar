@@ -15,7 +15,7 @@ import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
 import dev.ridill.oar.schedules.data.toActiveSchedule
 import dev.ridill.oar.schedules.domain.model.ActiveSchedule
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -49,13 +49,13 @@ class DashboardRepositoryImpl(
         .distinctUntilChanged()
 
     override fun getTotalDebitsForActiveCycle(): Flow<Double> =
-        getAmountAggregateForActiveCycle(TransactionType.DEBIT)
+        getAmountAggregateForActiveCycle(FundMovement.OUT)
 
     override fun getTotalCreditsForActiveCycle(): Flow<Double> =
-        getAmountAggregateForActiveCycle(TransactionType.CREDIT)
+        getAmountAggregateForActiveCycle(FundMovement.IN)
 
     private fun getAmountAggregateForActiveCycle(
-        type: TransactionType
+        type: FundMovement
     ): Flow<Double> = activeCycle()
         .flatMapLatest { cycle ->
             aggRepo.getAmountAggregateForCycle(
@@ -82,7 +82,7 @@ class DashboardRepositoryImpl(
         .flatMapLatest { cycle ->
             transactionRepo.getAllTransactionsPaged(
                 cycleIds = cycle?.id?.let { setOf(it) }.orEmpty(),
-                type = TransactionType.DEBIT,
+                type = FundMovement.OUT,
                 showExcluded = false,
                 tagIds = null,
                 folderId = null,

@@ -34,7 +34,7 @@ import dev.ridill.oar.schedules.domain.model.Schedule
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.schedules.domain.repository.AddEditScheduleRepository
 import dev.ridill.oar.transactions.domain.model.AmountTransformation
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -98,8 +98,8 @@ class AddEditScheduleViewModel @AssistedInject constructor(
         .mapLatest { it?.folderId }
         .distinctUntilChanged()
 
-    private val transactionType = scheduleInput
-        .mapLatest { it?.type ?: TransactionType.DEBIT }
+    private val fundMovement = scheduleInput
+        .mapLatest { it?.type ?: FundMovement.OUT }
         .distinctUntilChanged()
 
     private val selectedRepetition = scheduleInput
@@ -123,7 +123,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
     val state = combineTuple(
         isLoading,
         currency,
-        transactionType,
+        fundMovement,
         isAmountInputAnExpression,
         amountRecommendations,
         timestamp,
@@ -153,7 +153,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
             menuOptions = menuOptions,
             currency = currency,
             isLoading = isLoading,
-            transactionType = transactionType,
+            fundMovement = transactionType,
             isAmountInputAnExpression = isAmountInputAnExpression,
             amountRecommendations = amountRecommendations,
             timestamp = timestamp,
@@ -305,7 +305,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
         savedStateHandle[SHOW_DATE_PICKER] = true
     }
 
-    override fun onTypeChange(type: TransactionType) {
+    override fun onTypeChange(type: FundMovement) {
         savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
             type = type
         )

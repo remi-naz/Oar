@@ -55,7 +55,7 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.schedules.domain.model.ScheduleListItemUiModel
 import dev.ridill.oar.schedules.presentation.components.ScheduleListItem
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -245,7 +245,7 @@ private fun ScheduleItem(
     selectionModeActive: Boolean,
     amount: String,
     note: String?,
-    type: TransactionType,
+    type: FundMovement,
     nextPaymentTimestamp: LocalDateTime?,
     lastPaymentTimestamp: LocalDateTime?,
     canMarkPaid: Boolean,

@@ -13,7 +13,7 @@ import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
 import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.domain.repository.AllTransactionsRepository
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.Dispatchers
@@ -36,14 +36,14 @@ class AllTransactionsRepositoryImpl(
 ) : AllTransactionsRepository {
     override fun getAllTransactionsPaged(
         cycleIds: Set<Long>?,
-        transactionType: TransactionType?,
+        fundMovement: FundMovement?,
         showExcluded: Boolean,
         tagIds: Set<Long>?,
         folderId: Long?,
         currency: Currency?
     ): Flow<PagingData<TransactionListItemUIModel>> = repo.getDateSeparatedTransactions(
         cycleIds = cycleIds,
-        type = transactionType,
+        type = fundMovement,
         showExcluded = showExcluded,
         tagIds = tagIds,
         folderId = folderId,
@@ -97,8 +97,8 @@ class AllTransactionsRepositoryImpl(
             val aggregatedAmount = aggregationsDao.getAggregateAmountForCycle(-1L)
             var insertedId = -1L
             if (aggregatedAmount != Double.Zero) {
-                val type = if (aggregatedAmount > 0) TransactionType.DEBIT
-                else TransactionType.CREDIT
+                val type = if (aggregatedAmount > 0) FundMovement.OUT
+                else FundMovement.IN
                 val entity = TransactionEntity(
                     note = String.Empty,
                     amount = aggregatedAmount.absoluteValue,

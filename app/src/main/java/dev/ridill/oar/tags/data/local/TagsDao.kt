@@ -50,8 +50,8 @@ interface TagsDao : BaseDao<TagEntity> {
             tg.created_timestamp as createdTimestamp,
             IFNULL(SUM(
                 CASE
-                    WHEN tx.type = 'DEBIT' THEN tx.amount
-                    WHEN tx.type = 'CREDIT' THEN -tx.amount
+                    WHEN tx.type = 'OUT' THEN tx.amount
+                    WHEN tx.type = 'IN' THEN -tx.amount
                 END
                 ), 0) as aggregate
         FROM tag_table tg

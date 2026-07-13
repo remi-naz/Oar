@@ -1,7 +1,7 @@
 package dev.ridill.oar.aggregations.domain.repository
 
 import dev.ridill.oar.transactions.domain.model.AggregateAmountItem
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.Flow
 import java.util.Currency
 
@@ -15,7 +15,7 @@ interface AggregationsRepository {
         cycleId: Long,
         currency: Currency? = null,
         addExcluded: Boolean = false,
-        type: TransactionType? = null
+        type: FundMovement? = null
     ): Flow<List<AggregateAmountItem>>
 
     fun getTotalDebitsForCycle(id: Long, currency: Currency): Flow<Double>

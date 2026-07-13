@@ -1,7 +1,7 @@
 package dev.ridill.oar.transactions.data.local.views
 
 import androidx.room.DatabaseView
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime
         tx.note AS transactionNote,
         tx.amount AS transactionAmount,
         tx.timestamp AS transactionTimestamp,
-        tx.type AS transactionType,
+        tx.type AS fundMovement,
         tx.currency_code AS currencyCode,
         cyc.id AS cycleId,
         cyc.start_date AS cycleStartDate,
@@ -36,7 +36,7 @@ data class TransactionDetailsView(
     val transactionNote: String,
     val transactionAmount: Double,
     val transactionTimestamp: LocalDateTime,
-    val transactionType: TransactionType,
+    val fundMovement: FundMovement,
     val currencyCode: String,
     val cycleId: Long,
     val cycleStartDate: LocalDate,

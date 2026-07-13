@@ -1,7 +1,7 @@
 package dev.ridill.oar.schedules.presentation.addEditSchedule
 
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 
 interface AddEditScheduleActions {
     fun refreshCurrentDateTime()
@@ -16,7 +16,7 @@ interface AddEditScheduleActions {
     fun onTimeSelectionDismiss()
     fun onTimeSelectionConfirm(hour: Int, minute: Int)
     fun onPickDateClick()
-    fun onTypeChange(type: TransactionType)
+    fun onTypeChange(type: FundMovement)
     fun onOptionClick(option: AddEditScheduleOption)
     fun onDeleteDismiss()
     fun onDeleteConfirm()
