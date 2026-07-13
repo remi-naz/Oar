@@ -4,7 +4,7 @@ import android.os.Parcelable
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.Zero
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
 import java.util.Currency
@@ -15,7 +15,7 @@ data class Schedule(
     val amount: Double,
     val note: String?,
     val currency: Currency,
-    val type: TransactionType,
+    val type: FundMovement,
     val tagId: Long?,
     val folderId: Long?,
     val repetition: ScheduleRepetition,
@@ -28,7 +28,7 @@ data class Schedule(
             amount = Double.Zero,
             note = null,
             currency = LocaleUtil.defaultCurrency,
-            type = TransactionType.DEBIT,
+            type = FundMovement.OUT,
             tagId = null,
             folderId = null,
             repetition = ScheduleRepetition.NO_REPEAT,

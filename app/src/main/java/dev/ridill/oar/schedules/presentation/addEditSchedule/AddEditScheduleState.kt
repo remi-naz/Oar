@@ -3,7 +3,7 @@ package dev.ridill.oar.schedules.presentation.addEditSchedule
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -14,7 +14,7 @@ data class AddEditScheduleState(
     val menuOptions: Set<AddEditScheduleOption> = emptySet(),
     val currency: Currency = LocaleUtil.defaultCurrency,
     val isLoading: Boolean = false,
-    val transactionType: TransactionType = TransactionType.DEBIT,
+    val fundMovement: FundMovement = FundMovement.OUT,
     val isAmountInputAnExpression: Boolean = false,
     val amountRecommendations: List<Long> = emptyList(),
     val timestamp: LocalDateTime = DateUtil.now(),

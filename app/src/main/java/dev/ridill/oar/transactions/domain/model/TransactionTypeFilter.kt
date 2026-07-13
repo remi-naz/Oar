@@ -3,6 +3,7 @@ package dev.ridill.oar.transactions.domain.model
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import dev.ridill.oar.R
+import dev.ridill.oar.core.domain.model.FundMovement
 
 enum class TransactionTypeFilter(
     @DrawableRes val iconRes: Int,
@@ -15,9 +16,9 @@ enum class TransactionTypeFilter(
     companion object {
         fun mapToTransactionType(
             filter: TransactionTypeFilter
-        ): TransactionType? = when (filter) {
-            DEBITS -> TransactionType.DEBIT
-            CREDITS -> TransactionType.CREDIT
+        ): FundMovement? = when (filter) {
+            DEBITS -> FundMovement.OUT
+            CREDITS -> FundMovement.IN
             ALL -> null
         }
     }

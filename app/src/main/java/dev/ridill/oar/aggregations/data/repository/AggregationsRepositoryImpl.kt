@@ -6,7 +6,7 @@ import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
 import dev.ridill.oar.transactions.data.toAggregateAmountItem
 import dev.ridill.oar.transactions.domain.model.AggregateAmountItem
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -31,7 +31,7 @@ class AggregationsRepositoryImpl(
         cycleId: Long,
         currency: Currency?,
         addExcluded: Boolean,
-        type: TransactionType?
+        type: FundMovement?
     ): Flow<List<AggregateAmountItem>> = dao.getAggregatesForCycle(
         cycleId = cycleId,
         addExcluded = addExcluded,
@@ -46,7 +46,7 @@ class AggregationsRepositoryImpl(
     ): Flow<Double> = getAmountAggregateForCycle(
         cycleId = id,
         currency = currency,
-        type = TransactionType.DEBIT,
+        type = FundMovement.OUT,
         addExcluded = false,
     ).mapLatest { it.firstOrNull() }
         .mapLatest { it?.amount.orZero() }
@@ -59,7 +59,7 @@ class AggregationsRepositoryImpl(
     ): Flow<Double> = getAmountAggregateForCycle(
         cycleId = id,
         currency = currency,
-        type = TransactionType.CREDIT,
+        type = FundMovement.IN,
         addExcluded = false,
     ).mapLatest { it.firstOrNull() }
         .mapLatest { it?.amount.orZero() }

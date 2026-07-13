@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemElevation
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
+import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.core.domain.model.creditOrDebitLabel
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.NewLine
 import dev.ridill.oar.core.domain.util.WhiteSpace
@@ -58,7 +61,6 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 import dev.ridill.oar.transactions.domain.model.FolderIndicator
 import dev.ridill.oar.transactions.domain.model.TagIndicator
-import dev.ridill.oar.transactions.domain.model.TransactionType
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -69,7 +71,7 @@ fun TransactionListItem(
     timeStamp: LocalDateTime,
     leadingContentLine1: String,
     leadingContentLine2: String,
-    type: TransactionType,
+    type: FundMovement,
     modifier: Modifier = Modifier,
     tag: TagIndicator? = null,
     folder: FolderIndicator? = null,
@@ -83,8 +85,8 @@ fun TransactionListItem(
         append(
             stringResource(
                 when (type) {
-                    TransactionType.CREDIT -> R.string.cd_transaction_list_item_credit
-                    TransactionType.DEBIT -> R.string.cd_transaction_list_item_debit
+                    FundMovement.IN -> R.string.cd_transaction_list_item_credit
+                    FundMovement.OUT -> R.string.cd_transaction_list_item_debit
                 },
                 amount,
                 note,
@@ -133,7 +135,7 @@ fun TransactionListItem(
 
                         else -> {
                             Text(
-                                text = stringResource(type.labelRes),
+                                text = stringResource(type.creditOrDebitLabel),
                                 overflow = TextOverflow.Ellipsis,
                                 color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT),
                                 style = LocalTextStyle.current.copy(
@@ -265,12 +267,12 @@ fun NewTransactionFab(
 
 @Composable
 fun TypeIndicatorIcon(
-    type: TransactionType,
+    type: FundMovement,
     modifier: Modifier = Modifier
 ) {
     Icon(
         imageVector = ImageVector.vectorResource(type.iconRes),
-        contentDescription = stringResource(type.labelRes),
+        contentDescription = stringResource(type.creditOrDebitLabel),
         tint = type.color,
         modifier = modifier
     )
@@ -359,7 +361,7 @@ private fun PreviewTransactionListItem() {
             timeStamp = LocalDateTime.now(),
             leadingContentLine1 = LocalDate.now().dayOfMonth.toString(),
             leadingContentLine2 = LocalDate.now().month.toString(),
-            type = TransactionType.CREDIT,
+            type = FundMovement.IN,
             modifier = Modifier,
             tag = TagIndicator(id = Long.Zero, name = "Test", color = Color.Yellow),
             folder = null,

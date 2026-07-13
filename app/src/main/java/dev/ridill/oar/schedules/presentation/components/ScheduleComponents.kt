@@ -47,7 +47,8 @@ import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.mergedContentDescription
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.core.domain.model.creditOrDebitLabel
 import dev.ridill.oar.transactions.presentation.components.TypeIndicatorIcon
 import java.time.LocalDateTime
 
@@ -55,7 +56,7 @@ import java.time.LocalDateTime
 fun ScheduleListItem(
     note: String?,
     amount: String,
-    type: TransactionType,
+    type: FundMovement,
     nextPaymentTimestamp: LocalDateTime?,
     lastPaymentTimestamp: LocalDateTime?,
     modifier: Modifier = Modifier,
@@ -131,7 +132,7 @@ fun ScheduleListItem(
 fun ActiveScheduleItem(
     note: String?,
     amount: String,
-    type: TransactionType,
+    type: FundMovement,
     paymentDay: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -169,7 +170,7 @@ fun ActiveScheduleItem(
             ) {
                 BodyMediumText(
                     text = note.orEmpty()
-                        .ifEmpty { stringResource(type.labelRes) },
+                        .ifEmpty { stringResource(type.creditOrDebitLabel) },
                     color = LocalContentColor.current.copy(
                         alpha = if (note.isNullOrEmpty()) ContentAlpha.SUB_CONTENT
                         else Float.One
@@ -204,7 +205,7 @@ private fun PreviewScheduleListItemCard() {
         ScheduleListItem(
             amount = "100",
             note = "Test",
-            type = TransactionType.DEBIT,
+            type = FundMovement.OUT,
             nextPaymentTimestamp = DateUtil.now(),
             lastPaymentTimestamp = DateUtil.now(),
             modifier = Modifier
@@ -220,7 +221,7 @@ private fun PreviewActiveScheduleCard() {
         ActiveScheduleItem(
             note = LoremIpsum().values.joinToString(),
             amount = "Rs.100",
-            type = TransactionType.DEBIT,
+            type = FundMovement.OUT,
             paymentDay = "10th Wed",
             onClick = {},
             modifier = Modifier

@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.folders.domain.model.AggregateType
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.presentation.components.TypeIndicatorIcon
 
 @Composable
@@ -467,7 +467,7 @@ fun ListLabel(
 @Composable
 fun AmountWithTypeIndicator(
     value: String,
-    type: TransactionType?,
+    type: FundMovement?,
     modifier: Modifier = Modifier,
     showTypeIndicator: Boolean = true,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium

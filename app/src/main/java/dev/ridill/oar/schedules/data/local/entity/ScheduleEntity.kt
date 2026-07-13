@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 
 @Entity(tableName = "schedules_table")
@@ -24,7 +24,7 @@ data class ScheduleEntity(
     val currencyCode: String,
 
     @ColumnInfo(name = "type")
-    val type: TransactionType,
+    val type: FundMovement,
 
     @ColumnInfo(name = "tag_id")
     val tagId: Long?,

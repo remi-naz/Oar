@@ -15,7 +15,7 @@ import dev.ridill.oar.transactions.data.toTransactionListItem
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
 import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +30,7 @@ class TransactionRepositoryImpl(
     override fun getAllTransactionsPaged(
         query: String?,
         cycleIds: Set<Long>?,
-        type: TransactionType?,
+        type: FundMovement?,
         showExcluded: Boolean,
         tagIds: Set<Long>?,
         folderId: Long?,
@@ -54,7 +54,7 @@ class TransactionRepositoryImpl(
     override fun getDateSeparatedTransactions(
         query: String?,
         cycleIds: Set<Long>?,
-        type: TransactionType?,
+        type: FundMovement?,
         showExcluded: Boolean,
         tagIds: Set<Long>?,
         folderId: Long?,
@@ -85,7 +85,7 @@ class TransactionRepositoryImpl(
         id: Long,
         note: String?,
         timestamp: LocalDateTime,
-        type: TransactionType,
+        type: FundMovement,
         tagId: Long?,
         folderId: Long?,
         scheduleId: Long?,

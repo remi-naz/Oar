@@ -12,7 +12,7 @@ import dev.ridill.oar.core.domain.util.joinToCapitalizedString
 import dev.ridill.oar.core.domain.util.logD
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.ui.util.TextFormat
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -92,7 +92,7 @@ class RegexTransactionDataExtractor(
         return ExtractedTransactionData(
             amount = amount,
             paymentTimestamp = timestamp,
-            transactionType = transactionType,
+            fundMovement = transactionType,
             note = note
         )
     }
@@ -121,7 +121,7 @@ class RegexTransactionDataExtractor(
         TransactionNoteBuildFailedThrowable::class,
         RegexUnavailableThrowable::class
     )
-    private fun buildNote(content: List<String>, type: TransactionType): String {
+    private fun buildNote(content: List<String>, type: FundMovement): String {
         if (
             ::secondPartyStartRegex.isInitialized.not()
             || ::secondPartyEndRegex.isInitialized.not()
@@ -175,8 +175,8 @@ class RegexTransactionDataExtractor(
 
         return buildString {
             when (type) {
-                TransactionType.CREDIT -> append("From")
-                TransactionType.DEBIT -> append("Towards")
+                FundMovement.IN -> append("From")
+                FundMovement.OUT -> append("Towards")
             }
 
             append(String.WhiteSpace)
@@ -189,7 +189,7 @@ class RegexTransactionDataExtractor(
         TransactionTypeExtractionFailedThrowable::class,
         RegexUnavailableThrowable::class
     )
-    private fun extractTransactionType(content: List<String>): TransactionType {
+    private fun extractTransactionType(content: List<String>): FundMovement {
         if (
             ::debitRegex.isInitialized.not()
             || ::miscPaymentRegex.isInitialized.not()
@@ -198,9 +198,9 @@ class RegexTransactionDataExtractor(
         val contentString = content.joinToString(String.WhiteSpace)
 
         return when (true) {
-            contentString.contains(debitRegex) -> TransactionType.DEBIT
-            contentString.contains(miscPaymentRegex) -> TransactionType.DEBIT
-            contentString.contains(creditRegex) -> TransactionType.CREDIT
+            contentString.contains(debitRegex) -> FundMovement.OUT
+            contentString.contains(miscPaymentRegex) -> FundMovement.OUT
+            contentString.contains(creditRegex) -> FundMovement.IN
             else -> throw TransactionTypeExtractionFailedThrowable("Failed to find type match in\nContent: $contentString")
         }
     }

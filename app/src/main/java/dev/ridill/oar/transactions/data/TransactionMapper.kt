@@ -75,7 +75,7 @@ fun TransactionDetailsView.toTransactionListItem(): TransactionEntry {
         note = transactionNote,
         amount = transactionAmount,
         timestamp = transactionTimestamp,
-        type = transactionType,
+        type = fundMovement,
         excluded = excluded,
         cycle = cycle,
         tag = tag,

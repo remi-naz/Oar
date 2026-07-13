@@ -1,7 +1,7 @@
 package dev.ridill.oar.transactions.domain.model
 
-import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleEntry
 import dev.ridill.oar.budgetCycles.domain.model.CycleIndicator
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 import java.util.Currency
 
@@ -12,7 +12,7 @@ sealed class TransactionListItemUIModel {
         val amount: Double,
         val currency: Currency,
         val timestamp: LocalDateTime,
-        val type: TransactionType,
+        val type: FundMovement,
         val excluded: Boolean,
         val cycleEntry: CycleIndicator,
         val tag: TagIndicator?,

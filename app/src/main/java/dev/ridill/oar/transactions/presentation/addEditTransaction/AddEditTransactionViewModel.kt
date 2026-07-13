@@ -33,7 +33,7 @@ import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.transactions.domain.model.AmountTransformation
 import dev.ridill.oar.transactions.domain.model.Transaction
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.domain.repository.AddEditTransactionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -105,7 +105,7 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     private val transactionFolderId = txInput.mapLatest { it?.folderId }
         .distinctUntilChanged()
 
-    private val transactionType = txInput.mapLatest { it?.type ?: TransactionType.DEBIT }
+    private val fundMovement = txInput.mapLatest { it?.type ?: FundMovement.OUT }
         .distinctUntilChanged()
 
     private val isTransactionExcluded = txInput.mapLatest { it?.excluded == true }
@@ -128,7 +128,7 @@ class AddEditTransactionViewModel @AssistedInject constructor(
     val state = combineTuple(
         isLoading,
         currency,
-        transactionType,
+        fundMovement,
         isAmountInputAnExpression,
         amountRecommendations,
         timestamp,
@@ -161,7 +161,7 @@ class AddEditTransactionViewModel @AssistedInject constructor(
         AddEditTransactionState(
             isLoading = isLoading,
             currency = currency,
-            transactionType = transactionType,
+            fundMovement = transactionType,
             isAmountInputAnExpression = isAmountInputAnExpression,
             amountRecommendations = amountRecommendations,
             timestamp = timestamp,
@@ -308,7 +308,7 @@ class AddEditTransactionViewModel @AssistedInject constructor(
         savedStateHandle[SHOW_DATE_PICKER] = true
     }
 
-    override fun onTypeChange(type: TransactionType) {
+    override fun onTypeChange(type: FundMovement) {
         savedStateHandle[TX_INPUT] = txInput.value?.copy(
             type = type
         )

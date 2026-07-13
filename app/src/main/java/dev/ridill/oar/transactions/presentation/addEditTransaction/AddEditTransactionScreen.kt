@@ -72,6 +72,8 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.core.domain.model.creditOrDebitLabel
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.domain.util.UtilConstants
@@ -99,7 +101,6 @@ import dev.ridill.oar.core.ui.util.exclude
 import dev.ridill.oar.settings.presentation.components.SimplePreference
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
 import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionField
-import dev.ridill.oar.transactions.domain.model.TransactionType
 import dev.ridill.oar.transactions.presentation.components.AmountRecommendationsRow
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -193,7 +194,7 @@ fun AddEditTransactionScreen(
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
             ) {
                 TransactionTypeSelector(
-                    selectedType = state.transactionType,
+                    selectedType = state.fundMovement,
                     onValueChange = actions::onTypeChange,
                     modifier = Modifier
                         .fillMaxWidth(TRANSACTION_TYPE_SELECTOR_WIDTH_FRACTION)
@@ -528,13 +529,13 @@ private fun FolderIndicator(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TransactionTypeSelector(
-    selectedType: TransactionType,
-    onValueChange: (TransactionType) -> Unit,
+    selectedType: FundMovement,
+    onValueChange: (FundMovement) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val typeSelectorContentDescription = stringResource(
         R.string.cd_transaction_type_selector,
-        stringResource(selectedType.labelRes)
+        stringResource(selectedType.creditOrDebitLabel)
     )
 
     Row(
@@ -547,7 +548,7 @@ private fun TransactionTypeSelector(
             Alignment.CenterHorizontally
         )
     ) {
-        TransactionType.entries.forEachIndexed { index, type ->
+        FundMovement.entries.forEachIndexed { index, type ->
             ToggleButton(
                 checked = selectedType == type,
                 onCheckedChange = { onValueChange(type) },
@@ -567,7 +568,7 @@ private fun TransactionTypeSelector(
 
                 Spacer(ToggleButtonDefaults.IconSpacing)
 
-                Text(stringResource(type.labelRes))
+                Text(stringResource(type.creditOrDebitLabel))
             }
         }
     }
@@ -597,7 +598,7 @@ private fun PreviewScreenContent() {
                 override fun onDateSelectionConfirm(millis: Long) {}
                 override fun onTimeSelectionDismiss() {}
                 override fun onTimeSelectionConfirm(hour: Int, minute: Int) {}
-                override fun onTypeChange(type: TransactionType) {}
+                override fun onTypeChange(type: FundMovement) {}
                 override fun onExclusionToggle(excluded: Boolean) {}
                 override fun onDeleteDismiss() {}
                 override fun onDeleteConfirm() {}

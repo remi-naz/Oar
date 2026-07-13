@@ -13,8 +13,8 @@ import java.time.LocalDate
         bdgt.currency_code AS currencyCode,
         IFNULL(SUM(
                 CASE
-                    WHEN tx.transactionType = 'DEBIT' THEN tx.transactionAmount
-                    WHEN tx.transactionType = 'CREDIT' THEN -tx.transactionAmount
+                    WHEN tx.fundMovement = 'OUT' THEN tx.transactionAmount
+                    WHEN tx.fundMovement = 'IN' THEN -tx.transactionAmount
                 END
         ), 0) as aggregate,
         CASE

@@ -1,6 +1,6 @@
 package dev.ridill.oar.transactions.domain.autoDetection
 
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 
 interface TransactionDataExtractor {
@@ -20,7 +20,7 @@ interface TransactionDataExtractor {
 data class ExtractedTransactionData(
     val amount: Double,
     val paymentTimestamp: LocalDateTime,
-    val transactionType: TransactionType,
+    val fundMovement: FundMovement,
     val note: String?
 )
 

@@ -14,7 +14,7 @@ import dev.ridill.oar.application.OarDeepLink
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.transactions.domain.model.Transaction
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 
 const val ARG_TRANSACTION_ID = "ARG_TRANSACTION_ID"
 
@@ -67,8 +67,8 @@ class TransactionAutoDetectNotificationHelper(
             .setContentText(
                 context.getString(
                     when (data.type) {
-                        TransactionType.CREDIT -> R.string.amount_credited_notification_message
-                        TransactionType.DEBIT -> R.string.amount_debited_notification_message
+                        FundMovement.IN -> R.string.amount_credited_notification_message
+                        FundMovement.OUT -> R.string.amount_debited_notification_message
                     },
                     data.amount,
                     data.note

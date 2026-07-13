@@ -7,7 +7,7 @@ import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
 import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.transactions.domain.model.TransactionType
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import java.util.Currency
@@ -16,7 +16,7 @@ interface TransactionRepository {
     fun getAllTransactionsPaged(
         query: String? = String.Empty,
         cycleIds: Set<Long>? = null,
-        type: TransactionType? = null,
+        type: FundMovement? = null,
         showExcluded: Boolean = true,
         tagIds: Set<Long>? = null,
         folderId: Long? = null,
@@ -26,7 +26,7 @@ interface TransactionRepository {
     fun getDateSeparatedTransactions(
         query: String? = String.Empty,
         cycleIds: Set<Long>? = null,
-        type: TransactionType? = null,
+        type: FundMovement? = null,
         showExcluded: Boolean = true,
         tagIds: Set<Long>? = null,
         folderId: Long? = null,
@@ -39,7 +39,7 @@ interface TransactionRepository {
         id: Long = OarDatabase.DEFAULT_ID_LONG,
         note: String? = null,
         timestamp: LocalDateTime = DateUtil.now(),
-        type: TransactionType = TransactionType.DEBIT,
+        type: FundMovement = FundMovement.OUT,
         tagId: Long? = null,
         folderId: Long? = null,
         scheduleId: Long? = null,
