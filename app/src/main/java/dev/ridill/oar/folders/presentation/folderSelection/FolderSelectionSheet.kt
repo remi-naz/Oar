@@ -1,6 +1,5 @@
 package dev.ridill.oar.folders.presentation.folderSelection
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -21,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.paging.compose.LazyPagingItems
@@ -121,7 +119,8 @@ private fun NewFolderItem(
     modifier: Modifier = Modifier
 ) {
     ListItem(
-        headlineContent = { Text(stringResource(R.string.create_new_folder)) },
+        onClick = onClick,
+        modifier = modifier,
         trailingContent = {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_folder_add),
@@ -131,14 +130,10 @@ private fun NewFolderItem(
         colors = ListItemDefaults.colors(
             containerColor = BottomSheetDefaults.ContainerColor
         ),
-        tonalElevation = BottomSheetDefaults.Elevation,
-        modifier = Modifier
-            .clickable(
-                onClick = onClick,
-                role = Role.Button
-            )
-            .then(modifier)
-    )
+        elevation = ListItemDefaults.elevation(BottomSheetDefaults.Elevation),
+    ) {
+        Text(stringResource(R.string.create_new_folder))
+    }
 }
 
 @Composable
@@ -151,22 +146,10 @@ private fun FolderSelectionCard(
     modifier: Modifier = Modifier
 ) {
     ListItem(
-        headlineContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-            ) {
-                if (excluded) {
-                    ExcludedIconSmall()
-                }
-                Text(
-                    text = name,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        },
-        supportingContent = { Text(createdTimestamp) },
+        onClick = onClick,
+        modifier = Modifier
+            .exclusionGraphicsLayer(excluded)
+            .then(modifier),
         leadingContent = {
             ListItemLeadingContentContainer(
                 containerColor = MaterialTheme.colorScheme.tertiary
@@ -177,16 +160,24 @@ private fun FolderSelectionCard(
                 )
             }
         },
+        supportingContent = { Text(createdTimestamp) },
         colors = ListItemDefaults.colors(
             containerColor = if (selected) MaterialTheme.colorScheme.surfaceContainerHigh
             else BottomSheetDefaults.ContainerColor
         ),
-        modifier = Modifier
-            .clickable(
-                onClick = onClick,
-                onClickLabel = stringResource(R.string.cd_tap_to_select_folder, name)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            if (excluded) {
+                ExcludedIconSmall()
+            }
+            Text(
+                text = name,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
-            .exclusionGraphicsLayer(excluded)
-            .then(modifier)
-    )
+        }
+    }
 }

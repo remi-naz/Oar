@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Close
@@ -26,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Text
@@ -77,7 +74,6 @@ import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
-import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.isEmpty
@@ -424,22 +420,6 @@ private fun TransactionInFolderItem(
     modifier: Modifier = Modifier,
     hapticFeedback: HapticFeedback = LocalHapticFeedback.current,
 ) {
-    val clickableModifier = if (multiSelectionActive) Modifier
-        .selectable(
-            selected = selected,
-            onClick = onSelectionChange
-        )
-    else Modifier.combinedClickable(
-        onClick = onClick,
-        onClickLabel = stringResource(R.string.cd_tap_to_edit_transaction),
-        onLongClick = {
-            hapticFeedback.performHapticFeedback(
-                HapticFeedbackType.LongPress
-            )
-            onLongPress()
-        },
-        onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection)
-    )
     var isRevealed by remember { mutableStateOf(false) }
     LaunchedEffect(multiSelectionActive) {
         if (multiSelectionActive) {
@@ -475,17 +455,23 @@ private fun TransactionInFolderItem(
         gesturesEnabled = !multiSelectionActive
     ) {
         TransactionListItem(
+            onClick = if (multiSelectionActive) onSelectionChange else onClick,
+            onLongClick = {
+                hapticFeedback
+                    .performHapticFeedback(HapticFeedbackType.LongPress)
+                onLongPress()
+            },
+            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
             note = note,
             amount = amount,
             timeStamp = timestamp,
             leadingContentLine1 = timestamp.format(DateUtil.Formatters.ddth),
             leadingContentLine2 = timestamp.format(DateUtil.Formatters.EEE),
             type = type,
-            tonalElevation = if (selected) MaterialTheme.elevation.level1 else MaterialTheme.elevation.level0,
+            selected = selected,
             tag = tag,
             excluded = excluded,
             modifier = modifier
-                .then(clickableModifier)
         )
     }
 }

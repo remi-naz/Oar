@@ -1,6 +1,5 @@
 package dev.ridill.oar.budgetCycles.presentation.cycleSelection
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -73,15 +72,13 @@ private fun CycleSelectionItem(
     modifier: Modifier = Modifier
 ) {
     ListItem(
-        headlineContent = { Text(description) },
-        modifier = modifier
-            .clickable(
-                onClick = onClick,
-                onClickLabel = stringResource(R.string.cd_tap_to_select_cycle, description)
-            ),
+        onClick = onClick,
+        modifier = modifier,
         colors = ListItemDefaults.colors(
             containerColor = if (selected) MaterialTheme.colorScheme.surfaceContainerHigh
             else BottomSheetDefaults.ContainerColor
-        )
-    )
+        ),
+    ) {
+        Text(description)
+    }
 }

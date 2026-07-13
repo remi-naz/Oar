@@ -83,7 +83,6 @@
     <string name="cd_add_transaction_to_folder">Add transaction fo a folder</string>
     <string name="cd_action_continue">Continue</string>
     <string name="cd_transaction_selection_change">Select or Unselect Transaction</string>
-    <string name="cd_tap_to_edit_transaction">Tap to edit transaction</string>
     <string name="cd_long_press_to_toggle_selection">Long Press To Toggle Selection</string>
     <string name="cd_clear_transaction_selection">Clear Transaction Selection</string>
     <string name="cd_tap_tag_to_filter_transactions">Tap tag to filter transactions</string>
@@ -103,7 +102,6 @@
     <string name="cd_clear_search_query">Clear search query</string>
     <string name="cd_mark_as_paid">Mark as paid</string>
     <string name="cd_tap_to_edit_schedule">Tap to edit schedule</string>
-    <string name="cd_tap_to_toggle_selection">Tap to edit schedule</string>
     <string name="cd_evaluate_expression">Evaluate expression</string>
     <string name="cd_tap_to_edit_tag">Tap to edit tag</string>
     <string name="cd_clear_tag_selection">Clear tag selection</string>

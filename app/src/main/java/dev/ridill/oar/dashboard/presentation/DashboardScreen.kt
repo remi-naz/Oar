@@ -3,7 +3,6 @@ package dev.ridill.oar.dashboard.presentation
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +63,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.model.UserAccount
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.One
@@ -101,7 +101,6 @@ import dev.ridill.oar.core.ui.util.mergedContentDescription
 import dev.ridill.oar.schedules.domain.model.ActiveSchedule
 import dev.ridill.oar.schedules.presentation.components.ActiveScheduleItem
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.presentation.components.NewTransactionFab
 import dev.ridill.oar.transactions.presentation.components.TransactionListItem
 import kotlinx.coroutines.flow.flowOf
@@ -205,6 +204,7 @@ fun DashboardScreen(
                             ) { index ->
                                 recentSpends[index]?.let { transaction ->
                                     TransactionListItem(
+                                        onClick = { navigateToAddEditTransaction(transaction.id) },
                                         note = transaction.note,
                                         amount = transaction.amountFormatted,
                                         timeStamp = transaction.timestamp,
@@ -215,12 +215,6 @@ fun DashboardScreen(
                                         folder = transaction.folder,
                                         modifier = Modifier
                                             .fillParentMaxWidth()
-                                            .clickable(
-                                                onClick = {
-                                                    navigateToAddEditTransaction(transaction.id)
-                                                },
-                                                onClickLabel = stringResource(R.string.cd_tap_to_edit_transaction)
-                                            )
                                             .animateItem(),
                                     )
                                 }

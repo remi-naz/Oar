@@ -9,8 +9,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
@@ -254,31 +251,18 @@ fun AllTransactionsScreen(
                                         contentType = TransactionEntry::class
                                     ) {
                                         val selected = item.id in state.selectedTransactionIds
-                                        val clickableModifier =
-                                            if (state.transactionMultiSelectionModeActive) Modifier
-                                                .selectable(
-                                                    selected = selected,
-                                                    onClick = {
-                                                        actions.onTransactionSelectionChange(
-                                                            item.id
-                                                        )
-                                                    }
-                                                )
-                                            else Modifier.combinedClickable(
-                                                onClick = {
-                                                    navigateToAddEditTransaction(item.id)
-                                                },
-                                                onClickLabel = stringResource(R.string.cd_tap_to_edit_transaction),
-                                                onLongClick = {
-                                                    hapticFeedback.performHapticFeedback(
-                                                        HapticFeedbackType.LongPress
-                                                    )
-                                                    actions.onTransactionLongPress(item.id)
-                                                },
-                                                onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection)
-                                            )
-
                                         TransactionListItem(
+                                            onClick = {
+                                                if (state.transactionMultiSelectionModeActive) actions
+                                                    .onTransactionSelectionChange(item.id)
+                                                else navigateToAddEditTransaction(item.id)
+                                            },
+                                            onLongClick = {
+                                                hapticFeedback
+                                                    .performHapticFeedback(HapticFeedbackType.LongPress)
+                                                actions.onTransactionLongPress(item.id)
+                                            },
+                                            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
                                             note = item.note,
                                             amount = TextFormat.currency(
                                                 item.amount,
@@ -291,10 +275,9 @@ fun AllTransactionsScreen(
                                             tag = item.tag,
                                             folder = item.folder,
                                             excluded = item.excluded,
-                                            tonalElevation = if (selected) MaterialTheme.elevation.level1 else MaterialTheme.elevation.level0,
+                                            selected = selected,
                                             modifier = Modifier
                                                 .fillParentMaxWidth()
-                                                .then(clickableModifier)
                                                 .animateItem()
                                         )
                                     }
@@ -526,11 +509,11 @@ private fun AllTransactionsTopAppBar(
                                 colors = ListItemDefaults.colors(
                                     containerColor = SearchBarDefaults.colors().containerColor
                                 ),
-                                tonalElevation = MaterialTheme.elevation.level1,
+                                elevation = ListItemDefaults.elevation(
+                                    elevation = MaterialTheme.elevation.level1
+                                ),
+                                onClick = { onSearchItemClick(item.id) },
                                 modifier = Modifier
-                                    .clickable(
-                                        onClick = { onSearchItemClick(item.id) }
-                                    )
                                     .animateItem()
                             )
                         }

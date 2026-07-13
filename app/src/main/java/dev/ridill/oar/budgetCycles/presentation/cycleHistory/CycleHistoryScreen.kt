@@ -313,15 +313,16 @@ private fun CycleHistoryItem(
     modifier: Modifier = Modifier
 ) {
     ListItem(
-        headlineContent = { Text(description) },
+        modifier = modifier,
         trailingContent = {
             TitleMediumText(
                 text = stringResource(R.string.amounts_divided, aggregate, budget),
                 color = if (isUnderBudget) PositiveGreen else NegativeRed
             )
         },
-        modifier = modifier
-    )
+    ) {
+        Text(description)
+    }
 }
 
 @Composable

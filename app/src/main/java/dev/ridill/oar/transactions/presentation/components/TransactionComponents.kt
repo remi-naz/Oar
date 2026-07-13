@@ -78,8 +78,7 @@ fun TransactionListItem(
     excluded: Boolean = false,
     overlineContent: @Composable (() -> Unit)? = null,
     colors: ListItemColors = ListItemDefaults.colors(),
-    tonalElevation: Dp = ListItemDefaults.Elevation,
-    shadowElevation: Dp = ListItemDefaults.Elevation
+    elevation: ListItemElevation = ListItemDefaults.elevation(),
 ) {
     val transactionListItemContentDescription = buildString {
         append(
@@ -105,55 +104,19 @@ fun TransactionListItem(
         }
     }
     ListItem(
-        headlineContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-            ) {
-                CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
-                    if (excluded) {
-                        ExcludedIconSmall()
-                    }
-                    when {
-                        note.isNotEmpty() -> {
-                            Text(
-                                text = note,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                color = LocalContentColor.current,
-                                style = LocalTextStyle.current.copy(fontWeight = FontWeight.Medium)
-                            )
-                        }
-
-                        tag != null -> {
-                            TagLabel(name = tag.name)
-                        }
-
-                        folder != null -> {
-                            FolderIndicator(name = folder.name)
-                        }
-
-                        else -> {
-                            Text(
-                                text = stringResource(type.creditOrDebitLabel),
-                                overflow = TextOverflow.Ellipsis,
-                                color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT),
-                                style = LocalTextStyle.current.copy(
-                                    fontStyle = FontStyle.Italic,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            )
-                        }
-                    }
-                }
+        modifier = Modifier
+            .semantics(mergeDescendants = true) {}
+            .clearAndSetSemantics {
+                contentDescription = transactionListItemContentDescription
             }
-        },
+            .then(modifier)
+            .exclusionGraphicsLayer(excluded),
         leadingContent = {
             DateAndTag(
                 dateLine1 = leadingContentLine1,
                 dateLine2 = leadingContentLine2,
                 tag = tag,
-                tonalElevation = tonalElevation + 2.dp
+                tonalElevation = elevation.elevation + 2.dp
             )
         },
         trailingContent = {
@@ -162,6 +125,7 @@ fun TransactionListItem(
                 type = type
             )
         },
+        overlineContent = overlineContent,
         supportingContent = {
             if (note.isNotEmpty()) {
                 folder?.let {
@@ -173,7 +137,98 @@ fun TransactionListItem(
                 }
             }
         },
-        overlineContent = overlineContent,
+        colors = colors,
+        elevation = elevation,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
+                if (excluded) {
+                    ExcludedIconSmall()
+                }
+                when {
+                    note.isNotEmpty() -> {
+                        Text(
+                            text = note,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            color = LocalContentColor.current,
+                            style = LocalTextStyle.current.copy(fontWeight = FontWeight.Medium)
+                        )
+                    }
+
+                    tag != null -> {
+                        TagLabel(name = tag.name)
+                    }
+
+                    folder != null -> {
+                        FolderIndicator(name = folder.name)
+                    }
+
+                    else -> {
+                        Text(
+                            text = stringResource(type.creditOrDebitLabel),
+                            overflow = TextOverflow.Ellipsis,
+                            color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT),
+                            style = LocalTextStyle.current.copy(
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TransactionListItem(
+    onClick: () -> Unit,
+    note: String,
+    amount: String,
+    timeStamp: LocalDateTime,
+    leadingContentLine1: String,
+    leadingContentLine2: String,
+    type: FundMovement,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    tag: TagIndicator? = null,
+    folder: FolderIndicator? = null,
+    excluded: Boolean = false,
+    overlineContent: @Composable (() -> Unit)? = null,
+    colors: ListItemColors = ListItemDefaults.colors(),
+    elevation: ListItemElevation = ListItemDefaults.elevation(),
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
+) {
+    val transactionListItemContentDescription = buildString {
+        append(
+            stringResource(
+                when (type) {
+                    FundMovement.IN -> R.string.cd_transaction_list_item_credit
+                    FundMovement.OUT -> R.string.cd_transaction_list_item_debit
+                },
+                amount,
+                note,
+                timeStamp.format(DateUtil.Formatters.localizedDateLong)
+            )
+        )
+
+        tag?.let {
+            append(String.WhiteSpace)
+            append(stringResource(R.string.cd_transaction_list_item_tag_append, it.name))
+        }
+
+        folder?.let {
+            append(String.WhiteSpace)
+            append(stringResource(R.string.cd_transaction_list_item_folder_append, it.name))
+        }
+    }
+    ListItem(
+        onClick = onClick,
         modifier = Modifier
             .semantics(mergeDescendants = true) {}
             .clearAndSetSemantics {
@@ -181,10 +236,80 @@ fun TransactionListItem(
             }
             .then(modifier)
             .exclusionGraphicsLayer(excluded),
+        leadingContent = {
+            DateAndTag(
+                dateLine1 = leadingContentLine1,
+                dateLine2 = leadingContentLine2,
+                tag = tag,
+                tonalElevation = elevation.elevation + 2.dp
+            )
+        },
+        trailingContent = {
+            AmountWithTypeIndicator(
+                value = amount,
+                type = type
+            )
+        },
+        overlineContent = overlineContent,
+        supportingContent = {
+            if (note.isNotEmpty()) {
+                folder?.let {
+                    CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodySmall) {
+                        FolderIndicator(
+                            name = it.name
+                        )
+                    }
+                }
+            }
+        },
+        selected = selected,
         colors = colors,
-        tonalElevation = tonalElevation,
-        shadowElevation = shadowElevation
-    )
+        elevation = elevation,
+        onLongClick = onLongClick,
+        onLongClickLabel = onLongClickLabel,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
+                if (excluded) {
+                    ExcludedIconSmall()
+                }
+                when {
+                    note.isNotEmpty() -> {
+                        Text(
+                            text = note,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            color = LocalContentColor.current,
+                            style = LocalTextStyle.current.copy(fontWeight = FontWeight.Medium)
+                        )
+                    }
+
+                    tag != null -> {
+                        TagLabel(name = tag.name)
+                    }
+
+                    folder != null -> {
+                        FolderIndicator(name = folder.name)
+                    }
+
+                    else -> {
+                        Text(
+                            text = stringResource(type.creditOrDebitLabel),
+                            overflow = TextOverflow.Ellipsis,
+                            color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT),
+                            style = LocalTextStyle.current.copy(
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable

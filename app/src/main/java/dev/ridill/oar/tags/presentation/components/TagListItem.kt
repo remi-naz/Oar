@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.Dp
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.components.ListItemLeadingContentContainer
@@ -28,28 +29,11 @@ fun TagListItem(
     excluded: Boolean,
     createdTimestamp: String,
     modifier: Modifier = Modifier,
-    tonalElevation: Dp = MaterialTheme.elevation.level0
+    elevation: ListItemElevation = ListItemDefaults.elevation()
 ) {
     ListItem(
-        headlineContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-            ) {
-                if (excluded) {
-                    ExcludedIconSmall()
-                }
-                Text(name)
-            }
-        },
-        supportingContent = {
-            Text(
-                text = stringResource(
-                    R.string.created_colon_timestamp_value,
-                    createdTimestamp
-                )
-            )
-        },
+        modifier = modifier
+            .exclusionGraphicsLayer(excluded),
         leadingContent = {
             ListItemLeadingContentContainer(
                 tonalElevation = MaterialTheme.elevation.level0
@@ -61,8 +45,77 @@ fun TagListItem(
                 )
             }
         },
+        supportingContent = {
+            Text(
+                text = stringResource(
+                    R.string.created_colon_timestamp_value,
+                    createdTimestamp
+                )
+            )
+        },
+        elevation = elevation,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            if (excluded) {
+                ExcludedIconSmall()
+            }
+            Text(name)
+        }
+    }
+}
+
+@Composable
+fun TagListItem(
+    onClick: () -> Unit,
+    name: String,
+    color: Color,
+    excluded: Boolean,
+    createdTimestamp: String,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    elevation: ListItemElevation = ListItemDefaults.elevation(),
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
+) {
+    ListItem(
+        onClick = onClick,
         modifier = modifier
             .exclusionGraphicsLayer(excluded),
-        tonalElevation = tonalElevation
-    )
+        leadingContent = {
+            ListItemLeadingContentContainer(
+                tonalElevation = MaterialTheme.elevation.level0
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_tag),
+                    contentDescription = null,
+                    tint = color
+                )
+            }
+        },
+        supportingContent = {
+            Text(
+                text = stringResource(
+                    R.string.created_colon_timestamp_value,
+                    createdTimestamp
+                )
+            )
+        },
+        selected = selected,
+        elevation = elevation,
+        onLongClick = onLongClick,
+        onLongClickLabel = onLongClickLabel,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        ) {
+            if (excluded) {
+                ExcludedIconSmall()
+            }
+            Text(name)
+        }
+    }
 }
