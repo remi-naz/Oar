@@ -1,7 +1,6 @@
 package dev.ridill.oar.tags.presentation.allTags
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -19,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Text
@@ -153,30 +152,24 @@ fun AllTagsScreen(
                 ) { index ->
                     tagsLazyPagingItems[index]?.let { item ->
                         val selected = item.id in state.selectedIds
-                        val clickableModifier = if (state.multiSelectionModeActive) Modifier
-                            .toggleable(
-                                value = selected,
-                                onValueChange = { actions.onTagSelectionChange(item.id) }
-                            )
-                        else Modifier.combinedClickable(
-                            onClick = { navigateToAddEditTag(item.id) },
-                            onClickLabel = stringResource(R.string.cd_tap_to_edit_transaction),
+                        TagListItem(
+                            onClick = {
+                                if (state.multiSelectionModeActive) actions
+                                    .onTagSelectionChange(item.id)
+                                else navigateToAddEditTag(item.id)
+                            },
                             onLongClick = {
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                 actions.onTagLongPress(item.id)
                             },
-                            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection)
-                        )
-
-                        TagListItem(
+                            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
                             name = item.name,
                             color = item.color,
                             excluded = item.excluded,
                             createdTimestamp = item.createdTimestampFormatted,
-                            tonalElevation = if (selected) MaterialTheme.elevation.level1 else MaterialTheme.elevation.level0,
+                            selected = selected,
                             modifier = Modifier
                                 .fillParentMaxWidth()
-                                .then(clickableModifier)
                                 .animateItem()
                         )
                     }

@@ -2,8 +2,6 @@ package dev.ridill.oar.schedules.presentation.allSchedules
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.paging.compose.LazyPagingItems
 import dev.ridill.oar.R
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.logD
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.CancelButton
@@ -50,12 +49,10 @@ import dev.ridill.oar.core.ui.components.PermissionState
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.SwipeActionsContainer
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
-import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.schedules.domain.model.ScheduleListItemUiModel
 import dev.ridill.oar.schedules.presentation.components.ScheduleListItem
-import dev.ridill.oar.core.domain.model.FundMovement
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -258,17 +255,6 @@ private fun ScheduleItem(
     showPreview: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val clickModifier = if (selectionModeActive) Modifier.clickable(
-        onClick = onSelectionToggle,
-        onClickLabel = stringResource(R.string.cd_tap_to_toggle_selection)
-    )
-    else Modifier.combinedClickable(
-        onClick = onClick,
-        onClickLabel = stringResource(R.string.cd_tap_to_edit_schedule),
-        onLongClick = onLongPress,
-        onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection)
-    )
-
     // Launched effect added to hide actions whenever some key state changes
     var isRevealed by remember { mutableStateOf(false) }
     LaunchedEffect(selectionModeActive, canMarkPaid) {
@@ -305,14 +291,15 @@ private fun ScheduleItem(
         animatePreview = showPreview
     ) {
         ScheduleListItem(
+            onClick = if (selectionModeActive) onSelectionToggle else onClick,
+            onLongClick = onLongPress,
+            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
             note = note,
             amount = amount,
             type = type,
             nextPaymentTimestamp = nextPaymentTimestamp,
             lastPaymentTimestamp = lastPaymentTimestamp,
-            tonalElevation = if (selected) MaterialTheme.elevation.level1 else MaterialTheme.elevation.level0,
-            modifier = Modifier
-                .then(clickModifier)
+            selected = selected,
         )
     }
 }

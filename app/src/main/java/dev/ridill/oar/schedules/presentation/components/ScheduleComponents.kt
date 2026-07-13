@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemElevation
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,9 +33,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
+import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.core.domain.model.creditOrDebitLabel
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.NewLine
 import dev.ridill.oar.core.domain.util.One
@@ -47,8 +49,6 @@ import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.mergedContentDescription
-import dev.ridill.oar.core.domain.model.FundMovement
-import dev.ridill.oar.core.domain.model.creditOrDebitLabel
 import dev.ridill.oar.transactions.presentation.components.TypeIndicatorIcon
 import java.time.LocalDateTime
 
@@ -61,8 +61,7 @@ fun ScheduleListItem(
     lastPaymentTimestamp: LocalDateTime?,
     modifier: Modifier = Modifier,
     colors: ListItemColors = ListItemDefaults.colors(),
-    tonalElevation: Dp = ListItemDefaults.Elevation,
-    shadowElevation: Dp = ListItemDefaults.Elevation
+    elevation: ListItemElevation = ListItemDefaults.elevation(),
 ) {
     val nextPaymentDateFormatted = remember(nextPaymentTimestamp) {
         nextPaymentTimestamp?.format(DateUtil.Formatters.MMM_ddth_spaceSep)
@@ -75,26 +74,8 @@ fun ScheduleListItem(
     )
 
     ListItem(
-        headlineContent = {
-            val isNoteNullOrEmpty = remember(note) { note.isNullOrEmpty() }
-            Text(
-                text = note.orEmpty()
-                    .ifEmpty { stringResource(R.string.generic_schedule_title) },
-                fontStyle = if (isNoteNullOrEmpty) FontStyle.Italic
-                else null,
-                color = LocalContentColor.current
-                    .copy(
-                        alpha = if (isNoteNullOrEmpty) ContentAlpha.SUB_CONTENT
-                        else Float.One
-                    )
-            )
-        },
-        trailingContent = {
-            AmountWithTypeIndicator(
-                value = amount,
-                type = type
-            )
-        },
+        modifier = modifier
+            .mergedContentDescription(scheduleItemContentDescription),
         leadingContent = {
             ListItemLeadingContentContainer {
                 if (!nextPaymentDateFormatted.isNullOrEmpty()) {
@@ -110,6 +91,12 @@ fun ScheduleListItem(
                 }
             }
         },
+        trailingContent = {
+            AmountWithTypeIndicator(
+                value = amount,
+                type = type
+            )
+        },
         supportingContent = lastPaymentTimestamp?.let { timestamp ->
             {
                 Text(
@@ -120,12 +107,103 @@ fun ScheduleListItem(
                 )
             }
         },
+        colors = colors,
+        elevation = elevation,
+    ) {
+        val isNoteNullOrEmpty = remember(note) { note.isNullOrEmpty() }
+        Text(
+            text = note.orEmpty()
+                .ifEmpty { stringResource(R.string.generic_schedule_title) },
+            fontStyle = if (isNoteNullOrEmpty) FontStyle.Italic
+            else null,
+            color = LocalContentColor.current
+                .copy(
+                    alpha = if (isNoteNullOrEmpty) ContentAlpha.SUB_CONTENT
+                    else Float.One
+                )
+        )
+    }
+}
+
+@Composable
+fun ScheduleListItem(
+    onClick: () -> Unit,
+    note: String?,
+    amount: String,
+    type: FundMovement,
+    nextPaymentTimestamp: LocalDateTime?,
+    lastPaymentTimestamp: LocalDateTime?,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    colors: ListItemColors = ListItemDefaults.colors(),
+    elevation: ListItemElevation = ListItemDefaults.elevation(),
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
+) {
+    val nextPaymentDateFormatted = remember(nextPaymentTimestamp) {
+        nextPaymentTimestamp?.format(DateUtil.Formatters.MMM_ddth_spaceSep)
+            ?.replace(String.WhiteSpace, String.NewLine)
+    }
+    val scheduleItemContentDescription = stringResource(
+        R.string.cd_schedule_of_amount_for_date,
+        amount,
+        nextPaymentDateFormatted.orEmpty()
+    )
+
+    ListItem(
+        onClick = onClick,
         modifier = modifier
             .mergedContentDescription(scheduleItemContentDescription),
+        leadingContent = {
+            ListItemLeadingContentContainer {
+                if (!nextPaymentDateFormatted.isNullOrEmpty()) {
+                    BodyMediumText(
+                        text = nextPaymentDateFormatted,
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_wallet_done),
+                        contentDescription = null
+                    )
+                }
+            }
+        },
+        trailingContent = {
+            AmountWithTypeIndicator(
+                value = amount,
+                type = type
+            )
+        },
+        supportingContent = lastPaymentTimestamp?.let { timestamp ->
+            {
+                Text(
+                    text = stringResource(
+                        R.string.last_payment_colon_value,
+                        timestamp.format(DateUtil.Formatters.localizedDateMedium)
+                    )
+                )
+            }
+        },
+        selected = selected,
         colors = colors,
-        tonalElevation = tonalElevation,
-        shadowElevation = shadowElevation
-    )
+        elevation = elevation,
+        onLongClick = onLongClick,
+        onLongClickLabel = onLongClickLabel,
+    ) {
+        val isNoteNullOrEmpty = remember(note) { note.isNullOrEmpty() }
+        Text(
+            text = note.orEmpty()
+                .ifEmpty { stringResource(R.string.generic_schedule_title) },
+            fontStyle = if (isNoteNullOrEmpty) FontStyle.Italic
+            else null,
+            color = LocalContentColor.current
+                .copy(
+                    alpha = if (isNoteNullOrEmpty) ContentAlpha.SUB_CONTENT
+                    else Float.One
+                )
+        )
+    }
 }
 
 @Composable
