@@ -152,6 +152,8 @@
 
     <!-- Action Labels -->
     <string name="action_confirm">Confirm</string>
+    <string name="action_done">Done</string>
+    <string name="action_save_changes">Save Changes</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_continue">Continue</string>
     <string name="action_not_now">Not Now</string>
@@ -537,4 +539,96 @@
         <item quantity="one">Transaction removed from this folder</item>
         <item quantity="other">Transactions removed from this folder</item>
     </plurals>
+
+    <!-- Money Piles -->
+    <string name="destination_all_piles">All Piles</string>
+    <string name="destination_new_pile">New Pile</string>
+    <string name="destination_edit_pile">Edit Pile</string>
+
+    <string name="cd_new_pile">New Pile</string>
+    <string name="cd_edit_pile">Edit Pile</string>
+
+    <string name="error_invalid_pile_name">Please enter a valid name</string>
+
+    <string name="pile_list_subtitle">%1$s set aside across %2$d piles</string>
+    <string name="piles_list_empty_message">You don\'t have any Money Piles yet</string>
+    <string name="pile_locked">Locked</string>
+    <string name="pile_goal_reached">Goal reached</string>
+    <string name="pile_no_goal_label">No goal</string>
+    <string name="pile_target_label">of %1$s</string>
+    <string name="pile_remaining_label">%1$s to go</string>
+    <string name="pile_saving_freely_label">Saving freely, no goal</string>
+
+    <string name="pile_progress_label">Progress</string>
+    <string name="pile_projected_completion_label">On track for</string>
+    <string name="pile_projection_no_goal">No goal</string>
+    <string name="pile_projection_reached">Reached</string>
+    <string name="pile_projection_set_pace">Set pace</string>
+
+    <string name="pile_activity_label">Activity</string>
+    <string name="pile_action_add">Add to pile</string>
+    <string name="pile_action_withdraw">Withdraw</string>
+    <string name="pile_action_create">Create pile</string>
+
+    <string name="pile_history_entry_type_starter">Starter amount</string>
+    <string name="pile_history_entry_type_auto_contribution">Auto contribution</string>
+    <string name="pile_history_entry_type_deposit">Added to pile</string>
+    <string name="pile_history_entry_type_withdrawal">Withdrawal</string>
+
+    <string name="pile_contribution_mode_label">When I add money</string>
+    <string name="pile_contribution_mode_track_only">Track only</string>
+    <string name="pile_contribution_mode_track_only_help">Just tracks what you\'ve set aside. Your spendable balance stays the same.</string>
+    <string name="pile_contribution_mode_from_balance">From balance</string>
+    <string name="pile_contribution_mode_from_balance_help">Adding money moves it out of your spendable balance — like a real transfer into savings.</string>
+
+    <string name="pile_reminder_label">Reminder</string>
+    <string name="pile_reminder_cadence_no_repeat">No repeat</string>
+    <string name="pile_reminder_cadence_weekly">Weekly</string>
+    <string name="pile_reminder_cadence_monthly">Monthly</string>
+    <string name="pile_reminder_cadence_bi_monthly">Bi-monthly</string>
+    <string name="pile_reminder_cadence_yearly">Yearly</string>
+    <string name="pile_reminder_behavior_remind">Just remind</string>
+    <string name="pile_reminder_behavior_suggest">Suggest</string>
+    <string name="pile_reminder_behavior_auto_add">Auto-add</string>
+    <string name="pile_reminder_amount_auto_label">Each time</string>
+    <string name="pile_reminder_amount_suggest_label">Suggest</string>
+    <string name="pile_reminder_none">No reminder set</string>
+    <string name="pile_reminder_remind">Reminder · %1$s</string>
+    <string name="pile_reminder_suggest">Suggests %1$s %2$s</string>
+    <string name="pile_reminder_auto_add">Auto-adds %1$s %2$s</string>
+
+    <string name="pile_name">Name</string>
+    <string name="pile_name_placeholder">e.g. Japan trip</string>
+    <string name="pile_note_optional">Note (optional)</string>
+    <string name="pile_note_placeholder">What is this pile for?</string>
+    <string name="pile_starter_amount_optional">Starter (optional)</string>
+    <string name="pile_target_amount_optional">Target (optional)</string>
+    <string name="pile_lock_label">Make it non-breakable</string>
+    <string name="pile_lock_help">Hide withdraw until you hit the goal</string>
+
+    <string name="select_pile_icon">Select Icon</string>
+    <string name="search_pile_icon">Search icon</string>
+    <string name="pile_icon_selection_label">Icon</string>
+    <string name="pile_color_selection_label">Colour</string>
+    <string name="pile_icon_label_baby_family">Baby &amp; Family</string>
+    <string name="pile_icon_label_business_startup">Business &amp; Startup</string>
+    <string name="pile_icon_label_debt_payoff">Debt Payoff</string>
+    <string name="pile_icon_label_down_payment">Down Payment</string>
+    <string name="pile_icon_label_education">Education</string>
+    <string name="pile_icon_label_electronics">Electronics</string>
+    <string name="pile_icon_label_emergency_fund">Emergency Fund</string>
+    <string name="pile_icon_label_financial_independence">Financial Independence</string>
+    <string name="pile_icon_label_gift">Gift</string>
+    <string name="pile_icon_label_health">Health</string>
+    <string name="pile_icon_label_home">Home</string>
+    <string name="pile_icon_label_home_renovation">Home Renovation</string>
+    <string name="pile_icon_label_investment">Investment</string>
+    <string name="pile_icon_label_land_property">Land &amp; Property</string>
+    <string name="pile_icon_label_legacy_inheritance">Legacy &amp; Inheritance</string>
+    <string name="pile_icon_label_purchase">Purchase</string>
+    <string name="pile_icon_label_retirement">Retirement</string>
+    <string name="pile_icon_label_savings">Savings</string>
+    <string name="pile_icon_label_travel">Travel</string>
+    <string name="pile_icon_label_vehicle">Vehicle</string>
+    <string name="pile_icon_label_wedding">Wedding</string>
 </resources>

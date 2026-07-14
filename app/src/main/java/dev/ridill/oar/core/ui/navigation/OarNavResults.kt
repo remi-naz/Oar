@@ -40,3 +40,8 @@ data class TransformationResult(
     val transformation: AmountTransformation,
     val factor: String
 ) : Parcelable
+
+// Money Pile nav results
+@Parcelize data class PileSavedResult(val id: Long) : Parcelable
+@Parcelize data object PileDepositedResult : Parcelable
+@Parcelize data class PileIconSelectedResult(val code: String?) : Parcelable

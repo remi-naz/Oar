@@ -12,6 +12,8 @@ import dev.ridill.oar.budgetCycles.data.local.entity.BudgetCycleEntity
 import dev.ridill.oar.budgetCycles.data.local.view.BudgetCycleDetailsView
 import dev.ridill.oar.folders.data.local.FolderDao
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
+import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
+import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileEntity
 import dev.ridill.oar.schedules.data.local.SchedulesDao
 import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
 import dev.ridill.oar.settings.data.local.ConfigDao
@@ -35,17 +37,19 @@ import java.time.ZoneId
         FolderEntity::class,
         ScheduleEntity::class,
         CurrencyListEntity::class,
+        MoneyPileEntity::class
     ],
     views = [
         BudgetCycleDetailsView::class,
         TransactionDetailsView::class,
     ],
-    version = 7,
+    version = 8,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 7, to = 8),
     ]
 )
 @TypeConverters(DateTimeConverter::class)
@@ -66,6 +70,7 @@ abstract class OarDatabase : RoomDatabase() {
     abstract fun schedulesDao(): SchedulesDao
     abstract fun currencyListDao(): CurrencyListDao
     abstract fun configDao(): ConfigDao
+    abstract fun moneyPileDao(): MoneyPileDao
 }
 
 val MIGRATION_5_6 = object : Migration(5, 6) {

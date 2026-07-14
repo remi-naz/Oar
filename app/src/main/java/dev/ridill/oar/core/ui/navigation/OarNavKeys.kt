@@ -1,6 +1,7 @@
 package dev.ridill.oar.core.ui.navigation
 
 import androidx.navigation3.runtime.NavKey
+import dev.ridill.oar.moneyPiles.domain.model.PileDepositDirection
 import kotlinx.serialization.Serializable
 
 const val INVALID_ID_LONG = -1L
@@ -89,3 +90,22 @@ data class CurrencySelectionSheetRoute(val preSelectedCurrCode: String? = null) 
 
 @Serializable
 data class CycleSelectionSheetRoute(val preselectedId: Long = INVALID_ID_LONG) : NavKey
+
+// --- Money Piles ---
+@Serializable
+data object AllPilesRoute : NavKey
+
+@Serializable
+data class PileDetailsRoute(val pileId: Long) : NavKey
+
+@Serializable
+data class AddEditPileRoute(val pileId: Long = INVALID_ID_LONG) : NavKey
+
+@Serializable
+data class AddToPileSheetRoute(
+    val pileId: Long,
+    val direction: PileDepositDirection
+) : NavKey
+
+@Serializable
+data class PileIconSelectionSheetRoute(val preselectedCode: String? = null) : NavKey
