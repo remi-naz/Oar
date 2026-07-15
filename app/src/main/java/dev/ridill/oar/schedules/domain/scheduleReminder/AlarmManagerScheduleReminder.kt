@@ -19,39 +19,32 @@ class AlarmManagerScheduleReminder(
     override fun setReminder(schedule: Schedule) {
         val timeMillis = schedule.nextPaymentTimestamp
             ?.let { DateUtil.toMillis(it) } ?: return
-        val intent = Intent(context, ScheduledPaymentReminderReceiver::class.java).apply {
-            action = ScheduleReminder.ACTION
-            putExtra(ScheduleReminder.EXTRA_SCHEDULE_ID, schedule.id)
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            schedule.id.hashCode(),
-            intent,
-            UtilConstants.pendingIntentFlags
-        )
-
         alarmManager.setAndAllowWhileIdle(
             AlarmManager.RTC,
             timeMillis,
-            pendingIntent
+            buildPendingIntent(schedule.id)
         )
-
-        cancel(schedule.id)
-        receiverService.toggleBootAndTimeSetReceivers(true)
+        receiverService.toggleBootAndTimeReceivers(true)
 
         logI(ScheduleReminder::class.simpleName) { "Set reminder for schedule ID ${schedule.id} on ${schedule.nextPaymentTimestamp}" }
     }
 
     override fun cancel(id: Long) {
-        alarmManager.cancel(
-            PendingIntent.getBroadcast(
-                context,
-                id.hashCode(),
-                Intent(context, ScheduledPaymentReminderReceiver::class.java),
-                UtilConstants.pendingIntentFlags
-            )
-        )
+        alarmManager.cancel(buildPendingIntent(id))
 
         logI(ScheduleReminder::class.simpleName) { "Schedule ID $id reminder cancelled" }
+    }
+
+    private fun buildPendingIntent(id: Long): PendingIntent {
+        val intent = Intent(context, ScheduledPaymentReminderReceiver::class.java).apply {
+            action = ScheduleReminder.ACTION
+            putExtra(ScheduleReminder.EXTRA_SCHEDULE_ID, id)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            id.hashCode(),
+            intent,
+            UtilConstants.pendingIntentFlags
+        )
     }
 }
