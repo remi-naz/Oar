@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import dev.ridill.oar.schedules.domain.scheduleReminder.MarkScheduleAsPaidActionReceiver
 import dev.ridill.oar.application.BootReceiver
-import dev.ridill.oar.application.TimeSetReceiver
+import dev.ridill.oar.application.TimeOrTimezoneChangeReceiver
 import dev.ridill.oar.settings.domain.notification.LockAppImmediateReceiver
 import dev.ridill.oar.transactions.domain.autoDetection.TransactionSmsReceiver
 import dev.ridill.oar.transactions.domain.notification.DeleteTransactionActionReceiver
@@ -24,9 +24,9 @@ class ReceiverService(
         toggleReceiver(MarkScheduleAsPaidActionReceiver::class.java, enable)
     }
 
-    fun toggleBootAndTimeSetReceivers(enable: Boolean) {
+    fun toggleBootAndTimeReceivers(enable: Boolean) {
         toggleReceiver(BootReceiver::class.java, enable)
-        toggleReceiver(TimeSetReceiver::class.java, enable)
+        toggleReceiver(TimeOrTimezoneChangeReceiver::class.java, enable)
     }
 
     private fun toggleReceiver(receiverClass: Class<*>, enable: Boolean) {
