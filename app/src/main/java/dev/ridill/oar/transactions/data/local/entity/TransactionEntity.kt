@@ -39,11 +39,10 @@ import java.time.LocalDateTime
         )
     ],
     indices = [
-        Index("cycle_id"),
+        Index("cycle_id", "timestamp"),
         Index("tag_id"),
         Index("folder_id"),
-        Index("schedule_id"),
-        Index("timestamp")
+        Index("schedule_id")
     ]
 )
 data class TransactionEntity(

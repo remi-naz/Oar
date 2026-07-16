@@ -1,8 +1,9 @@
 package dev.ridill.oar.schedules.data.local
 
-import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import dev.ridill.oar.core.data.db.BaseDao
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
@@ -13,21 +14,8 @@ import java.time.LocalDateTime
 @Dao
 interface SchedulesDao : BaseDao<ScheduleEntity> {
 
-    @Query(
-        """
-        SELECT *
-        FROM schedules_table
-        ORDER BY CASE
-            WHEN strftime('${UtilConstants.DB_MONTH_AND_YEAR_FORMAT}', next_payment_timestamp) = strftime('${UtilConstants.DB_MONTH_AND_YEAR_FORMAT}', :dateNow) THEN 0
-            WHEN strftime('${UtilConstants.DB_MONTH_AND_YEAR_FORMAT}', next_payment_timestamp) < strftime('${UtilConstants.DB_MONTH_AND_YEAR_FORMAT}', :dateNow) THEN 1
-            WHEN next_payment_timestamp IS NULL THEN 3
-            ELSE 2
-            END ASC
-    """
-    )
-    fun getSchedulesPaged(
-        dateNow: LocalDate
-    ): PagingSource<Int, ScheduleEntity>
+    @RawQuery
+    suspend fun getSchedulesPagedRaw(query: RoomRawQuery): List<ScheduleEntity>
 
     @Query("SELECT * FROM schedules_table WHERE id = :id")
     suspend fun getScheduleById(id: Long): ScheduleEntity?

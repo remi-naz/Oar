@@ -1,8 +1,9 @@
 package dev.ridill.oar.folders.data.local
 
-import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import dev.ridill.oar.core.data.db.BaseDao
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
@@ -10,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FolderDao : BaseDao<FolderEntity> {
-    @Query("SELECT * FROM folder_table WHERE name LIKE '%' || :query || '%' ORDER BY name ASC, DATETIME(created_timestamp) DESC")
-    fun getFoldersPaged(query: String): PagingSource<Int, FolderEntity>
+    @RawQuery
+    suspend fun getFoldersPagedRaw(query: RoomRawQuery): List<FolderEntity>
 
     @Query("SELECT * FROM folder_table WHERE id = :id")
     suspend fun getFolderById(id: Long): FolderEntity?

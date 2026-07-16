@@ -3,6 +3,8 @@ package dev.ridill.oar.tags.data.local
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import dev.ridill.oar.core.data.db.BaseDao
 import dev.ridill.oar.tags.data.local.entity.TagEntity
@@ -12,34 +14,8 @@ import java.time.LocalDate
 
 @Dao
 interface TagsDao : BaseDao<TagEntity> {
-    @Query(
-        """
-        SELECT *
-        FROM tag_table
-        WHERE (name LIKE '%' || :query || '%')
-        ORDER BY DATETIME(created_timestamp) DESC, name ASC
-        LIMIT :limit
-    """
-    )
-    fun getAllTagsPaged(
-        query: String,
-        limit: Int
-    ): PagingSource<Int, TagEntity>
-
-    @Query(
-        """
-        SELECT *
-        FROM tag_table
-        WHERE (LENGTH(:query) > 0) AND (name LIKE '%' || :query || '%') AND (id NOT IN (:idIgnoreSet))
-        ORDER BY DATETIME(created_timestamp) DESC, name ASC
-        LIMIT :limit
-    """
-    )
-    fun searchTagsForSelection(
-        query: String,
-        idIgnoreSet: Set<Long>,
-        limit: Int
-    ): PagingSource<Int, TagEntity>
+    @RawQuery
+    suspend fun getTagsPagedRaw(query: RoomRawQuery): List<TagEntity>
 
     @Transaction
     @Query(

@@ -5,9 +5,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.UtilConstants
+import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.transactions.data.local.TransactionDao
+import dev.ridill.oar.transactions.data.local.TransactionPagingSource
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import dev.ridill.oar.transactions.data.local.views.TransactionDetailsView
 import dev.ridill.oar.transactions.data.toTransaction
@@ -15,8 +19,8 @@ import dev.ridill.oar.transactions.data.toTransactionListItem
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.model.TransactionEntry
 import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
@@ -25,7 +29,9 @@ import java.time.LocalDateTime
 import java.util.Currency
 
 class TransactionRepositoryImpl(
-    private val dao: TransactionDao
+    private val dao: TransactionDao,
+    private val db: OarDatabase,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ) : TransactionRepository {
     override fun getAllTransactionsPaged(
         query: String?,
@@ -38,7 +44,10 @@ class TransactionRepositoryImpl(
     ): Flow<PagingData<TransactionEntry>> = Pager(
         config = PagingConfig(pageSize = UtilConstants.DEFAULT_PAGE_SIZE),
         pagingSourceFactory = {
-            dao.getTransactionsPaged(
+            TransactionPagingSource(
+                dao = dao,
+                db = db,
+                applicationScope = applicationScope,
                 query = query,
                 cycleIds = cycleIds?.takeIf { it.isNotEmpty() },
                 type = type,

@@ -4,7 +4,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.UtilConstants
+import dev.ridill.oar.di.ApplicationScope
+import dev.ridill.oar.tags.data.local.TagPagingSource
 import dev.ridill.oar.tags.data.local.TagsDao
 import dev.ridill.oar.tags.data.local.entity.TagEntity
 import dev.ridill.oar.tags.data.toTag
@@ -13,6 +16,7 @@ import dev.ridill.oar.tags.domain.model.Tag
 import dev.ridill.oar.tags.domain.model.TagInfo
 import dev.ridill.oar.tags.domain.repository.TagsRepository
 import dev.ridill.oar.transactions.data.local.relation.TagAndAggregateRelation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
@@ -21,7 +25,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class TagsRepositoryImpl(
-    private val dao: TagsDao
+    private val dao: TagsDao,
+    private val db: OarDatabase,
+    @ApplicationScope private val applicationScope: CoroutineScope,
 ) : TagsRepository {
     override fun getAllTagsPagingData(
         searchQuery: String,
@@ -29,8 +35,13 @@ class TagsRepositoryImpl(
     ): Flow<PagingData<Tag>> = Pager(
         config = PagingConfig(UtilConstants.DEFAULT_PAGE_SIZE),
         pagingSourceFactory = {
-            dao.getAllTagsPaged(
+            TagPagingSource(
+                dao = dao,
+                db = db,
+                applicationScope = applicationScope,
                 query = searchQuery,
+                requireNonBlankQuery = false,
+                idIgnoreSet = null,
                 limit = limit
             )
         }
@@ -59,9 +70,13 @@ class TagsRepositoryImpl(
     ): Flow<PagingData<Tag>> = Pager(
         config = PagingConfig(UtilConstants.DEFAULT_PAGE_SIZE),
         pagingSourceFactory = {
-            dao.searchTagsForSelection(
+            TagPagingSource(
+                dao = dao,
+                db = db,
+                applicationScope = applicationScope,
                 query = searchQuery,
-                idIgnoreSet = ignoreIds,
+                requireNonBlankQuery = true,
+                idIgnoreSet = ignoreIds.takeIf { it.isNotEmpty() },
                 limit = limit
             )
         }
