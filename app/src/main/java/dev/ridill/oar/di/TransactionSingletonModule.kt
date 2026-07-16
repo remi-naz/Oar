@@ -29,8 +29,12 @@ object TransactionSingletonModule {
     @Provides
     fun provideTransactionRepository(
         transactionDao: TransactionDao,
+        db: OarDatabase,
+        @ApplicationScope applicationScope: CoroutineScope,
     ): TransactionRepository = TransactionRepositoryImpl(
-        dao = transactionDao
+        dao = transactionDao,
+        db = db,
+        applicationScope = applicationScope
     )
 
     @Provides

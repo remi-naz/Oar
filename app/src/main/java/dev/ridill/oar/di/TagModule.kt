@@ -11,6 +11,7 @@ import dev.ridill.oar.tags.data.repository.TagsRepositoryImpl
 import dev.ridill.oar.tags.domain.repository.TagsRepository
 import dev.ridill.oar.tags.presentation.addEditTag.AddEditTagViewModel
 import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionViewModel
+import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -20,7 +21,15 @@ object TagModule {
     fun provideTagsDao(db: OarDatabase): TagsDao = db.tagsDao()
 
     @Provides
-    fun provideTagsRepository(dao: TagsDao): TagsRepository = TagsRepositoryImpl(dao)
+    fun provideTagsRepository(
+        dao: TagsDao,
+        db: OarDatabase,
+        @ApplicationScope applicationScope: CoroutineScope
+    ): TagsRepository = TagsRepositoryImpl(
+        dao = dao,
+        db = db,
+        applicationScope = applicationScope
+    )
 
     @Provides
     fun provideAddEditTagEventBus(): EventBus<AddEditTagViewModel.AddEditTagEvent> = EventBus()

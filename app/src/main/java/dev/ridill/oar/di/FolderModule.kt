@@ -18,6 +18,7 @@ import dev.ridill.oar.folders.presentation.addEditFolder.AddEditFolderViewModel
 import dev.ridill.oar.folders.presentation.folderDetails.FolderDetailsViewModel
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
+import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -28,9 +29,13 @@ object FolderModule {
 
     @Provides
     fun provideFolderListsRepository(
-        folderDao: FolderDao
+        folderDao: FolderDao,
+        db: OarDatabase,
+        @ApplicationScope applicationScope: CoroutineScope
     ): FolderListRepository = FolderListRepositoryImpl(
-        folderDao = folderDao
+        folderDao = folderDao,
+        db = db,
+        applicationScope = applicationScope
     )
 
     @Provides

@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import dev.ridill.oar.R
+import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.animPreferences.AnimPreferencesManager
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.DateUtil
@@ -13,11 +14,14 @@ import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.isSameMonthAs
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.core.ui.util.UiText
+import dev.ridill.oar.di.ApplicationScope
+import dev.ridill.oar.schedules.data.local.SchedulePagingSource
 import dev.ridill.oar.schedules.data.local.SchedulesDao
 import dev.ridill.oar.schedules.domain.model.ScheduleListItemUiModel
 import dev.ridill.oar.schedules.domain.repository.AllSchedulesRepository
 import dev.ridill.oar.schedules.domain.repository.ScheduleError
 import dev.ridill.oar.schedules.domain.repository.SchedulesRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +36,8 @@ class AllSchedulesRepositoryImpl(
     private val dao: SchedulesDao,
     private val repo: SchedulesRepository,
     private val animPreferencesManager: AnimPreferencesManager,
+    private val db: OarDatabase,
+    @ApplicationScope private val applicationScope: CoroutineScope,
 ) : AllSchedulesRepository {
     private val _currentDate = MutableStateFlow(DateUtil.dateNow())
     private val currentDate = _currentDate.asStateFlow()
@@ -44,7 +50,14 @@ class AllSchedulesRepositoryImpl(
         .flatMapLatest { dateNow ->
             Pager(
                 config = PagingConfig(UtilConstants.DEFAULT_PAGE_SIZE),
-                pagingSourceFactory = { dao.getSchedulesPaged(dateNow) }
+                pagingSourceFactory = {
+                    SchedulePagingSource(
+                        dao = dao,
+                        db = db,
+                        applicationScope = applicationScope,
+                        dateNow = dateNow
+                    )
+                }
             ).flow.mapLatest { pagingData ->
                 val currentMonthStartDateTime = dateNow
                     .withDayOfMonth(1)
