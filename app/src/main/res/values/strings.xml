@@ -153,7 +153,6 @@
     <!-- Action Labels -->
     <string name="action_confirm">Confirm</string>
     <string name="action_done">Done</string>
-    <string name="action_save_changes">Save Changes</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_continue">Continue</string>
     <string name="action_not_now">Not Now</string>
@@ -549,7 +548,7 @@
     <string name="cd_new_pile">New Pile</string>
     <string name="cd_edit_pile">Edit Pile</string>
 
-    <string name="error_invalid_pile_name">Please enter a valid name</string>
+    <string name="error_invalid_pile_name">Name cannot be empty</string>
 
     <string name="piles_list_empty_message">You don\'t have any Money Piles yet</string>
     <string name="piles_list_load_error_message">Something went wrong while loading your Piles</string>
@@ -569,7 +568,6 @@
     <string name="pile_activity_label">Activity</string>
     <string name="pile_action_add">Add to pile</string>
     <string name="pile_action_withdraw">Withdraw</string>
-    <string name="pile_action_create">Create pile</string>
 
     <string name="pile_history_entry_type_starter">Starter amount</string>
     <string name="pile_history_entry_type_auto_contribution">Auto contribution</string>
@@ -583,16 +581,14 @@
     <string name="pile_contribution_mode_from_balance_help">Adding money moves it out of your spendable balance — like a real transfer into savings.</string>
 
     <string name="pile_reminder_label">Reminder</string>
-    <string name="pile_reminder_cadence_no_repeat">No repeat</string>
+    <string name="pile_reminder_cadence_no_remind">Don\'t Remind</string>
     <string name="pile_reminder_cadence_weekly">Weekly</string>
     <string name="pile_reminder_cadence_monthly">Monthly</string>
     <string name="pile_reminder_cadence_bi_monthly">Bi-monthly</string>
     <string name="pile_reminder_cadence_yearly">Yearly</string>
     <string name="pile_reminder_behavior_remind">Just remind</string>
-    <string name="pile_reminder_behavior_suggest">Suggest</string>
     <string name="pile_reminder_behavior_auto_add">Auto-add</string>
     <string name="pile_reminder_amount_auto_label">Each time</string>
-    <string name="pile_reminder_amount_suggest_label">Suggest</string>
     <string name="pile_reminder_none">No reminder set</string>
     <string name="pile_reminder_remind">Reminder · %1$s</string>
     <string name="pile_reminder_suggest">Suggests %1$s %2$s</string>
@@ -607,7 +603,6 @@
     <string name="pile_lock_label">Make it non-breakable</string>
     <string name="pile_lock_help">Hide withdraw until you hit the goal</string>
 
-    <string name="select_pile_icon">Select Icon</string>
     <string name="search_pile_icon">Search icon</string>
     <string name="pile_icon_selection_label">Icon</string>
     <string name="pile_color_selection_label">Colour</string>
@@ -634,4 +629,7 @@
     <string name="pile_icon_label_wedding">Wedding</string>
     <string name="cd_tap_to_view_pile_details">Tap to view pile details</string>
     <string name="of_value">of %s</string>
+    <string name="delete_pile_confirmation_title">Delete Pile?</string>
+    <string name="pile_deleted">Pile Deleted</string>
+    <string name="pile_saved">Pile Saved</string>
 </resources>

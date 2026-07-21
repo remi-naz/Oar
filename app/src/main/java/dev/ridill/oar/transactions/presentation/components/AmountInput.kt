@@ -26,6 +26,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,6 +54,9 @@ import java.util.Currency
 fun AmountInput(
     inputState: TextFieldState,
     modifier: Modifier = Modifier,
+    label: String? = null,
+    placeholder: String? = stringResource(R.string.amount_zero),
+    prefix: @Composable (() -> Unit)? = null,
     currency: Currency = LocaleUtil.defaultCurrency,
     onCurrencySelect: (Currency) -> Unit = {},
     isInputAnExpression: Boolean = false,
@@ -62,6 +66,7 @@ fun AmountInput(
     onKeyboardAction: KeyboardActionHandler? = { focusManager.moveFocus(FocusDirection.Next) },
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
 ) {
+    if (LocalInspectionMode.current) return
     val showTransformButton by remember {
         derivedStateOf {
             inputState.text.toString()
@@ -89,15 +94,13 @@ fun AmountInput(
             textStyle = MaterialTheme.typography.headlineMedium.copy(
                 textAlign = TextAlign.Center
             ),
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.amount_zero),
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier
-                        .defaultMinSize(minWidth = InputMinWidth),
-                    textAlign = TextAlign.Center
-                )
+            label = label?.let {
+                { Text(it) }
             },
+            placeholder = placeholder?.let {
+                { Text(it) }
+            },
+            prefix = prefix,
             keyboardOptions = keyboardOptions.copy(
                 keyboardType = KeyboardType.Phone,
             ),

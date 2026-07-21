@@ -39,6 +39,9 @@ data class MoneyPileEntity(
     @ColumnInfo(name = "reminder_behavior")
     val reminderBehavior: PileReminderBehavior,
 
+    @ColumnInfo(name = "reminder_amount")
+    val reminderAmount: Double?,
+
     @ColumnInfo(name = "locked")
     val locked: Boolean,
 

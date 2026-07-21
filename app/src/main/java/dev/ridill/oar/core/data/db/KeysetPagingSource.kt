@@ -2,6 +2,7 @@ package dev.ridill.oar.core.data.db
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import dev.ridill.oar.core.domain.util.logE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -70,6 +71,7 @@ abstract class KeysetPagingSource<Key : Any, Value : Any>(
             nextKey = rows.lastOrNull()?.let(::keyOf)?.takeIf { rows.size == loadSize }
         )
     } catch (e: Exception) {
+        logE(e, KeysetPagingSource::class.simpleName) { "load()" }
         LoadResult.Error(e)
     }
 

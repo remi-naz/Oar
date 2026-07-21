@@ -1,6 +1,7 @@
 package dev.ridill.oar.moneyPiles.data.local
 
 import androidx.room.Dao
+import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.RoomRawQuery
 import dev.ridill.oar.core.data.db.BaseDao
@@ -15,4 +16,10 @@ interface MoneyPileDao : BaseDao<MoneyPileEntity> {
 
     @RawQuery
     suspend fun getTransactionsInPilePagedRaw(query: RoomRawQuery): List<MoneyPileTransactionsEntity>
+
+    @Query("SELECT * FROM money_pile_table WHERE id = :id")
+    suspend fun getPileById(id: Long): MoneyPileEntity?
+
+    @Query("DELETE FROM money_pile_table WHERE id = :id")
+    suspend fun deletePileById(id: Long)
 }

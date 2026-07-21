@@ -16,19 +16,36 @@ enum class AddEditScheduleResult {
 }
 
 // Folder nav results
-@Parcelize data class FolderSelectedResult(val id: Long) : Parcelable
-@Parcelize data class FolderSavedResult(val id: Long) : Parcelable
-@Parcelize data object FolderDeletedResult : Parcelable
+@Parcelize
+data class FolderSelectedResult(val id: Long) : Parcelable
+
+@Parcelize
+data class FolderSavedResult(val id: Long) : Parcelable
+
+@Parcelize
+data object FolderDeletedResult : Parcelable
 
 // Cycle selection result
-@Parcelize data class CycleSelectedResult(val id: Long?) : Parcelable
+@Parcelize
+data class CycleSelectedResult(val id: Long?) : Parcelable
 
 // Tag nav results
-@Parcelize data class TagSelectedResult(val id: Long?) : Parcelable
-@Parcelize data class TagSavedResult(val id: Long) : Parcelable
+@Parcelize
+data class TagSelectedResult(val id: Long?) : Parcelable
+
+@Parcelize
+data class TagSavedResult(val id: Long) : Parcelable
 
 // Budget update result
-@Parcelize data object BudgetUpdatedResult : Parcelable
+@Parcelize
+data object BudgetUpdatedResult : Parcelable
 
 // Backup encryption result
-@Parcelize data object EncryptionPasswordUpdatedResult : Parcelable
+@Parcelize
+data object EncryptionPasswordUpdatedResult : Parcelable
+
+// Money Pile nav results
+enum class AddEditPileResult {
+    PILE_DELETED,
+    PILE_SAVED,
+}

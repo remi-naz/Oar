@@ -2,7 +2,9 @@ package dev.ridill.oar.moneyPiles.data
 
 import androidx.compose.ui.graphics.Color
 import dev.ridill.oar.core.domain.util.LocaleUtil
+import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileEntity
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileAggregateView
+import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileWithSavedAmount
 
 fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount = MoneyPileWithSavedAmount(
@@ -15,4 +17,36 @@ fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount = MoneyPileWi
     savedAmount = aggregate,
     locked = locked,
     createdTimestamp = createdTimestamp
+)
+
+internal fun MoneyPileEntity.toMoneyPile(): MoneyPileDetails = MoneyPileDetails(
+    id = id,
+    name = name,
+    icon = icon,
+    colorCode = color,
+    contributionMode = contributionMode,
+    targetAmount = targetAmount,
+    locked = locked,
+    reminderCadence = reminderCadence,
+    reminderBehavior = reminderBehavior,
+    reminderAmount = reminderAmount,
+    createdTimestamp = createdTimestamp,
+    currency = LocaleUtil.currencyForCode(currencyCode),
+    targetDate = targetDate
+)
+
+internal fun MoneyPileDetails.toEntity(): MoneyPileEntity = MoneyPileEntity(
+    id = id,
+    name = name,
+    icon = icon,
+    color = colorCode,
+    contributionMode = contributionMode,
+    reminderCadence = reminderCadence,
+    reminderBehavior = reminderBehavior,
+    locked = locked,
+    currencyCode = currency.currencyCode,
+    targetAmount = targetAmount,
+    targetDate = targetDate,
+    createdTimestamp = createdTimestamp,
+    reminderAmount = reminderAmount,
 )

@@ -2,6 +2,8 @@ package dev.ridill.oar.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.ColorUtils
 
 val PrimaryBrandColor = Color(0xFF466644)
 val onPrimaryBrandColor = Color(0xFFE3F5BD)
@@ -349,3 +351,14 @@ fun Color.contentColor(
     onDark: Color = Color.White
 ): Color = if (luminance() >= 0.4f) onLight
 else onDark
+
+private const val ON_CONTAINER_LIGHTNESS_LIGHT = 0.20f
+private const val ON_CONTAINER_LIGHTNESS_DARK = 0.90f
+
+fun Color.adjustedContentColor(): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hsl)
+    hsl[2] = if (this.luminance() >= 0.4f) ON_CONTAINER_LIGHTNESS_LIGHT
+    else ON_CONTAINER_LIGHTNESS_DARK
+    return Color(ColorUtils.HSLToColor(hsl))
+}
