@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "c647fe1f8f9ff21f1b32b530b49cfafa",
+    "identityHash": "df329ccc1f3297193e5dc8770e270b31",
     "entities": [
       {
         "tableName": "budget_cycle_table",
@@ -588,7 +588,7 @@
       },
       {
         "viewName": "money_pile_aggregate_view",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        pile.id AS id,\n        pile.name AS name,\n        pile.icon AS icon,\n        pile.color AS color,\n        pile.contribution_mode AS contributionMode,\n        pile.reminder_cadence AS reminderCadence,\n        pile.reminder_behavior AS reminderBehavior,\n        pile.locked AS locked,\n        pile.currency_code AS currencyCode,\n        pile.target_amount AS targetAmount,\n        pile.target_date AS targetDate,\n        pile.created_timestamp AS createdTimestamp,\n        IFNULL(SUM(\n            CASE\n                WHEN tx.movement = 'OUT' THEN -tx.amount\n                WHEN tx.movement = 'IN' THEN tx.amount\n            END\n        ), 0) as aggregate\n        FROM money_pile_table pile\n        JOIN money_pile_transactions_table tx ON pile.id = tx.pile_id\n        GROUP BY pile.id"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        pile.id AS id,\n        pile.name AS name,\n        pile.icon AS icon,\n        pile.color AS color,\n        pile.contribution_mode AS contributionMode,\n        pile.reminder_cadence AS reminderCadence,\n        pile.reminder_behavior AS reminderBehavior,\n        pile.locked AS locked,\n        pile.currency_code AS currencyCode,\n        pile.target_amount AS targetAmount,\n        pile.target_date AS targetDate,\n        pile.created_timestamp AS createdTimestamp,\n        IFNULL(SUM(\n            CASE\n                WHEN tx.movement = 'OUT' THEN -tx.amount\n                WHEN tx.movement = 'IN' THEN tx.amount\n            END\n        ), 0) as aggregate\n        FROM money_pile_table pile\n        LEFT JOIN money_pile_transactions_table tx ON pile.id = tx.pile_id\n        GROUP BY pile.id"
       },
       {
         "viewName": "budget_cycle_details_view",
@@ -597,7 +597,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c647fe1f8f9ff21f1b32b530b49cfafa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df329ccc1f3297193e5dc8770e270b31')"
     ]
   }
 }

@@ -166,6 +166,7 @@
     <string name="action_next">Next</string>
     <string name="action_acknowledge">I understand</string>
     <string name="action_dismiss">Dismiss</string>
+    <string name="action_retry">Retry</string>
 
     <!-- Permission Rationales -->
     <string name="permission_notification">Notifications</string>
@@ -550,8 +551,8 @@
 
     <string name="error_invalid_pile_name">Please enter a valid name</string>
 
-    <string name="pile_list_subtitle">%1$s set aside across %2$d piles</string>
     <string name="piles_list_empty_message">You don\'t have any Money Piles yet</string>
+    <string name="piles_list_load_error_message">Something went wrong while loading your Piles</string>
     <string name="pile_locked">Locked</string>
     <string name="pile_goal_reached">Goal reached</string>
     <string name="pile_no_goal_label">No goal</string>
@@ -631,4 +632,6 @@
     <string name="pile_icon_label_travel">Travel</string>
     <string name="pile_icon_label_vehicle">Vehicle</string>
     <string name="pile_icon_label_wedding">Wedding</string>
+    <string name="cd_tap_to_view_pile_details">Tap to view pile details</string>
+    <string name="of_value">of %s</string>
 </resources>

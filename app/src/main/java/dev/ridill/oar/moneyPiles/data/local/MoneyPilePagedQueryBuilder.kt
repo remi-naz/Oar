@@ -20,7 +20,7 @@ object MoneyPilePagedQueryBuilder {
         val builder = KeysetPagedQuery("money_pile_aggregate_view", COLUMNS)
 
         if (query.isNotBlank()) {
-            builder.where("name LIKE '%' || ? || '%") { s, i -> s.bindText(i, query); i + 1 }
+            builder.where("name LIKE '%' || ? || '%'") { s, i -> s.bindText(i, query); i + 1 }
         }
 
         return builder.build(cursor, direction, limit)

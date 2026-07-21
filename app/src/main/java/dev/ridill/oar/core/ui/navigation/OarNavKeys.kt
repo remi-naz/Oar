@@ -85,3 +85,7 @@ data class CurrencySelectionSheetRoute(val preSelectedCurrCode: String? = null) 
 
 @Serializable
 data class CycleSelectionSheetRoute(val preselectedId: Long = INVALID_ID_LONG) : NavKey
+
+// --- Money Piles ---
+@Serializable
+data object AllPilesRoute : NavKey

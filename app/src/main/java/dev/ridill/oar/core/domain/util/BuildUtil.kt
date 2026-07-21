@@ -16,6 +16,9 @@ object BuildUtil {
     val isApiLevelAtLeast31: Boolean
         get() = Build.VERSION.SDK_INT >= 31
 
+    val isApiLevelAtLeastTiramisu: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
     fun isDynamicColorsSupported(): Boolean =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 

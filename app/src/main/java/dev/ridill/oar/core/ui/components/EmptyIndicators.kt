@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +27,9 @@ fun EmptyListIndicator(
     @RawRes rawResId: Int,
     modifier: Modifier = Modifier,
     @StringRes messageRes: Int? = null,
-    size: Dp = DefaultSize
+    size: Dp = DefaultSize,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier,
@@ -46,6 +49,14 @@ fun EmptyListIndicator(
                     .copy(alpha = ContentAlpha.SUB_CONTENT)
             )
         }
+
+        if (actionLabel.isNullOrEmpty().not() && onActionClick != null) {
+            TextButton(
+                onClick = onActionClick
+            ) {
+                Text(actionLabel)
+            }
+        }
     }
 }
 
@@ -59,7 +70,9 @@ fun LazyListScope.listEmptyIndicator(
     @RawRes animResId: Int = R.raw.lottie_empty_list_ghost,
     @StringRes messageRes: Int? = null,
     heightFraction: Float = LIST_EMPTY_INDICATOR_CONTAINER_HEIGHT_FRACTION,
-    size: Dp = DefaultSize
+    size: Dp = DefaultSize,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null
 ) {
     if (isListEmpty) {
         item(
@@ -71,7 +84,9 @@ fun LazyListScope.listEmptyIndicator(
                 animResId = animResId,
                 messageRes = messageRes,
                 heightFraction = heightFraction,
-                size = size
+                size = size,
+                actionLabel = actionLabel,
+                onActionClick = onActionClick
             )
         }
     }
@@ -86,7 +101,9 @@ fun LazyItemScope.ListEmptyIndicatorItem(
     @RawRes animResId: Int = R.raw.lottie_empty_list_ghost,
     @StringRes messageRes: Int? = null,
     heightFraction: Float = LIST_EMPTY_INDICATOR_CONTAINER_HEIGHT_FRACTION,
-    size: Dp = DefaultSize
+    size: Dp = DefaultSize,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
@@ -99,7 +116,9 @@ fun LazyItemScope.ListEmptyIndicatorItem(
         EmptyListIndicator(
             rawResId = animResId,
             messageRes = messageRes,
-            size = size
+            size = size,
+            actionLabel = actionLabel,
+            onActionClick = onActionClick
         )
     }
 }

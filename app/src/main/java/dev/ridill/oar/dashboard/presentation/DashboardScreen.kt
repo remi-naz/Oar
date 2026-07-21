@@ -88,6 +88,7 @@ import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.components.scrollableLayout.ScrollableHeaderLayout
 import dev.ridill.oar.core.ui.components.scrollableLayout.ScrollableLayoutDefaults
 import dev.ridill.oar.core.ui.navigation.AllFoldersRoute
+import dev.ridill.oar.core.ui.navigation.AllPilesRoute
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.SettingsRoute
 import dev.ridill.oar.core.ui.theme.ContentAlpha
@@ -245,6 +246,11 @@ private fun FeatureMenu(
 ) {
     val bottomNavItems = remember {
         listOf(
+            Triple(
+                AllPilesRoute,
+                R.drawable.ic_outlined_money_pile,
+                R.string.destination_all_piles
+            ),
             Triple(
                 AllSchedulesRoute,
                 R.drawable.ic_outlined_calendar_days,
