@@ -5,35 +5,45 @@ import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.ridill.oar.core.domain.util.LocaleUtil
-import dev.ridill.oar.core.domain.util.logD
+import dev.ridill.oar.core.ui.util.TextFormat
 import java.util.Locale
 
 class AmountOutputTransformation(
     private val locale: Locale = LocaleUtil.defaultLocale
 ) : OutputTransformation {
     override fun TextFieldBuffer.transformOutput() {
-        val text = this.originalText
-        logD("AmountOutputTransformation") { "text = $text" }
-        val containsInvalidChars = text.any { !it.isDigit() }
+        val text = originalText
+        val containsNonDigitChars = text.any { !it.isDigit() }
+        if (containsNonDigitChars) return
 
-        /*val formatted = if (containsInvalidChars) text
-        else text.toString().toDoubleOrNull()?.let {
-            TextFormat.number(value = it, locale = locale)
-        }.orEmpty()
-            .let { formatted ->
-                val prefixZeroCount = text.takeWhile { it == '0' }.count()
-                val padCount = formatted.length + prefixZeroCount
-                    .takeIf { formatted != "0" }
-                    .orZero()
-                // Formatted amount padded with prefix 0s
-                // to prevent app crash due to failed offset mapping
-                // as prefix 0s are removed in formatted string
+        val formatted = text.toString().toDoubleOrNull()
+            ?.let { TextFormat.number(value = it, locale = locale) }
+            ?: return
 
-                formatted.padStart(padCount, '0')
-            }*/
+        // Insert only the grouping separators rather than replacing the whole
+        // buffer, so each digit keeps its original offset mapping. Replacing
+        // the entire range collapses that mapping into a single segment,
+        // which makes the cursor position (and backspace) resolve incorrectly
+        // and can end up deleting the whole string instead of one digit.
+        val insertions = mutableListOf<Pair<Int, Char>>()
+        var digitIndex = 0
+        formatted.forEach { ch ->
+            if (digitIndex < text.length && ch == text[digitIndex]) {
+                digitIndex++
+            } else {
+                insertions += digitIndex to ch
+            }
+        }
+        if (digitIndex != text.length) return
+        insertions.asReversed().forEach { (index, separator) ->
+            replace(index, index, separator.toString())
+        }
     }
 }
 
 @Composable
-fun rememberAmountOutputTransformation(): AmountOutputTransformation =
-    remember { AmountOutputTransformation() }
+fun rememberAmountOutputTransformation(
+    locale: Locale = LocaleUtil.defaultLocale
+): AmountOutputTransformation = remember(locale) {
+    AmountOutputTransformation(locale = locale)
+}
