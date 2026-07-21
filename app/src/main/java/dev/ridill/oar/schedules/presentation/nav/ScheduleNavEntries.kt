@@ -30,21 +30,17 @@ import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
-import dev.ridill.oar.core.ui.navigation.AmountTransformationSheetRoute
-import dev.ridill.oar.core.ui.navigation.CurrencySelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.FolderSelectedResult
 import dev.ridill.oar.core.ui.navigation.FolderSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
-import dev.ridill.oar.core.ui.navigation.TransformationResult
 import dev.ridill.oar.core.ui.util.launchAppNotificationSettings
 import dev.ridill.oar.schedules.presentation.addEditSchedule.AddEditScheduleScreen
 import dev.ridill.oar.schedules.presentation.addEditSchedule.AddEditScheduleViewModel
 import dev.ridill.oar.schedules.presentation.allSchedules.AllSchedulesScreen
 import dev.ridill.oar.schedules.presentation.allSchedules.AllSchedulesViewModel
-import java.util.Currency
 
 // region Schedules
 
@@ -157,12 +153,6 @@ fun EntryProviderScope<NavKey>.scheduleEntries(
         ResultEffect<FolderSelectedResult> { result ->
             viewModel.onFolderSelectionResult(result.id)
         }
-        ResultEffect<TransformationResult> { result ->
-            viewModel.onAmountTransformationResult(result)
-        }
-        ResultEffect<Currency> { currency ->
-            viewModel.onCurrencySelect(currency)
-        }
 
         CollectFlowEffect(viewModel.events, snackbarController, context) { event ->
             when (event) {
@@ -195,11 +185,7 @@ fun EntryProviderScope<NavKey>.scheduleEntries(
             noteInputState = noteInputState,
             state = state,
             actions = viewModel,
-            navigateUp = navigator::goBack,
-            navigateToAmountTransformation = { navigator.navigate(AmountTransformationSheetRoute) },
-            navigateToCurrencySelection = {
-                navigator.navigate(CurrencySelectionSheetRoute(preSelectedCurrCode = state.currency.currencyCode))
-            }
+            navigateUp = navigator::goBack
         )
     }
 }

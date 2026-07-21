@@ -1,8 +1,10 @@
 package dev.ridill.oar.transactions.presentation.addEditTransaction
 
 import dev.ridill.oar.core.domain.model.FundMovement
+import java.util.Currency
 
 interface AddEditTransactionActions {
+    fun onCurrencySelect(currency: Currency)
     fun onAmountFocusLost()
     fun onEvaluateExpressionClick()
     fun onRecommendedAmountClick(amount: Long)

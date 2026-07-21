@@ -14,27 +14,24 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.asStateFlow
-import dev.ridill.oar.core.domain.util.ifInfinite
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.core.domain.util.textAsFlow
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
-import dev.ridill.oar.core.ui.navigation.TransformationResult
 import dev.ridill.oar.core.ui.navigation.toSchedule
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.schedules.domain.model.Schedule
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.schedules.domain.repository.AddEditScheduleRepository
-import dev.ridill.oar.transactions.domain.model.AmountTransformation
-import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -221,7 +218,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
         }
     }
 
-    fun onCurrencySelect(currency: Currency) {
+    override fun onCurrencySelect(currency: Currency) {
         savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(currency = currency)
     }
 
@@ -246,7 +243,7 @@ class AddEditScheduleViewModel @AssistedInject constructor(
         val isExpression = evalService.isExpression(amountInput)
         val result = if (isExpression) evalService.evalOrNull(amountInput)
         else TextFormat.parseNumber(amountInput)
-        amountInputState.setTextAndPlaceCursorAtEnd(result.orZero().toString())
+        amountInputState.setTextAndPlaceCursorAtEnd(TextFormat.number(result.orZero()))
     }
 
     override fun onRecommendedAmountClick(amount: Long) {
@@ -308,26 +305,6 @@ class AddEditScheduleViewModel @AssistedInject constructor(
     override fun onTypeChange(type: FundMovement) {
         savedStateHandle[SCHEDULE_INPUT] = scheduleInput.value?.copy(
             type = type
-        )
-    }
-
-    fun onAmountTransformationResult(result: TransformationResult) {
-        val amount = amountInputState.text.toString()
-            .toDoubleOrNull() ?: return
-        val transformedAmount = when (result.transformation) {
-            AmountTransformation.DIVIDE_BY -> amount / result.factor.toDoubleOrNull()
-                .orZero()
-
-            AmountTransformation.MULTIPLIER -> amount * result.factor.toDoubleOrNull()
-                .orZero()
-
-            AmountTransformation.PERCENT -> amount * (result.factor.toFloatOrNull()
-                .orZero() / 100f)
-        }
-        amountInputState.setTextAndPlaceCursorAtEnd(
-            text = transformedAmount
-                .ifInfinite { Double.Zero }
-                .toString()
         )
     }
 

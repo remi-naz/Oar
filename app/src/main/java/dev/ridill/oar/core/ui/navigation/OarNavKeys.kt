@@ -24,10 +24,6 @@ data class AddEditTransactionRoute(
 @Serializable
 data object AllTransactionsRoute : NavKey
 
-// --- Amount transformation (sheet launched from AddEditTransaction) ---
-@Serializable
-data object AmountTransformationSheetRoute : NavKey
-
 // --- Folders ---
 @Serializable
 data object AllFoldersRoute : NavKey
