@@ -1,7 +1,6 @@
 package dev.ridill.oar.core.ui.navigation
 
 import android.os.Parcelable
-import dev.ridill.oar.transactions.domain.model.AmountTransformation
 import kotlinx.parcelize.Parcelize
 
 // Transaction add/edit nav result
@@ -33,10 +32,3 @@ enum class AddEditScheduleResult {
 
 // Backup encryption result
 @Parcelize data object EncryptionPasswordUpdatedResult : Parcelable
-
-// Amount transformation result (moved from AmountTransformationSheetSpec)
-@Parcelize
-data class TransformationResult(
-    val transformation: AmountTransformation,
-    val factor: String
-) : Parcelable

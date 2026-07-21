@@ -2,8 +2,10 @@ package dev.ridill.oar.schedules.presentation.addEditSchedule
 
 import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import dev.ridill.oar.core.domain.model.FundMovement
+import java.util.Currency
 
 interface AddEditScheduleActions {
+    fun onCurrencySelect(currency: Currency)
     fun refreshCurrentDateTime()
     fun onAmountFocusLost()
     fun onEvaluateExpressionClick()

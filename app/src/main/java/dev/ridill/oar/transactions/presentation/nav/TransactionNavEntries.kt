@@ -32,9 +32,6 @@ import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.AllTransactionsRoute
-import dev.ridill.oar.core.ui.navigation.AmountTransformationSheetRoute
-import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
-import dev.ridill.oar.core.ui.navigation.CurrencySelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.CycleSelectedResult
 import dev.ridill.oar.core.ui.navigation.CycleSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.FolderSelectedResult
@@ -45,14 +42,10 @@ import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.core.ui.navigation.TagSelectedResult
 import dev.ridill.oar.core.ui.navigation.TagSelectionSheetRoute
-import dev.ridill.oar.core.ui.navigation.TransformationResult
 import dev.ridill.oar.transactions.presentation.addEditTransaction.AddEditTransactionScreen
 import dev.ridill.oar.transactions.presentation.addEditTransaction.AddEditTransactionViewModel
 import dev.ridill.oar.transactions.presentation.allTransactions.AllTransactionsScreen
 import dev.ridill.oar.transactions.presentation.allTransactions.AllTransactionsViewModel
-import dev.ridill.oar.transactions.presentation.amountTransformation.AmountTransformationSheet
-import dev.ridill.oar.transactions.presentation.amountTransformation.AmountTransformationViewModel
-import java.util.Currency
 
 // region Transactions
 @Suppress("LongMethod")
@@ -203,12 +196,6 @@ fun EntryProviderScope<NavKey>.transactionEntries(
         ResultEffect<FolderSelectedResult> { result ->
             viewModel.onFolderSelectionResult(result.id)
         }
-        ResultEffect<TransformationResult> { result ->
-            viewModel.onAmountTransformationResult(result)
-        }
-        ResultEffect<Currency> { currency ->
-            viewModel.onCurrencySelect(currency)
-        }
         ResultEffect<CycleSelectedResult> { result ->
             viewModel.onCycleSelect(result.id)
         }
@@ -264,38 +251,12 @@ fun EntryProviderScope<NavKey>.transactionEntries(
             state = state,
             actions = viewModel,
             navigateUp = navigator::goBack,
-            navigateToAmountTransformation = { navigator.navigate(AmountTransformationSheetRoute) },
-            navigateToCurrencySelection = {
-                navigator.navigate(CurrencySelectionSheetRoute(preSelectedCurrCode = state.currency.currencyCode))
-            },
             navigateToCycleSelection = {
                 navigator.navigate(
                     CycleSelectionSheetRoute(
                         preselectedId = state.selectedCycleId ?: INVALID_ID_LONG
                     )
                 )
-            }
-        )
-    }
-
-    entry<AmountTransformationSheetRoute>(metadata = BottomSheetSceneStrategy.bottomSheet()) {
-        val viewModel: AmountTransformationViewModel = hiltViewModel()
-        val selectedTransformation by viewModel.selectedTransformation.collectAsStateWithLifecycle()
-
-        val resultBus = LocalResultBus.current
-
-        AmountTransformationSheet(
-            selectedTransformation = selectedTransformation,
-            onTransformationSelect = viewModel::onTransformationSelect,
-            factorInput = viewModel.factorInputState,
-            onTransformClick = {
-                resultBus.sendResult<TransformationResult>(
-                    TransformationResult(
-                        transformation = selectedTransformation,
-                        factor = viewModel.factorInputState.text.toString()
-                    )
-                )
-                navigator.goBack()
             }
         )
     }
