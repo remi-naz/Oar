@@ -632,4 +632,6 @@
     <string name="delete_pile_confirmation_title">Delete Pile?</string>
     <string name="pile_deleted">Pile Deleted</string>
     <string name="pile_saved">Pile Saved</string>
+    <string name="add_recommended_amount">Add recommended amount: %s</string>
+    <string name="fund_added_to_pile">Fund added to pile</string>
 </resources>

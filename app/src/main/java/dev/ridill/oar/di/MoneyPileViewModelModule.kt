@@ -9,10 +9,15 @@ import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileTransactionDao
 import dev.ridill.oar.moneyPiles.data.repository.AddEditPileRepositoryImpl
+import dev.ridill.oar.moneyPiles.data.repository.AddToPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.AllPilesRepositoryImpl
+import dev.ridill.oar.moneyPiles.data.repository.MoneyPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.domain.repository.AddEditPileRepository
+import dev.ridill.oar.moneyPiles.domain.repository.AddToPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.AllPilesRepository
+import dev.ridill.oar.moneyPiles.domain.repository.MoneyPileRepository
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileViewModel
+import dev.ridill.oar.moneyPiles.presentation.addToPile.AddToPileViewModel
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesViewModel
 import kotlinx.coroutines.CoroutineScope
 
@@ -26,6 +31,15 @@ object MoneyPileViewModelModule {
     @Provides
     fun provideMoneyPileTransactionDao(db: OarDatabase): MoneyPileTransactionDao =
         db.moneyPileTransactionsDao()
+
+    @Provides
+    fun provideMoneyPileRepository(
+        dao: MoneyPileDao,
+        transactionDao: MoneyPileTransactionDao,
+    ): MoneyPileRepository = MoneyPileRepositoryImpl(
+        pileDao = dao,
+        transactionDao = transactionDao,
+    )
 
     @Provides
     fun provideAllPileRepository(
@@ -46,12 +60,24 @@ object MoneyPileViewModelModule {
         db: OarDatabase,
         pileDao: MoneyPileDao,
         pileTransactionDao: MoneyPileTransactionDao,
+        pileRepo: MoneyPileRepository,
     ): AddEditPileRepository = AddEditPileRepositoryImpl(
         db = db,
         pileDao = pileDao,
         pileTransactionDao = pileTransactionDao,
+        pileRepo = pileRepo,
     )
 
     @Provides
     fun provideAddEditPileEventBus(): EventBus<AddEditPileViewModel.AddEditPileEvent> = EventBus()
+
+    @Provides
+    fun provideAddToPileRepository(
+        pileRepo: MoneyPileRepository,
+    ): AddToPileRepository = AddToPileRepositoryImpl(
+        pileRepo = pileRepo,
+    )
+
+    @Provides
+    fun provideAddToPileEventBus(): EventBus<AddToPileViewModel.AddToPileEvent> = EventBus()
 }

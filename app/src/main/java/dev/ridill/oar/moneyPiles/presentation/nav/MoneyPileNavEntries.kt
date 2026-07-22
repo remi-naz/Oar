@@ -6,16 +6,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.navigation.AddEditPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditPileRoute
+import dev.ridill.oar.core.ui.navigation.AddToPileRoute
 import dev.ridill.oar.core.ui.navigation.AllPilesRoute
+import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
+import dev.ridill.oar.core.ui.navigation.FundAddedToPile
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileScreen
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileViewModel
+import dev.ridill.oar.moneyPiles.presentation.addToPile.AddToPileSheetContent
+import dev.ridill.oar.moneyPiles.presentation.addToPile.AddToPileViewModel
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesScreen
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesViewModel
 
@@ -27,6 +33,10 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(navigator: OarNavigator) {
 
         ResultEffect<AddEditPileResult> { result ->
             viewModel.onAddEditPileResult(result)
+        }
+
+        ResultEffect<FundAddedToPile> {
+            viewModel.onFundAddedToPile()
         }
 
         CollectFlowEffect(viewModel.events) { event ->
@@ -42,7 +52,14 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(navigator: OarNavigator) {
             pilesPagingItems = pilesPagingItems,
             navigateToAddPile = { navigator.navigate(AddEditPileRoute()) },
             navigateToPileDetails = { navigator.navigate(AddEditPileRoute(it)) },
-            navigateToAddToPile = {},
+            navigateToAddToPile = {
+                navigator.navigate(
+                    AddToPileRoute(
+                        pileId = it,
+                        movement = FundMovement.IN
+                    )
+                )
+            },
             navigateUp = navigator::goBack,
         )
     }
@@ -84,6 +101,31 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(navigator: OarNavigator) {
             actions = viewModel,
             navigateUp = navigator::goBack,
             snackbarController = snackbarController,
+        )
+    }
+
+    entry<AddToPileRoute>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) { route ->
+        val viewModel: AddToPileViewModel =
+            hiltViewModel<AddToPileViewModel, AddToPileViewModel.Factory>(
+                creationCallback = { it.create(route) }
+            )
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val resultBus = LocalResultBus.current
+        CollectFlowEffect(viewModel.events, resultBus) { event ->
+            when (event) {
+                AddToPileViewModel.AddToPileEvent.Deposited -> {
+                    resultBus.sendResult(FundAddedToPile)
+                    navigator.goBack()
+                }
+            }
+        }
+        AddToPileSheetContent(
+            movement = route.movement,
+            state = state,
+            amountInputState = viewModel.amountInputState,
+            actions = viewModel,
         )
     }
 }

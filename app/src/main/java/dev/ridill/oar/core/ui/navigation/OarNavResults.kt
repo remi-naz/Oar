@@ -49,3 +49,6 @@ enum class AddEditPileResult {
     PILE_DELETED,
     PILE_SAVED,
 }
+
+@Parcelize
+data object FundAddedToPile : Parcelable

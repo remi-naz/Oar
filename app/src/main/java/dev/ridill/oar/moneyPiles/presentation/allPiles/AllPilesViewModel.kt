@@ -32,6 +32,10 @@ class AllPilesViewModel @Inject constructor(
         eventBus.send(AllPilesEvent.ShowUiMessage(message))
     }
 
+    fun onFundAddedToPile() = viewModelScope.launch {
+        eventBus.send(AllPilesEvent.ShowUiMessage(UiText.StringResource(R.string.fund_added_to_pile)))
+    }
+
     sealed interface AllPilesEvent {
         data class ShowUiMessage(val text: UiText) : AllPilesEvent
     }

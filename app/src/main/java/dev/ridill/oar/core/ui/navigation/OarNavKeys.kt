@@ -1,6 +1,7 @@
 package dev.ridill.oar.core.ui.navigation
 
 import androidx.navigation3.runtime.NavKey
+import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.serialization.Serializable
 
 const val INVALID_ID_LONG = -1L
@@ -93,4 +94,10 @@ data object AllPilesRoute : NavKey
 @Serializable
 data class AddEditPileRoute(
     val pileId: Long = INVALID_ID_LONG,
+) : NavKey
+
+@Serializable
+data class AddToPileRoute(
+    val pileId: Long,
+    val movement: FundMovement,
 ) : NavKey

@@ -225,10 +225,9 @@ fun AddEditPileScreen(
                     if (!isEditMode) {
                         AmountInput(
                             inputState = starterAmountState,
+                            currency = state.currency,
                             label = stringResource(R.string.pile_starter_amount_optional),
-                            prefix = { Text(state.currency.symbol) },
                             keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Decimal,
                                 imeAction = ImeAction.Next
                             ),
                             lineLimits = TextFieldLineLimits.SingleLine,
@@ -236,12 +235,11 @@ fun AddEditPileScreen(
                                 .weight(1f)
                         )
                     }
-                    OarTextField(
-                        state = targetAmountState,
-                        label = { Text(stringResource(R.string.pile_target_amount_optional)) },
-                        prefix = { Text(state.currency.symbol) },
+                    AmountInput(
+                        inputState = targetAmountState,
+                        currency = state.currency,
+                        label = stringResource(R.string.pile_target_amount_optional),
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal,
                             imeAction = ImeAction.Next
                         ),
                         lineLimits = TextFieldLineLimits.SingleLine,
