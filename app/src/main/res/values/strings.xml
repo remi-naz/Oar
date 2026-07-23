@@ -566,6 +566,7 @@
     <string name="pile_projection_set_pace">Set pace</string>
 
     <string name="pile_activity_label">Activity</string>
+    <string name="pile_activity_empty_message">No activity yet</string>
     <string name="pile_action_add">Add to pile</string>
     <string name="pile_action_withdraw">Withdraw</string>
 

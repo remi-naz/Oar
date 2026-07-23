@@ -12,13 +12,16 @@ import dev.ridill.oar.moneyPiles.data.repository.AddEditPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.AddToPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.AllPilesRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.MoneyPileRepositoryImpl
+import dev.ridill.oar.moneyPiles.data.repository.PileDetailRepositoryImpl
 import dev.ridill.oar.moneyPiles.domain.repository.AddEditPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.AddToPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.AllPilesRepository
 import dev.ridill.oar.moneyPiles.domain.repository.MoneyPileRepository
+import dev.ridill.oar.moneyPiles.domain.repository.PileDetailRepository
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileViewModel
 import dev.ridill.oar.moneyPiles.presentation.addToPile.AddToPileViewModel
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesViewModel
+import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailViewModel
 import kotlinx.coroutines.CoroutineScope
 
 @Module
@@ -80,4 +83,20 @@ object MoneyPileViewModelModule {
 
     @Provides
     fun provideAddToPileEventBus(): EventBus<AddToPileViewModel.AddToPileEvent> = EventBus()
+
+    @Provides
+    fun providePileDetailRepository(
+        db: OarDatabase,
+        @ApplicationScope applicationScope: CoroutineScope,
+        pileDao: MoneyPileDao,
+        pileRepo: MoneyPileRepository,
+    ): PileDetailRepository = PileDetailRepositoryImpl(
+        db = db,
+        applicationScope = applicationScope,
+        pileDao = pileDao,
+        pileRepo = pileRepo,
+    )
+
+    @Provides
+    fun providePileDetailEventBus(): EventBus<PileDetailViewModel.PileDetailEvent> = EventBus()
 }

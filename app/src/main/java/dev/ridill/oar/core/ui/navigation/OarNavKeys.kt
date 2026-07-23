@@ -92,6 +92,9 @@ data class CycleSelectionSheetRoute(val preselectedId: Long = INVALID_ID_LONG) :
 data object AllPilesRoute : NavKey
 
 @Serializable
+data class PileDetailRoute(val pileId: Long) : NavKey
+
+@Serializable
 data class AddEditPileRoute(
     val pileId: Long = INVALID_ID_LONG,
 ) : NavKey

@@ -24,6 +24,9 @@ interface MoneyPileDao : BaseDao<MoneyPileEntity> {
     @Query("SELECT * FROM money_pile_table WHERE id = :id")
     fun getPileByIdFlow(id: Long): Flow<MoneyPileEntity?>
 
+    @Query("SELECT aggregate FROM money_pile_aggregate_view WHERE id = :id")
+    fun getPileSavedAmountFlow(id: Long): Flow<Double?>
+
     @Query("DELETE FROM money_pile_table WHERE id = :id")
     suspend fun deletePileById(id: Long)
 }
