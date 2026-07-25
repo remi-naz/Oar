@@ -4,13 +4,14 @@ import dev.ridill.oar.core.data.db.KeysetPagingSource
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.db.PageLoadDirection
 import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileTransactionsEntity
+import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileTransactionDao
 import kotlinx.coroutines.CoroutineScope
 
 class PileTransactionPagingSource(
     db: OarDatabase,
     applicationScope: CoroutineScope,
     private val pileId: Long,
-    private val dao: MoneyPileDao,
+    private val dao: MoneyPileTransactionDao,
 ) : KeysetPagingSource<PileTransactionKey, MoneyPileTransactionsEntity>(
     db = db,
     applicationScope = applicationScope,
