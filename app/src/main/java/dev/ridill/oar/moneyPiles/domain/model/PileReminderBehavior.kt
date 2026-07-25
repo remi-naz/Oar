@@ -6,7 +6,6 @@ import dev.ridill.oar.R
 enum class PileReminderBehavior(
     @StringRes val labelRes: Int
 ) {
-    REMIND(R.string.pile_reminder_behavior_remind),
-    SUGGEST(R.string.pile_reminder_behavior_suggest),
-    AUTO_ADD(R.string.pile_reminder_behavior_auto_add)
+    AUTO_ADD(R.string.pile_reminder_behavior_auto_add),
+    REMIND(R.string.pile_reminder_behavior_remind)
 }

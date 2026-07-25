@@ -39,10 +39,10 @@ import dev.ridill.oar.settings.domain.modal.BaseRadioOption
 @Composable
 fun ConfirmationDialog(
     @StringRes titleRes: Int,
-    @StringRes contentRes: Int,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes contentRes: Int = R.string.action_irreversible_message,
     @StringRes confirmActionRes: Int = R.string.action_confirm,
     @StringRes dismissActionRes: Int = R.string.action_cancel,
     showDismissButton: Boolean = true,
@@ -64,10 +64,10 @@ fun ConfirmationDialog(
 @Composable
 fun ConfirmationDialog(
     title: String,
-    content: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    content: String = stringResource(R.string.action_irreversible_message),
     @StringRes confirmActionRes: Int = R.string.action_confirm,
     @StringRes dismissActionRes: Int = R.string.action_cancel,
     showDismissButton: Boolean = true,
