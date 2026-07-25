@@ -57,7 +57,6 @@ import dev.ridill.oar.core.ui.components.Spacer
 import dev.ridill.oar.core.ui.components.SpacerSmall
 import dev.ridill.oar.core.ui.theme.BorderWidthStandard
 import dev.ridill.oar.core.ui.theme.ContentAlpha
-import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.IconSizeSmall
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.SelectableColorsList
@@ -65,6 +64,7 @@ import dev.ridill.oar.core.ui.theme.contentColor
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.moneyPiles.domain.model.PileIcon
+import dev.ridill.oar.moneyPiles.presentation.components.PileIconIndicator
 import java.util.Currency
 
 @Composable
@@ -168,24 +168,11 @@ internal fun PileGridItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.surfaceContainer
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(icon.iconRes),
-                            contentDescription = stringResource(icon.labelRes),
-                            tint = accent,
-                            modifier = Modifier
-                                .size(IconSizeMedium)
-                        )
-                    }
-                }
+                PileIconIndicator(
+                    icon = icon,
+                    color = accent,
+                )
+
                 if (locked) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_circle_lock),
