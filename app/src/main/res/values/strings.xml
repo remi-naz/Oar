@@ -631,4 +631,16 @@
     <string name="fund_withdrawn_from_pile">Fund withdrawn from pile</string>
     <string name="pile_action_add">Add to pile</string>
     <string name="pile_action_withdraw">Withdraw</string>
+    <string name="pile_history_entry_type_starter">Starter amount</string>
+    <string name="pile_history_entry_type_auto_contribution">Auto contribution</string>
+    <string name="pile_history_entry_type_deposit">Added to pile</string>
+    <string name="cd_tap_to_edit_pile">Tap to edit pile</string>
+    <string name="pile_activity_label">Activity</string>
+    <string name="pile_goal_reached">Goal reached</string>
+    <string name="pile_no_goal_label">No goal</string>
+    <string name="pile_target_label">of %1$s</string>
+    <string name="pile_remaining_label">%1$s to go</string>
+    <string name="pile_saving_freely_label">Saving freely, no goal</string>
+    <string name="pile_progress_label">Progress</string>
+    <string name="pile_projected_completion_label">On track for</string>
 </resources>

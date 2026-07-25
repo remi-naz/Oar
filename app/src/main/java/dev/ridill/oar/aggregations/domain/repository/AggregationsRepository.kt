@@ -1,7 +1,7 @@
 package dev.ridill.oar.aggregations.domain.repository
 
-import dev.ridill.oar.transactions.domain.model.AggregateAmountItem
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.transactions.domain.model.AggregateAmountItem
 import kotlinx.coroutines.flow.Flow
 import java.util.Currency
 
@@ -21,4 +21,6 @@ interface AggregationsRepository {
     fun getTotalDebitsForCycle(id: Long, currency: Currency): Flow<Double>
     fun getTotalCreditsForCycle(id: Long, currency: Currency): Flow<Double>
     suspend fun getAggregateAmountForCycle(id: Long): Double
+
+    fun getAggregateForMoneyPile(id: Long): Flow<Double>
 }
