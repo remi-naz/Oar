@@ -2,7 +2,7 @@ package dev.ridill.oar.moneyPiles.presentation.addEditPile
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.MediumFloatingActionButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ToggleButton
@@ -65,9 +64,7 @@ import dev.ridill.oar.core.ui.components.OarTextField
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.SpacerExtraSmall
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
-import dev.ridill.oar.core.ui.theme.BorderWidthStandard
 import dev.ridill.oar.core.ui.theme.OarTheme
-import dev.ridill.oar.core.ui.theme.adjustedContentColor
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.PaddingSide
@@ -78,6 +75,8 @@ import dev.ridill.oar.moneyPiles.domain.model.PileContributionMode
 import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderBehavior
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderCadence
+import dev.ridill.oar.moneyPiles.presentation.components.PileIconDefaults
+import dev.ridill.oar.moneyPiles.presentation.components.PileIconIndicator
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
 import dev.ridill.oar.transactions.presentation.components.AmountInput
 import java.util.Currency
@@ -147,24 +146,16 @@ fun AddEditPileScreen(
                     verticalAlignment = Alignment.Top,
                     modifier = maxWidthWithPaddingModifier,
                 ) {
-                    Surface(
-                        onClick = actions::onIconIndicatorClick,
-                        shape = MaterialTheme.shapes.medium,
+                    PileIconIndicator(
+                        icon = state.icon,
                         color = state.color,
-                        border = BorderStroke(
-                            BorderWidthStandard,
-                            state.color.adjustedContentColor()
-                        ),
-                        modifier = Modifier.size(PileIconAvatarSize)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(state.icon.iconRes),
-                                contentDescription = stringResource(state.icon.labelRes),
-                                tint = state.color.adjustedContentColor()
-                            )
-                        }
-                    }
+                        borderStroke = PileIconDefaults.accentedBorder(state.color),
+                        modifier = Modifier
+                            .size(PileIconAvatarSize)
+                            .clickable(
+                                onClick = actions::onIconIndicatorClick
+                            ),
+                    )
 
                     OarTextField(
                         state = nameState,
