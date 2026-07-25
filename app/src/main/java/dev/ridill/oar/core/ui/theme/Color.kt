@@ -336,6 +336,7 @@ val SelectableColorsList: List<Color>
 
 object ContentAlpha {
     const val PERCENT_08 = 0.08f
+    const val PERCENT_16 = 0.16f
     const val PERCENT_32 = 0.32f
     const val PERCENT_50 = 0.50f
     const val SUB_CONTENT = 0.72f
