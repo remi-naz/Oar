@@ -2,11 +2,11 @@ package dev.ridill.oar.aggregations.data.repository
 
 import dev.ridill.oar.aggregations.data.local.AggregationsDao
 import dev.ridill.oar.aggregations.domain.repository.AggregationsRepository
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
 import dev.ridill.oar.transactions.data.toAggregateAmountItem
 import dev.ridill.oar.transactions.domain.model.AggregateAmountItem
-import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -70,4 +70,7 @@ class AggregationsRepositoryImpl(
         withContext(Dispatchers.IO) {
             dao.getAggregateAmountForCycle(id)
         }
+
+    override fun getAggregateForMoneyPile(id: Long): Flow<Double> = dao
+        .getAggregateAmountForMoneyPileFlow(id)
 }

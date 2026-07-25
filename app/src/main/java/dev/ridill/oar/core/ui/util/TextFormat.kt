@@ -69,6 +69,20 @@ object TextFormat {
         }
         .format(value)
 
+    fun percent(
+        value: Number,
+        locale: Locale = LocaleUtil.defaultLocale,
+        maxFractionDigits: Int = DEFAULT_MAX_FRACTION_DIGITS,
+        minFractionDigits: Int = DEFAULT_MIN_FRACTION_DIGITS,
+        isGroupingUsed: Boolean = true
+    ): String = NumberFormat.getPercentInstance(locale)
+        .apply {
+            maximumFractionDigits = maxFractionDigits
+            minimumFractionDigits = minFractionDigits
+            this.isGroupingUsed = isGroupingUsed
+        }
+        .format(value)
+
     fun parseNumber(
         value: String,
         locale: Locale = LocaleUtil.defaultLocale
