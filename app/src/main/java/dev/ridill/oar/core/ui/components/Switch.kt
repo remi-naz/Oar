@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
-import dev.ridill.oar.core.ui.theme.spacing
 
 @Composable
 fun LabelledSwitch(
@@ -38,7 +37,7 @@ fun LabelledSwitch(
             )
             .then(modifier),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = stringResource(labelRes),
