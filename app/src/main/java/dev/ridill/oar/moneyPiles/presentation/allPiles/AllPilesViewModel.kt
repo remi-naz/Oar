@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
+import dev.ridill.oar.core.ui.navigation.PileFundMovementResult
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.moneyPiles.domain.repository.AllPilesRepository
 import kotlinx.coroutines.launch
@@ -30,6 +31,19 @@ class AllPilesViewModel @Inject constructor(
         }
 
         eventBus.send(AllPilesEvent.ShowUiMessage(message))
+    }
+
+    fun onPileFundMovementResult(result: PileFundMovementResult) = viewModelScope.launch {
+        eventBus.send(
+            AllPilesEvent.ShowUiMessage(
+                UiText.StringResource(
+                    when (result) {
+                        PileFundMovementResult.FUND_ADDED -> R.string.fund_added_to_pile
+                        PileFundMovementResult.FUND_WITHDRAWN -> R.string.fund_withdrawn_from_pile
+                    }
+                )
+            )
+        )
     }
 
     sealed interface AllPilesEvent {

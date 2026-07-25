@@ -49,3 +49,8 @@ enum class AddEditMoneyPileResult {
     PILE_DELETED,
     PILE_SAVED,
 }
+
+enum class PileFundMovementResult {
+    FUND_ADDED,
+    FUND_WITHDRAWN
+}

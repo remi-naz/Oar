@@ -1,6 +1,7 @@
 package dev.ridill.oar.moneyPiles.domain.model
 
 import android.os.Parcelable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.Empty
@@ -27,6 +28,9 @@ data class MoneyPileDetails(
     val reminderAmount: Double?,
     val createdTimestamp: LocalDateTime,
 ) : Parcelable {
+    val color: Color
+        get() = Color(colorCode)
+
     companion object {
         val NEW
             get() = MoneyPileDetails(

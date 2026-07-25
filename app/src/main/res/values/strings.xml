@@ -626,4 +626,9 @@
     <string name="pile_lock_help">Hide withdraw until you hit the goal</string>
     <string name="pile_starter_amount_optional">Starter (optional)</string>
     <string name="pile_target_amount_optional">Target (optional)</string>
+    <string name="add_recommended_amount">Add recommended amount: %s</string>
+    <string name="fund_added_to_pile">Fund added to pile</string>
+    <string name="fund_withdrawn_from_pile">Fund withdrawn from pile</string>
+    <string name="pile_action_add">Add to pile</string>
+    <string name="pile_action_withdraw">Withdraw</string>
 </resources>
