@@ -73,7 +73,6 @@ import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.SelectableColorsList
-import dev.ridill.oar.core.ui.theme.adjustedContentColor
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.excludeTop
@@ -87,6 +86,7 @@ import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderBehavior
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderCadence
 import dev.ridill.oar.moneyPiles.domain.model.PileTransactionEntry
+import dev.ridill.oar.moneyPiles.presentation.components.PileIconIndicator
 import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -290,22 +290,13 @@ private fun PileHeroSection(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(contentAlignment = Alignment.BottomEnd) {
-            Surface(
-                shape = MaterialTheme.shapes.large,
+            PileIconIndicator(
+                icon = icon,
                 color = color,
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier
                     .size(PileHeroAvatarSize)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(icon.iconRes),
-                        contentDescription = stringResource(icon.labelRes),
-                        tint = color.adjustedContentColor(),
-                        modifier = Modifier
-                            .size(PileHeroIconSize)
-                    )
-                }
-            }
+            )
 
             if (locked) {
                 Surface(
@@ -561,7 +552,6 @@ private fun PileHistoryItem(
 }
 
 private val PileHeroAvatarSize = 88.dp
-private val PileHeroIconSize = 36.dp
 private val PileLockBadgeSize = 26.dp
 
 @PreviewLightDark
