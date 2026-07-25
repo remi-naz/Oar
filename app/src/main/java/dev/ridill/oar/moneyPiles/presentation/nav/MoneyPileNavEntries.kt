@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
+import dev.ridill.oar.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileRoute
@@ -26,6 +27,8 @@ import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesScreen
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesViewModel
 import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundSheetContent
 import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundViewModel
+import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailScreen
+import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailViewModel
 
 fun EntryProviderScope<NavKey>.moneyPileEntries(
     navigator: OarNavigator,
@@ -56,7 +59,7 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
             snackbarController = snackbarController,
             pilesPagingItems = pilesPagingItems,
             navigateToAddPile = { navigator.navigate(AddEditMoneyPileRoute()) },
-            navigateToPileDetails = { navigator.navigate(AddEditMoneyPileRoute(it)) },
+            navigateToPileDetails = { navigator.navigate(MoneyPileDetailsRoute(it)) },
             navigateToAddToPile = {
                 navigator.navigate(
                     MoneyPileFundMovementRoute(
@@ -69,7 +72,55 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
         )
     }
 
-    entry<MoneyPileDetailsRoute> {}
+    entry<MoneyPileDetailsRoute> { route ->
+        val viewModel: PileDetailViewModel =
+            hiltViewModel<PileDetailViewModel, PileDetailViewModel.Factory>(
+                creationCallback = { it.create(route) }
+            )
+
+        val transactionPagingItems = viewModel.transactionPagingData.collectAsLazyPagingItems()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        val snackbarController = rememberSnackbarController()
+        CollectFlowEffect(viewModel.events, snackbarController) { event ->
+            when (event) {
+                is PileDetailViewModel.PileDetailEvent.ShowUiMessage -> {
+                    snackbarController.showSnackbar(event.text)
+                }
+            }
+        }
+
+        ResultEffect<AddEditMoneyPileResult> { result ->
+            viewModel.onAddEditPileResult(result)
+        }
+
+        ResultEffect<PileFundMovementResult> { result ->
+            viewModel.onPileFundMovementResult(result)
+        }
+
+        OnLifecycleStartEffect(
+            viewModel,
+            block = viewModel::refreshDateNow
+        )
+
+        PileDetailScreen(
+            state = state,
+            actions = viewModel,
+            transactionPagingItems = transactionPagingItems,
+            navigateUp = navigator::goBack,
+            navigateToEditPile = { navigator.navigate(AddEditMoneyPileRoute(route.pileId)) },
+            navigateToFundMovement = {
+                navigator.navigate(
+                    MoneyPileFundMovementRoute(
+                        pileId = route.pileId,
+                        movement = it
+                    )
+                )
+            },
+            snackbarController = snackbarController
+        )
+    }
+
     entry<AddEditMoneyPileRoute> { route ->
         val viewModel: AddEditPileViewModel =
             hiltViewModel<AddEditPileViewModel, AddEditPileViewModel.Factory>(

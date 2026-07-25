@@ -37,6 +37,11 @@ fun PaddingValues.exclude(
 )
 
 @Composable
+fun PaddingValues.onlyTop(
+    layoutDirection: LayoutDirection = LocalLayoutDirection.current
+): PaddingValues = this.only(PaddingSide.TOP, layoutDirection = layoutDirection)
+
+@Composable
 fun PaddingValues.excludeTop(
     layoutDirection: LayoutDirection = LocalLayoutDirection.current
 ): PaddingValues = this.exclude(PaddingSide.TOP, layoutDirection = layoutDirection)
