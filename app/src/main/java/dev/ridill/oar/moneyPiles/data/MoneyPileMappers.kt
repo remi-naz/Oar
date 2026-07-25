@@ -3,9 +3,11 @@ package dev.ridill.oar.moneyPiles.data
 import androidx.compose.ui.graphics.Color
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileEntity
+import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileTransactionsEntity
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileAggregateView
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileWithSavedAmount
+import dev.ridill.oar.moneyPiles.domain.model.PileTransactionEntry
 
 internal fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount =
     MoneyPileWithSavedAmount(
@@ -35,6 +37,15 @@ internal fun MoneyPileEntity.toMoneyPileDetails(): MoneyPileDetails = MoneyPileD
     currency = LocaleUtil.currencyForCode(currencyCode),
     targetDate = targetDate
 )
+
+internal fun MoneyPileTransactionsEntity.toPileTransactionEntry(): PileTransactionEntry =
+    PileTransactionEntry(
+        id = id,
+        amount = amount,
+        movement = movement,
+        contributionSource = contributionSource,
+        timestamp = createdTimestamp,
+    )
 
 internal fun MoneyPileDetails.toEntity(): MoneyPileEntity = MoneyPileEntity(
     id = id,
