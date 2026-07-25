@@ -7,19 +7,20 @@ import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileAggregateView
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileWithSavedAmount
 
-fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount = MoneyPileWithSavedAmount(
-    id = id,
-    name = name,
-    icon = icon,
-    color = Color(color),
-    currency = LocaleUtil.currencyForCode(currencyCode),
-    targetAmount = targetAmount,
-    savedAmount = aggregate,
-    locked = locked,
-    createdTimestamp = createdTimestamp
-)
+internal fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount =
+    MoneyPileWithSavedAmount(
+        id = id,
+        name = name,
+        icon = icon,
+        color = Color(color),
+        currency = LocaleUtil.currencyForCode(currencyCode),
+        targetAmount = targetAmount,
+        savedAmount = aggregate,
+        locked = locked,
+        createdTimestamp = createdTimestamp
+    )
 
-internal fun MoneyPileEntity.toMoneyPile(): MoneyPileDetails = MoneyPileDetails(
+internal fun MoneyPileEntity.toMoneyPileDetails(): MoneyPileDetails = MoneyPileDetails(
     id = id,
     name = name,
     icon = icon,
