@@ -34,6 +34,11 @@
     <string name="destination_edit_folder">Edit Folder</string>
     <string name="destination_budget_cycles">Budget Cycles</string>
     <string name="destination_budget_cycle_selection">Select Cycle</string>
+    <string name="destination_money_piles_graph">Money Piles</string>
+    <string name="destination_all_money_piles">Money Piles</string>
+    <string name="destination_money_pile_details">Money Pile</string>
+    <string name="destination_add_edit_money_pile">Add/Edit Money Pile</string>
+    <string name="destination_money_pile_fund_movement">Move Money Pile Fund</string>
 
     <!-- App Shortcuts -->
     <string name="shortcut_add_new_transaction_label">Add New Transaction</string>
