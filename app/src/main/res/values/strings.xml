@@ -155,6 +155,8 @@
 
     <!-- Action Labels -->
     <string name="action_confirm">Confirm</string>
+    <string name="action_done">Done</string>
+    <string name="action_save_changes">Save Changes</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_continue">Continue</string>
     <string name="action_not_now">Not Now</string>
@@ -556,4 +558,49 @@
     <string name="search_eg_placeholder_gas_money">e.g. Gas money</string>
     <string name="search_eg_placeholder_amount_decimal">e.g. 45.99</string>
     <string name="search_eg_placeholder_amount_round">e.g. 1200</string>
+
+    <string name="pile_contribution_mode_label">When I add money</string>
+    <string name="pile_contribution_mode_track_only">Track only</string>
+    <string name="pile_contribution_mode_track_only_help">Just tracks what you\'ve set aside. Your spendable balance stays the same.</string>
+    <string name="pile_contribution_mode_from_balance">From balance</string>
+    <string name="pile_contribution_mode_from_balance_help">Adding money moves it out of your spendable balance — like a real transfer into savings.</string>
+    <string name="pile_reminder_label">Reminder</string>
+    <string name="pile_reminder_cadence_no_repeat">No repeat</string>
+    <string name="pile_reminder_cadence_weekly">Weekly</string>
+    <string name="pile_reminder_cadence_monthly">Monthly</string>
+    <string name="pile_reminder_cadence_bi_monthly">Bi-monthly</string>
+    <string name="pile_reminder_cadence_yearly">Yearly</string>
+    <string name="pile_reminder_behavior_remind">Just remind</string>
+    <string name="pile_reminder_behavior_suggest">Suggest</string>
+    <string name="pile_reminder_behavior_auto_add">Auto-add</string>
+    <string name="pile_reminder_amount_auto_label">Each time</string>
+    <string name="pile_reminder_amount_suggest_label">Suggest</string>
+    <string name="pile_reminder_none">No reminder set</string>
+    <string name="pile_reminder_remind">Reminder · %1$s</string>
+    <string name="pile_reminder_suggest">Suggests %1$s %2$s</string>
+    <string name="pile_reminder_auto_add">Auto-adds %1$s %2$s</string>
+    <string name="pile_icon_selection_label">Icon</string>
+    <string name="pile_color_selection_label">Colour</string>
+    <string name="pile_icon_label_general">General</string>
+    <string name="pile_icon_label_baby_family">Baby &amp; Family</string>
+    <string name="pile_icon_label_business_startup">Business &amp; Startup</string>
+    <string name="pile_icon_label_debt_payoff">Debt Payoff</string>
+    <string name="pile_icon_label_down_payment">Down Payment</string>
+    <string name="pile_icon_label_education">Education</string>
+    <string name="pile_icon_label_electronics">Electronics</string>
+    <string name="pile_icon_label_emergency_fund">Emergency Fund</string>
+    <string name="pile_icon_label_financial_independence">Financial Independence</string>
+    <string name="pile_icon_label_gift">Gift</string>
+    <string name="pile_icon_label_health">Health</string>
+    <string name="pile_icon_label_home">Home</string>
+    <string name="pile_icon_label_home_renovation">Home Renovation</string>
+    <string name="pile_icon_label_investment">Investment</string>
+    <string name="pile_icon_label_land_property">Land &amp; Property</string>
+    <string name="pile_icon_label_legacy_inheritance">Legacy &amp; Inheritance</string>
+    <string name="pile_icon_label_purchase">Purchase</string>
+    <string name="pile_icon_label_retirement">Retirement</string>
+    <string name="pile_icon_label_savings">Savings</string>
+    <string name="pile_icon_label_travel">Travel</string>
+    <string name="pile_icon_label_vehicle">Vehicle</string>
+    <string name="pile_icon_label_wedding">Wedding</string>
 </resources>
