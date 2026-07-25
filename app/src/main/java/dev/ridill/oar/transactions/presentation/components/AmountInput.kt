@@ -99,7 +99,15 @@ fun AmountInput(
                 { Text(it) }
             },
             placeholder = placeholder?.let {
-                { Text(it) }
+                {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier
+                            .defaultMinSize(minWidth = InputMinWidth),
+                        textAlign = TextAlign.Center
+                    )
+                }
             },
             prefix = prefix,
             keyboardOptions = keyboardOptions.copy(
@@ -176,6 +184,10 @@ fun AmountInput(
     }
 }
 
+/**
+ * Variant of [AmountInput] without [CurrencySelectionSheet] functionality
+ * and static hardcoded [currency] param
+ */
 @Composable
 fun AmountInput(
     inputState: TextFieldState,
@@ -215,7 +227,15 @@ fun AmountInput(
                 { Text(it) }
             },
             placeholder = placeholder?.let {
-                { Text(it) }
+                {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier
+                            .defaultMinSize(minWidth = InputMinWidth),
+                        textAlign = TextAlign.Center
+                    )
+                }
             },
             prefix = prefix,
             keyboardOptions = keyboardOptions.copy(
