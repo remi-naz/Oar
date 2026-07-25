@@ -1,5 +1,6 @@
 package dev.ridill.oar.core.ui.components
 
+import android.content.Context
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarData
@@ -18,6 +19,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
+import dev.ridill.oar.core.ui.util.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -92,6 +95,7 @@ class OarSnackbarVisuals(
 
 class SnackbarController(
     val snackbarHostState: SnackbarHostState,
+    private val context: Context,
     private val coroutineScope: CoroutineScope
 ) {
     private var snackbarJob: Job? = null
@@ -127,15 +131,40 @@ class SnackbarController(
             onSnackbarResult?.invoke(snackbarResult)
         }
     }
+
+    fun showSnackbar(
+        message: UiText,
+        actionLabel: String? = null,
+        withDismissAction: Boolean = false,
+        duration: SnackbarDuration = if (actionLabel == null) SnackbarDuration.Short
+        else SnackbarDuration.Indefinite,
+        onSnackbarResult: ((SnackbarResult) -> Unit)? = null
+    ) {
+        cancelCurrentJob()
+        snackbarJob = coroutineScope.launch {
+            val visuals = OarSnackbarVisuals(
+                isError = message.isErrorText,
+                actionLabel = actionLabel,
+                duration = duration,
+                message = message.asString(context),
+                withDismissAction = withDismissAction
+            )
+
+            val snackbarResult = snackbarHostState.showSnackbar(visuals)
+            onSnackbarResult?.invoke(snackbarResult)
+        }
+    }
 }
 
 @Composable
 fun rememberSnackbarController(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    context: Context = LocalContext.current,
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ): SnackbarController = remember(snackbarHostState, coroutineScope) {
     SnackbarController(
         snackbarHostState = snackbarHostState,
+        context = context,
         coroutineScope = coroutineScope
     )
 }

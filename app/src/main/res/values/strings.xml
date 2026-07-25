@@ -38,6 +38,8 @@
     <string name="destination_all_money_piles">Money Piles</string>
     <string name="destination_money_pile_details">Money Pile</string>
     <string name="destination_add_edit_money_pile">Add/Edit Money Pile</string>
+    <string name="destination_edit_money_pile">Edit Money Pile</string>
+    <string name="destination_add_money_pile">Add Money Pile</string>
     <string name="destination_money_pile_fund_movement">Move Money Pile Fund</string>
 
     <!-- App Shortcuts -->
@@ -161,7 +163,6 @@
     <!-- Action Labels -->
     <string name="action_confirm">Confirm</string>
     <string name="action_done">Done</string>
-    <string name="action_save_changes">Save Changes</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_continue">Continue</string>
     <string name="action_not_now">Not Now</string>
@@ -571,7 +572,7 @@
     <string name="pile_contribution_mode_from_balance">From balance</string>
     <string name="pile_contribution_mode_from_balance_help">Adding money moves it out of your spendable balance — like a real transfer into savings.</string>
     <string name="pile_reminder_label">Reminder</string>
-    <string name="pile_reminder_cadence_no_repeat">No repeat</string>
+    <string name="pile_reminder_cadence_no_remind">No remind</string>
     <string name="pile_reminder_cadence_weekly">Weekly</string>
     <string name="pile_reminder_cadence_monthly">Monthly</string>
     <string name="pile_reminder_cadence_bi_monthly">Bi-monthly</string>
@@ -615,4 +616,14 @@
     <string name="cd_tap_to_view_pile_details">Tap to view pile details</string>
     <string name="of_value">of %s</string>
     <string name="pile_locked">Pile locked</string>
+    <string name="delete_pile_confirmation_title">Delete Pile?</string>
+    <string name="pile_deleted">Pile Deleted</string>
+    <string name="pile_saved">Pile Saved</string>
+    <string name="error_invalid_pile_name">Please enter a valid name</string>
+    <string name="name">Name</string>
+    <string name="pile_name_placeholder">e.g. That new thing I wanna save for</string>
+    <string name="pile_lock_label">Make it non-breakable</string>
+    <string name="pile_lock_help">Hide withdraw until you hit the goal</string>
+    <string name="pile_starter_amount_optional">Starter (optional)</string>
+    <string name="pile_target_amount_optional">Target (optional)</string>
 </resources>

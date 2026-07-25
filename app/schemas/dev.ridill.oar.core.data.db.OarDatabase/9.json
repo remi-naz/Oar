@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "df329ccc1f3297193e5dc8770e270b31",
+    "identityHash": "10619b522c109ae2488e133caf37e125",
     "entities": [
       {
         "tableName": "budget_cycle_table",
@@ -416,7 +416,7 @@
       },
       {
         "tableName": "money_pile_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `color` INTEGER NOT NULL, `contribution_mode` TEXT NOT NULL, `reminder_cadence` TEXT NOT NULL, `reminder_behavior` TEXT NOT NULL, `locked` INTEGER NOT NULL, `currency_code` TEXT NOT NULL, `target_amount` REAL, `target_date` TEXT, `created_timestamp` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `color` INTEGER NOT NULL, `contribution_mode` TEXT NOT NULL, `reminder_cadence` TEXT NOT NULL, `reminder_behavior` TEXT NOT NULL, `reminder_amount` REAL, `locked` INTEGER NOT NULL, `currency_code` TEXT NOT NULL, `target_amount` REAL, `target_date` TEXT, `created_timestamp` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -459,6 +459,11 @@
             "columnName": "reminder_behavior",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "reminderAmount",
+            "columnName": "reminder_amount",
+            "affinity": "REAL"
           },
           {
             "fieldPath": "locked",
@@ -597,7 +602,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df329ccc1f3297193e5dc8770e270b31')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '10619b522c109ae2488e133caf37e125')"
     ]
   }
 }
