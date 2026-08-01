@@ -11,6 +11,7 @@ import androidx.work.workDataOf
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dev.ridill.oar.R
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.logE
@@ -23,8 +24,7 @@ import dev.ridill.oar.settings.domain.backup.BackupWorkManager
 import dev.ridill.oar.settings.domain.repositoty.BackupRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.crypto.BadPaddingException
-import javax.crypto.IllegalBlockSizeException
+import javax.crypto.AEADBadTagException
 
 @HiltWorker
 class GDriveDataRestoreWorker @AssistedInject constructor(
@@ -40,6 +40,9 @@ class GDriveDataRestoreWorker @AssistedInject constructor(
                 .ifEmpty { throw InvalidEncryptionPasswordThrowable() }
             val passwordHashSalt = inputData.getString(BackupWorkManager.KEY_PASSWORD_HASH_SALT)
                 .orEmpty().ifEmpty { throw InvalidEncryptionPasswordThrowable() }
+            val scheme = EncryptionScheme.fromTag(
+                inputData.getString(BackupWorkManager.KEY_ENCRYPTION_SCHEME)
+            )
             val timestamp = inputData.getString(BackupWorkManager.KEY_BACKUP_TIMESTAMP)
                 ?.let { DateUtil.parseDateTimeOrNull(it) }
                 ?: throw BackupDownloadFailedThrowable()
@@ -47,41 +50,21 @@ class GDriveDataRestoreWorker @AssistedInject constructor(
             repo.performAppDataRestoreFromCache(
                 password = password,
                 passwordSalt = passwordHashSalt,
+                scheme = scheme,
                 timestamp = timestamp
             )
             logI(GDriveDataRestoreWorker::class.simpleName) { "Backup Restored" }
             repo.tryClearLocalCache()
             logI(GDriveDataRestoreWorker::class.simpleName) { "Cleared cache" }
             Result.success()
-        } catch (t: InvalidEncryptionPasswordThrowable) {
+        } catch (t: AEADBadTagException) {
             logE(
                 t,
                 GDriveDataRestoreWorker::class.simpleName
             ) { "InvalidEncryptionPasswordThrowable" }
             Result.failure(
                 workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_invalid_encryption_password)
-                )
-            )
-        } catch (e: IllegalBlockSizeException) {
-            logE(e, GDriveDataRestoreWorker::class.simpleName) { "IllegalBlockSizeException" }
-            Result.failure(
-                workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_incorrect_encryption_password)
-                )
-            )
-        } catch (e: BadPaddingException) {
-            logE(e, GDriveDataRestoreWorker::class.simpleName) { "BadPaddingException" }
-            Result.failure(
-                workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_incorrect_encryption_password)
-                )
-            )
-        } catch (t: BackupDownloadFailedThrowable) {
-            logE(t, GDriveDataRestoreWorker::class.simpleName) { "BackupDownloadFailedThrowable" }
-            Result.failure(
-                workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_download_backup_failed)
+                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_app_data_restore_failed)
                 )
             )
         } catch (t: Throwable) {

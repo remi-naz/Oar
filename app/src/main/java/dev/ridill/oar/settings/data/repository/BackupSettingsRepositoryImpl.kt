@@ -3,7 +3,9 @@ package dev.ridill.oar.settings.data.repository
 import androidx.work.WorkInfo
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
-import dev.ridill.oar.core.domain.crypto.CryptoManager
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
+import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
+import dev.ridill.oar.di.Argon2PasswordBasedCryptoManager
 import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.local.ConfigKey
 import dev.ridill.oar.settings.data.local.entity.ConfigEntity
@@ -24,7 +26,8 @@ class BackupSettingsRepositoryImpl(
     private val preferencesManager: PreferencesManager,
     private val securityPreferencesManager: SecurityPreferencesManager,
     private val backupWorkManager: BackupWorkManager,
-    private val cryptoManager: CryptoManager
+    @Argon2PasswordBasedCryptoManager private val argon2CryptoManager: PasswordBasedCryptoManager,
+    private val legacyCryptoManager: PasswordBasedCryptoManager
 ) : BackupSettingsRepository {
 
     override fun getLastBackupTime(): Flow<LocalDateTime?> = preferencesManager.preferences
@@ -77,17 +80,29 @@ class BackupSettingsRepositoryImpl(
     override suspend fun isCurrentPasswordMatch(currentPasswordInput: String): Boolean {
         val securityPreferences = securityPreferencesManager.preferences.first()
         val passwordHash = securityPreferences.backupEncryptionHash
-        return cryptoManager.areHashesMatch(
-            value = currentPasswordInput,
-            hash2 = passwordHash
-        )
+        return when (securityPreferences.backupEncryptionScheme) {
+            EncryptionScheme.ARGON2_GCM -> argon2CryptoManager.areHashesMatch(
+                value = currentPasswordInput,
+                hash2 = passwordHash
+            )
+
+            EncryptionScheme.LEGACY_BCRYPT_PBKDF2_CBC -> legacyCryptoManager.areHashesMatch(
+                value = currentPasswordInput,
+                hash2 = passwordHash
+            )
+        }
     }
 
-    override suspend fun updateEncryptionPassword(password: String): Unit =
-        withContext(Dispatchers.IO) {
-            val (hash, salt) = cryptoManager.saltedHash(password)
-            securityPreferencesManager.updateBackupEncryptionHash(hash = hash, salt = salt)
-        }
+    override suspend fun updateEncryptionPassword(
+        password: String
+    ): Unit = withContext(Dispatchers.IO) {
+        val (hash, salt) = argon2CryptoManager.hash(password)
+        securityPreferencesManager.updateBackupEncryptionHash(
+            hash = hash,
+            salt = salt,
+            scheme = EncryptionScheme.ARGON2_GCM
+        )
+    }
 
     override fun getFatalBackupError(): Flow<FatalBackupError?> = preferencesManager
         .preferences

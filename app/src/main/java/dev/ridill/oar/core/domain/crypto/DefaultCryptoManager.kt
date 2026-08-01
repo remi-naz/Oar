@@ -1,5 +1,6 @@
 package dev.ridill.oar.core.domain.crypto
 
+import android.security.keystore.KeyProperties
 import org.mindrot.jbcrypt.BCrypt
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
@@ -8,39 +9,41 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
-class DefaultCryptoManager : CryptoManager {
+/**
+ * Pre-migration BCrypt -> PBKDF2 -> AES/CBC scheme. Decrypt/verify-only: never used to encrypt
+ * or hash new data, only to read data produced before the Argon2id/AES-GCM migration.
+ */
+@Deprecated(message = "Use the new Argon2id/AES-GCM scheme instead")
+internal class DefaultCryptoManager : PasswordBasedCryptoManager {
 
-    private fun getEncryptCipher(password: String, salt: String): Cipher = Cipher
-        .getInstance(CryptoManager.TRANSFORMATION)
-        .apply {
-            init(Cipher.ENCRYPT_MODE, createKey(password, salt))
-        }
+    private companion object {
+        const val TRANSFORMATION =
+            "${PasswordBasedCryptoManager.ALGORITHM}/${KeyProperties.BLOCK_MODE_CBC}/${KeyProperties.ENCRYPTION_PADDING_PKCS7}"
+        const val ITERATION_COUNT = 65536
+        const val KEY_LENGTH = 128
+        const val KEY_ALGORITHM = "PBKDF2WithHmacSha256"
+    }
 
     private fun getDecryptCipher(password: String, salt: String, iv: ByteArray): Cipher = Cipher
-        .getInstance(CryptoManager.TRANSFORMATION)
+        .getInstance(TRANSFORMATION)
         .apply {
             init(Cipher.DECRYPT_MODE, createKey(password, salt), IvParameterSpec(iv))
         }
 
     private fun createKey(password: String, salt: String): SecretKey {
-        val factory = SecretKeyFactory.getInstance(CryptoManager.KEY_ALGORITHM)
+        val factory = SecretKeyFactory.getInstance(KEY_ALGORITHM)
         val keySpec = PBEKeySpec(
             password.toCharArray(),
             salt.toByteArray(),
-            CryptoManager.ITERATION_COUNT,
-            CryptoManager.KEY_LENGTH
+            ITERATION_COUNT,
+            KEY_LENGTH
         )
         val key = factory.generateSecret(keySpec)
-        return SecretKeySpec(key.encoded, CryptoManager.ALGORITHM)
+        return SecretKeySpec(key.encoded, PasswordBasedCryptoManager.ALGORITHM)
     }
 
     override fun encrypt(rawData: ByteArray, password: String, salt: String): EncryptionResult {
-        val cipher = getEncryptCipher(password = password, salt = salt)
-        val encryptedData = cipher.doFinal(rawData)
-        return EncryptionResult(
-            data = encryptedData,
-            iv = cipher.iv
-        )
+        throw RuntimeException("Version deprecated")
     }
 
     override fun decrypt(
@@ -54,10 +57,9 @@ class DefaultCryptoManager : CryptoManager {
         iv = iv
     ).doFinal(encryptedData)
 
-    override fun generateSalt(): HashSaltString =
-        BCrypt.gensalt(CryptoManager.HASH_LOG_ROUNDS)
+    override fun generateSalt(): HashSalt = BCrypt.gensalt(15)
 
-    override fun saltedHash(message: String, salt: String): Pair<HashString, HashSaltString> {
+    override fun hash(message: String, salt: String): SaltedHash {
         val hash = BCrypt.hashpw(message, salt)
         return hash to salt
     }

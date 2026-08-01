@@ -4,29 +4,51 @@ import android.security.keystore.KeyProperties
 import javax.crypto.BadPaddingException
 import javax.crypto.IllegalBlockSizeException
 
-typealias HashString = String
-typealias HashSaltString = String
+typealias Hash = String
+typealias HashSalt = String
+typealias SaltedHash = Pair<Hash, HashSalt>
 
-interface CryptoManager {
+/**
+ * ARGON2_GCM is the current scheme, always written for new backups/hashes.
+ * LEGACY_BCRYPT_PBKDF2_CBC is decrypt/verify-only, kept so pre-migration local hashes and
+ * cloud backups remain readable; it is never written again.
+ */
+enum class EncryptionScheme {
+    LEGACY_BCRYPT_PBKDF2_CBC,
+    ARGON2_GCM;
+
+    companion object {
+        fun fromTag(tag: String?): EncryptionScheme =
+            entries.firstOrNull { it.name == tag } ?: LEGACY_BCRYPT_PBKDF2_CBC
+    }
+}
+
+interface PasswordBasedCryptoManager {
     @Throws(IllegalBlockSizeException::class, BadPaddingException::class)
-    fun encrypt(rawData: ByteArray, password: String, salt: String): EncryptionResult
+    fun encrypt(
+        rawData: ByteArray,
+        password: String,
+        salt: String
+    ): EncryptionResult
 
     @Throws(IllegalBlockSizeException::class, BadPaddingException::class)
-    fun decrypt(encryptedData: ByteArray, iv: ByteArray, password: String, salt: String): ByteArray
+    fun decrypt(
+        encryptedData: ByteArray,
+        iv: ByteArray,
+        password: String,
+        salt: String
+    ): ByteArray
 
-    fun generateSalt(): HashSaltString
-    fun saltedHash(message: String, salt: String = generateSalt()): Pair<HashString, HashSaltString>
+    fun generateSalt(): HashSalt
+    fun hash(
+        message: String,
+        salt: String = generateSalt()
+    ): SaltedHash
+
     fun areHashesMatch(value: String?, hash2: String?): Boolean
 
     companion object {
         const val ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
-        private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC
-        private const val PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7
-        const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
-        const val ITERATION_COUNT = 65536
-        const val KEY_LENGTH = 128
-        const val KEY_ALGORITHM = "PBKDF2WithHmacSha256"
-        const val HASH_LOG_ROUNDS = 15
     }
 }
 
@@ -52,11 +74,10 @@ data class EncryptionResult(
 }
 
 interface KeystoreCryptoManager {
-    fun encrypt(rawData: ByteArray): EncryptionResult
-    fun decrypt(encryptedData: ByteArray, iv: ByteArray): ByteArray
+    fun encrypt(rawData: ByteArray, alias: String): EncryptionResult
+    fun decrypt(encryptedData: ByteArray, iv: ByteArray, alias: String): ByteArray
 
     companion object {
-        const val KEY_ALIAS = "oar_access_token_key"
         const val ANDROID_KEYSTORE = "AndroidKeyStore"
         const val TRANSFORMATION = "AES/GCM/NoPadding"
         const val GCM_TAG_LENGTH = 128
