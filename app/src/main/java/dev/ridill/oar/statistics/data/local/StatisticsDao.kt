@@ -12,33 +12,6 @@ import kotlinx.coroutines.flow.Flow
 interface StatisticsDao {
     @Query(
         """
-        SELECT bc.id as id,
-            bc.start_date as startDate,
-            bc.end_date as endDate,
-            bc.budget as budget,
-            IFNULL(SUM(CASE WHEN tx.fundMovement = 'OUT' THEN tx.transactionAmount END), 0) as spent,
-            IFNULL(SUM(CASE WHEN tx.fundMovement = 'IN' THEN tx.transactionAmount END), 0) as received
-        FROM budget_cycle_table bc
-        LEFT OUTER JOIN transaction_details_view tx ON (
-            tx.cycleId = bc.id
-            AND tx.currencyCode = bc.currency_code
-            AND (:addExcluded = 1 OR tx.excluded = 0)
-        )
-        WHERE bc.currency_code = :currencyCode
-        GROUP BY bc.id
-        ORDER BY bc.start_date DESC, bc.end_date DESC
-        LIMIT :limit
-    """
-    )
-    @RewriteQueriesToDropUnusedColumns
-    fun getRecentCycleAggregates(
-        currencyCode: String,
-        limit: Int,
-        addExcluded: Boolean
-    ): Flow<List<CycleAggregateRelation>>
-
-    @Query(
-        """
         SELECT tagId, tagName, tagColorCode,
             SUM(transactionAmount) as amount,
             COUNT(*) as transactionCount

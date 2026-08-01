@@ -3,9 +3,10 @@ package dev.ridill.oar.aggregations.data.local
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
-import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.statistics.data.local.relation.CycleAggregateRelation
 import dev.ridill.oar.statistics.data.local.relation.CycleTotalsRelation
+import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -84,4 +85,32 @@ interface AggregationsDao {
         currencyCode: String,
         addExcluded: Boolean
     ): Flow<CycleTotalsRelation>
+
+    @Query(
+        """
+        SELECT bc.id as id,
+            bc.start_date as startDate,
+            bc.end_date as endDate,
+            bc.budget as budget,
+            IFNULL(SUM(CASE WHEN tx.fundMovement = 'OUT' THEN tx.transactionAmount END), 0) as spent,
+            IFNULL(SUM(CASE WHEN tx.fundMovement = 'IN' THEN tx.transactionAmount END), 0) as received,
+            currency_code as currencyCode
+        FROM budget_cycle_table bc
+        LEFT OUTER JOIN transaction_details_view tx ON (
+            tx.cycleId = bc.id
+            AND tx.currencyCode = bc.currency_code
+            AND (:addExcluded = 1 OR tx.excluded = 0)
+        )
+        WHERE bc.currency_code = :currencyCode
+        GROUP BY bc.id
+        ORDER BY DATE(bc.end_date) DESC, DATE(bc.start_date) DESC
+        LIMIT :limit
+    """
+    )
+    @RewriteQueriesToDropUnusedColumns
+    fun getCycleAggregatesGroupedByCycle(
+        currencyCode: String,
+        limit: Int,
+        addExcluded: Boolean
+    ): Flow<List<CycleAggregateRelation>>
 }

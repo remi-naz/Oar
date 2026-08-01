@@ -9,8 +9,8 @@ import dev.ridill.oar.statistics.data.toLargestSpend
 import dev.ridill.oar.statistics.data.toStatisticsCycleSummary
 import dev.ridill.oar.statistics.data.toTagSpendEntry
 import dev.ridill.oar.statistics.domain.model.CycleBarEntry
-import dev.ridill.oar.statistics.domain.model.LargestSpend
 import dev.ridill.oar.statistics.domain.model.CycleSummary
+import dev.ridill.oar.statistics.domain.model.LargestSpend
 import dev.ridill.oar.statistics.domain.model.TagSpendEntry
 import dev.ridill.oar.statistics.domain.repository.StatisticsRepository
 import kotlinx.coroutines.flow.Flow
@@ -40,16 +40,16 @@ internal class StatisticsRepositoryImpl(
 
     override fun getRecentCycleBars(
         cycleId: Long,
-        limit: Int,
-        addExcluded: Boolean
+        addExcluded: Boolean,
+        limit: Int
     ): Flow<List<CycleBarEntry>> = cycleRepo.getCycleByIdFlow(cycleId)
         .flatMapLatest { cycle ->
             if (cycle == null) flowOf(emptyList())
-            else dao.getRecentCycleAggregates(
+            else aggDao.getCycleAggregatesGroupedByCycle(
                 currencyCode = cycle.currency.currencyCode,
                 limit = limit,
                 addExcluded = addExcluded
-            ).mapLatest { list -> list.asReversed().map(CycleAggregateRelation::toCycleBarEntry) }
+            ).mapLatest { list -> list.map(CycleAggregateRelation::toCycleBarEntry) }
         }.distinctUntilChanged()
 
     override fun getTagBreakdown(

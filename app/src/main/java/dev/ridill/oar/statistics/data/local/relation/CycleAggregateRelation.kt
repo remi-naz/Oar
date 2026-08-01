@@ -8,5 +8,6 @@ data class CycleAggregateRelation(
     val endDate: LocalDate,
     val budget: Long,
     val spent: Double,
-    val received: Double
+    val received: Double,
+    val currencyCode: String,
 )

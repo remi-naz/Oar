@@ -6,6 +6,6 @@ import dev.ridill.oar.R
 enum class StatisticsChartMode(
     @StringRes val labelRes: Int
 ) {
-    SPEND(R.string.statistics_mode_spend),
-    IN_VS_OUT(R.string.statistics_mode_in_vs_out)
+    IN_VS_OUT(R.string.statistics_mode_in_vs_out),
+    SPEND(R.string.statistics_mode_spend)
 }

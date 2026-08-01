@@ -163,11 +163,11 @@ fun StatisticsScreen(
                         bars = state.cycleBars,
                         selectedBar = state.selectedCycleBar,
                         chartMode = state.chartMode,
-                        currency = cycle.currency,
+                        cycleBarChartSummaryText = state.cycleBarsSummaryText,
                         onModeChange = actions::onChartModeChange,
                         onBarSelect = actions::onBarSelect,
-                        cycleNet = null,
-                        inVsOutDiff = null,
+                        modifier = Modifier
+                            .animateItem()
                     )
                 }
             }
@@ -282,7 +282,8 @@ private fun previewStatisticsState(): StatisticsState {
             endDate = barStart.plusMonths(1).minusDays(1),
             spent = spent,
             received = received,
-            budget = 60_000L
+            budget = 60_000L,
+            currency = LocaleUtil.currencyForCode("INR"),
         )
     }
 

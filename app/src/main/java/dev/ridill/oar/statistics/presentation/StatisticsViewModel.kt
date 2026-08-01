@@ -5,14 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.asStateFlow
+import dev.ridill.oar.core.ui.util.TextFormat
+import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.statistics.domain.model.StatisticsChartMode
 import dev.ridill.oar.statistics.domain.repository.StatisticsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
@@ -29,9 +33,6 @@ class StatisticsViewModel @Inject constructor(
     private val currentDate = MutableStateFlow(DateUtil.dateNow())
     private val selectedCycleId = savedStateHandle.getStateFlow<Long?>(SELECTED_CYCLE_ID, null)
     private val showExcluded = savedStateHandle.getStateFlow(SHOW_EXCLUDED, false)
-    private val chartMode = savedStateHandle.getStateFlow(CHART_MODE, StatisticsChartMode.SPEND)
-    private val selectedBarCycleId = savedStateHandle
-        .getStateFlow<Long?>(SELECTED_BAR_CYCLE_ID, null)
     private val selectedTagId = savedStateHandle.getStateFlow<Long?>(SELECTED_TAG_ID, null)
 
     private val resolvedCycle = selectedCycleId.flatMapLatest { id ->
@@ -88,10 +89,43 @@ class StatisticsViewModel @Inject constructor(
             )
         }
 
+    private val selectedBarCycleId = savedStateHandle
+        .getStateFlow<Long?>(SELECTED_BAR_CYCLE_ID, null)
     private val selectedCycleBar = combineTuple(selectedBarCycleId, cycleBars)
-        .mapLatest { (selectedBarCycleId, cycleBars) ->
-            cycleBars.find { it.cycleId == selectedBarCycleId }
+        .mapLatest { (selectedId, bars) ->
+            bars.find { it.cycleId == (selectedId ?: resolvedCycleId.first()) }
         }
+    private val chartMode = savedStateHandle.getStateFlow(CHART_MODE, StatisticsChartMode.IN_VS_OUT)
+    private val cycleBarsSummaryText = combineTuple(
+        selectedCycleBar,
+        chartMode
+    ).mapLatest { (bar, mode) ->
+        if (bar == null) return@mapLatest UiText.DynamicString("-")
+        when (mode) {
+            StatisticsChartMode.SPEND -> {
+                val budget = bar.budget
+                val spent = bar.spent
+                UiText.StringResource(
+                    if (spent >= budget) R.string.statistics_over_budget_of else R.string.statistics_under_budget_of,
+                    args = listOf(
+                        TextFormat.currency(spent, bar.currency),
+                        TextFormat.currency(budget, bar.currency)
+                    )
+                )
+            }
+
+            StatisticsChartMode.IN_VS_OUT -> {
+                UiText.StringResource(
+                    R.string.statistics_spent_received_and_net,
+                    args = listOf(
+                        TextFormat.currency(bar.spent, bar.currency),
+                        TextFormat.currency(bar.received, bar.currency),
+                        TextFormat.currency(bar.spent - bar.received, bar.currency),
+                    )
+                )
+            }
+        }
+    }.distinctUntilChanged()
 
     private val tagBreakdown = combineTuple(resolvedCycleId, showExcluded)
         .flatMapLatest { (cycleId, addExcluded) ->
@@ -119,6 +153,7 @@ class StatisticsViewModel @Inject constructor(
         cycleBars,
         selectedCycleBar,
         chartMode,
+        cycleBarsSummaryText,
         tagBreakdown,
         selectedTagEntry,
         largestSpend,
@@ -132,6 +167,7 @@ class StatisticsViewModel @Inject constructor(
                       cycleBars,
                       selectedCycleBar,
                       chartMode,
+                                      cycleBarsSummaryText,
                       tagBreakdown,
                       selectedTagEntry,
                       largestSpend,
@@ -146,6 +182,7 @@ class StatisticsViewModel @Inject constructor(
             cycleBars = cycleBars,
             selectedCycleBar = selectedCycleBar,
             chartMode = chartMode,
+            cycleBarsSummaryText = cycleBarsSummaryText,
             tagBreakdown = tagBreakdown,
             selectedTagEntry = selectedTagEntry,
             largestSpend = largestSpend,

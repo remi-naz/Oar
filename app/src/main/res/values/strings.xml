@@ -572,7 +572,7 @@
     <string name="statistics_budget_line">Budget</string>
     <string name="statistics_under_budget_of">%1$s under a %2$s budget</string>
     <string name="statistics_over_budget_of">%1$s over a %2$s budget</string>
-    <string name="statistics_received_and_net">%1$s received · net %2$s</string>
+    <string name="statistics_spent_received_and_net">%1$s spent · %2$s received · net %3$s</string>
     <string name="statistics_x_spent">%s spent</string>
     <string name="statistics_by_tag">By tag</string>
     <string name="statistics_tag_count">%1$d tags</string>

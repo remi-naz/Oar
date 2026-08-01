@@ -30,6 +30,10 @@ sealed class UiText(
         vararg val args: String
     ) : UiText(isErrorText = false)
 
+    companion object {
+        fun empty(): UiText = DynamicString("")
+    }
+
     @Composable
     fun asString(): String = when (this) {
         is DynamicString -> message

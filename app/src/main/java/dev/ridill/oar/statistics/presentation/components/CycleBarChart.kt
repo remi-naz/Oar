@@ -1,25 +1,29 @@
 package dev.ridill.oar.statistics.presentation.components
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedToggleButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,54 +32,44 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
-import dev.ridill.oar.core.domain.util.orZero
+import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.ui.components.BodySmallText
 import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.SpacerSmall
 import dev.ridill.oar.core.ui.components.TitleMediumText
 import dev.ridill.oar.core.ui.theme.ContentAlpha
-import dev.ridill.oar.core.ui.theme.CornerRadiusLarge
-import dev.ridill.oar.core.ui.theme.CornerRadiusMedium
-import dev.ridill.oar.core.ui.theme.CornerRadiusSmall
 import dev.ridill.oar.core.ui.theme.NegativeRed
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PositiveGreen
 import dev.ridill.oar.core.ui.theme.spacing
-import dev.ridill.oar.core.ui.util.TextFormat
+import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.statistics.domain.model.CycleBarEntry
 import dev.ridill.oar.statistics.domain.model.StatisticsChartMode
-import java.util.Currency
-import kotlin.math.max
 
 @Composable
 internal fun CycleBarChart(
+    chartMode: StatisticsChartMode,
     bars: List<CycleBarEntry>,
     selectedBar: CycleBarEntry?,
-    cycleNet: Double?,
-    inVsOutDiff: Double?,
-    chartMode: StatisticsChartMode,
+    cycleBarChartSummaryText: UiText,
     onModeChange: (StatisticsChartMode) -> Unit,
-    currency: Currency,
     onBarSelect: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val referenceBudget = bars.lastOrNull()?.budget ?: 0L
-    val maxValue = (bars.maxOfOrNull { max(it.spent, it.received) } ?: 0.0)
-        .let { if (it <= 0.0) 1.0 else it * 1.1 }
-
-    Card(
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    EntryCard(
         modifier = modifier
     ) {
         Column(
@@ -99,86 +93,36 @@ internal fun CycleBarChart(
 
             selectedBar?.let { bar ->
                 BodySmallText(
-                    text = "${bar.description} · " +
-                            stringResource(
-                                R.string.statistics_x_spent,
-                                TextFormat.currency(bar.spent, currency)
-                            ),
+                    text = bar.description,
                     color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
                 )
                 Crossfade(
-                    targetState = chartMode
-                ) { mode ->
-                    when (mode) {
-                        StatisticsChartMode.SPEND -> {
-                            BodySmallText(
-                                text = if (inVsOutDiff.orZero() >= 0) {
-                                    stringResource(
-                                        R.string.statistics_under_budget_of,
-                                        TextFormat.currency(inVsOutDiff.orZero(), currency),
-                                        TextFormat.currency(bar.budget)
-                                    )
-                                } else {
-                                    stringResource(
-                                        R.string.statistics_over_budget_of,
-                                        TextFormat.currency(-inVsOutDiff.orZero(), currency),
-                                        TextFormat.currency(bar.budget)
-                                    )
-                                }
-                            )
-                        }
-
-                        StatisticsChartMode.IN_VS_OUT -> {
-                            BodySmallText(
-                                text = stringResource(
-                                    R.string.statistics_received_and_net,
-                                    TextFormat.currency(bar.received, currency),
-                                    TextFormat.currency(cycleNet.orZero(), currency)
-                                )
-                            )
-                        }
-                    }
+                    targetState = cycleBarChartSummaryText.asString()
+                ) { text ->
+                    BodySmallText(text)
                 }
             }
 
             SpacerMedium()
 
-            Box(
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(
+                    space = MaterialTheme.spacing.small,
+                    alignment = Alignment.End
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(ChartHeight)
+                    .height(BarChartHeight)
+                    .horizontalScroll(rememberScrollState())
             ) {
-                if (chartMode == StatisticsChartMode.SPEND && referenceBudget > 0) {
-                    val dashColor = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val fraction = (referenceBudget / maxValue).toFloat().coerceIn(0f, 1f)
-                        val y = size.height * (1f - fraction)
-                        drawLine(
-                            color = dashColor,
-                            start = Offset(0f, y),
-                            end = Offset(size.width, y),
-                            strokeWidth = 1.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f))
-                        )
-                    }
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    bars.forEach { bar ->
-                        CycleBarColumn(
-                            bar = bar,
-                            maxValue = maxValue,
-                            chartMode = chartMode,
-                            selected = bar.cycleId == selectedBar?.cycleId,
-                            onClick = { onBarSelect(bar.cycleId) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        )
-                    }
+                bars.forEach { bar ->
+                    CycleBarColumn(
+                        selected = bar.cycleId == selectedBar?.cycleId,
+                        onClick = { onBarSelect(bar.cycleId) },
+                        label = bar.label,
+                        value = bar.spent,
+                        maxValue = bar.budget.toDouble()
+                    )
                 }
             }
 
@@ -213,61 +157,70 @@ internal fun CycleBarChart(
 
 @Composable
 private fun CycleBarColumn(
-    bar: CycleBarEntry,
+    label: String,
+    value: Double,
     maxValue: Double,
-    chartMode: StatisticsChartMode,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val alpha = if (selected) 1f else ContentAlpha.PERCENT_50
-    val spentFraction = (bar.spent / maxValue).toFloat().coerceIn(0f, 1f)
-    val receivedFraction = (bar.received / maxValue).toFloat().coerceIn(0f, 1f)
-    val barShape = RoundedCornerShape(
-        topStart = CornerRadiusSmall,
-        topEnd = CornerRadiusSmall
+    val animatedFraction = animateFloatAsState(
+        targetValue = (value / maxValue).toFloat()
     )
-
+    val containerColor = MaterialTheme.colorScheme.primaryContainer
+    val containerColorAlpha = animateFloatAsState(
+        if (selected) 1f else ContentAlpha.PERCENT_50
+    )
+    val barShape = MaterialTheme.shapes.extraSmall.copy(
+        bottomEnd = CornerSize(Dp.Zero),
+        bottomStart = CornerSize(Dp.Zero),
+    )
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.clickable(onClick = onClick)
+        modifier = modifier
+            .width(BarWidth)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-            verticalAlignment = Alignment.Bottom,
+        Box(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(spentFraction.coerceAtLeast(MinBarFraction))
-                    .clip(barShape)
-                    .background(NegativeRed.copy(alpha = alpha))
-            )
-            if (chartMode == StatisticsChartMode.IN_VS_OUT) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(receivedFraction.coerceAtLeast(MinBarFraction))
-                        .clip(barShape)
-                        .background(PositiveGreen.copy(alpha = alpha))
-                )
-            }
-        }
-
-        SpacerSmall()
+                .weight(1f)
+                .clip(barShape)
+                .clickable(onClick = onClick)
+                .drawWithCache {
+                    val barHeightPx = size.height * animatedFraction.value
+                    val outline = barShape.createOutline(
+                        size = size.copy(height = barHeightPx),
+                        layoutDirection = layoutDirection,
+                        density = this
+                    )
+                    onDrawBehind {
+                        translate(
+                            top = size.height - barHeightPx
+                        ) {
+                            drawOutline(
+                                outline = outline,
+                                color = containerColor,
+                                alpha = containerColorAlpha.value,
+                            )
+                        }
+                    }
+                }
+        )
 
         BodySmallText(
-            text = bar.label,
-            overflow = TextOverflow.Ellipsis,
+            text = label,
+            overflow = TextOverflow.MiddleEllipsis,
             maxLines = 1,
             color = if (selected) LocalContentColor.current
             else LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
         )
     }
 }
+
+private val BarWidth = 48.dp
+private val BarChartHeight = 158.dp
 
 @Composable
 private fun ChartModeSegmentedControl(
@@ -276,27 +229,25 @@ private fun ChartModeSegmentedControl(
     modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier
-            .clip(RoundedCornerShape(CornerRadiusLarge))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(2.dp)
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(
+            ButtonGroupDefaults.ConnectedSpaceBetween,
+            Alignment.CenterHorizontally
+        )
     ) {
-        StatisticsChartMode.entries.forEach { mode ->
+        StatisticsChartMode.entries.forEachIndexed { index, mode ->
             val selected = mode == chartMode
-            BodySmallText(
-                text = stringResource(mode.labelRes),
-                color = if (selected) LocalContentColor.current
-                else LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(CornerRadiusMedium))
-                    .background(
-                        if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
-                        else Color.Transparent
-                    )
-                    .clickable { onModeChange(mode) }
-                    .padding(horizontal = MaterialTheme.spacing.small, vertical = 6.dp)
-            )
+            OutlinedToggleButton(
+                checked = selected,
+                onCheckedChange = { onModeChange(mode) },
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                },
+                contentPadding = PaddingValues(horizontal = 12.dp)
+            ) {
+                Text(stringResource(mode.labelRes))
+            }
         }
     }
 }
@@ -326,9 +277,6 @@ private fun LegendItem(
     }
 }
 
-private val ChartHeight = 158.dp
-private const val MinBarFraction = 0.02f
-
 private fun previewBars(): List<CycleBarEntry> {
     val amounts = listOf(
         52_100.0 to 5_200.0,
@@ -347,7 +295,8 @@ private fun previewBars(): List<CycleBarEntry> {
             endDate = start.plusMonths(1).minusDays(1),
             spent = spent,
             received = received,
-            budget = 60_000L
+            budget = 60_000L,
+            currency = LocaleUtil.currencyForCode("INR"),
         )
     }
 }
@@ -364,12 +313,10 @@ private fun PreviewCycleBarChart() {
             CycleBarChart(
                 bars = bars,
                 chartMode = chartMode,
-                currency = LocaleUtil.currencyForCode("INR"),
                 selectedBar = bars.find { it.cycleId == selectedCycleId },
-                cycleNet = null,
-                inVsOutDiff = null,
                 onModeChange = { chartMode = it },
                 onBarSelect = { selectedCycleId = it },
+                cycleBarChartSummaryText = UiText.DynamicString(LoremIpsum(3).values.joinToString()),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(MaterialTheme.spacing.medium)
@@ -388,9 +335,7 @@ private fun PreviewCycleBarChartInVsOut() {
                 bars = bars,
                 chartMode = StatisticsChartMode.IN_VS_OUT,
                 selectedBar = bars.last(),
-                currency = LocaleUtil.currencyForCode("INR"),
-                cycleNet = null,
-                inVsOutDiff = null,
+                cycleBarChartSummaryText = UiText.DynamicString(LoremIpsum(3).values.joinToString()),
                 onModeChange = {},
                 onBarSelect = {},
                 modifier = Modifier

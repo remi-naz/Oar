@@ -1,6 +1,7 @@
 package dev.ridill.oar.statistics.data
 
 import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleEntry
+import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.statistics.data.local.relation.CycleAggregateRelation
 import dev.ridill.oar.statistics.data.local.relation.CycleTotalsRelation
 import dev.ridill.oar.statistics.data.local.relation.LargestSpendRelation
@@ -30,7 +31,8 @@ fun CycleAggregateRelation.toCycleBarEntry(): CycleBarEntry = CycleBarEntry(
     endDate = endDate,
     spent = spent,
     received = received,
-    budget = budget
+    budget = budget,
+    currency = LocaleUtil.currencyForCode(currencyCode),
 )
 
 fun TagSpendRelation.toTagSpendEntry(totalSpend: Double): TagSpendEntry = TagSpendEntry(
