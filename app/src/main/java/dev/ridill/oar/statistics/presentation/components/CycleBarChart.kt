@@ -119,8 +119,9 @@ internal fun CycleBarChart(
                     CycleBarColumn(
                         selected = bar.cycleId == selectedBar?.cycleId,
                         onClick = { onBarSelect(bar.cycleId) },
+                        incoming = bar.received,
+                        outgoing = bar.spent,
                         label = bar.label,
-                        value = bar.spent,
                         maxValue = bar.budget.toDouble()
                     )
                 }
@@ -158,16 +159,16 @@ internal fun CycleBarChart(
 @Composable
 private fun CycleBarColumn(
     label: String,
-    value: Double,
+    incoming: Double,
+    outgoing: Double,
     maxValue: Double,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val animatedFraction = animateFloatAsState(
-        targetValue = (value / maxValue).toFloat()
+    val animatedOutgoingFraction = animateFloatAsState(
+        targetValue = (outgoing / maxValue).toFloat()
     )
-    val containerColor = MaterialTheme.colorScheme.primaryContainer
     val containerColorAlpha = animateFloatAsState(
         if (selected) 1f else ContentAlpha.PERCENT_50
     )
@@ -189,22 +190,32 @@ private fun CycleBarColumn(
                 .clip(barShape)
                 .clickable(onClick = onClick)
                 .drawWithCache {
-                    val barHeightPx = size.height * animatedFraction.value
-                    val outline = barShape.createOutline(
-                        size = size.copy(height = barHeightPx),
-                        layoutDirection = layoutDirection,
-                        density = this
-                    )
+                    val outgoingHeightPx = size.height * animatedOutgoingFraction.value
+                    val incomingHeightPx = size.height - outgoingHeightPx
                     onDrawBehind {
                         translate(
-                            top = size.height - barHeightPx
+                            top = size.height - outgoingHeightPx
                         ) {
                             drawOutline(
-                                outline = outline,
-                                color = containerColor,
+                                outline = barShape.createOutline(
+                                    size = size.copy(height = outgoingHeightPx),
+                                    layoutDirection = layoutDirection,
+                                    density = this
+                                ),
+                                color = NegativeRed,
                                 alpha = containerColorAlpha.value,
                             )
                         }
+
+                        drawOutline(
+                            outline = barShape.createOutline(
+                                size = size.copy(height = incomingHeightPx),
+                                layoutDirection = layoutDirection,
+                                density = this
+                            ),
+                            color = PositiveGreen,
+                            alpha = containerColorAlpha.value,
+                        )
                     }
                 }
         )
