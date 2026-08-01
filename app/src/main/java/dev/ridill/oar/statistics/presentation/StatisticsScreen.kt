@@ -36,9 +36,9 @@ import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.SelectableColorsList
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.statistics.domain.model.CycleBarEntry
+import dev.ridill.oar.statistics.domain.model.CycleSummary
 import dev.ridill.oar.statistics.domain.model.LargestSpend
 import dev.ridill.oar.statistics.domain.model.StatisticsChartMode
-import dev.ridill.oar.statistics.domain.model.StatisticsCycleSummary
 import dev.ridill.oar.statistics.domain.model.TagSpendEntry
 import dev.ridill.oar.statistics.presentation.components.CycleBarChart
 import dev.ridill.oar.statistics.presentation.components.CycleSummaryCard
@@ -145,6 +145,9 @@ fun StatisticsScreen(
                 ) {
                     CycleSummaryCard(
                         summary = summary,
+                        isOnPace = state.isCycleOnPace,
+                        currentDay = state.cycleElapsedDays + 1,
+                        daysTotal = state.cycleTotalDays,
                         modifier = Modifier
                             .animateItem()
                     )
@@ -192,7 +195,7 @@ fun StatisticsScreen(
 
 @Composable
 private fun buildStatTiles(
-    summary: StatisticsCycleSummary,
+    summary: CycleSummary,
     state: StatisticsState
 ): List<StatTile> {
     val busiestTag = state.tagBreakdown.maxByOrNull { it.transactionCount }
@@ -201,8 +204,8 @@ private fun buildStatTiles(
     return listOf(
         StatTile(
             label = stringResource(R.string.statistics_average_per_day),
-            value = summary.averagePerDayFormatted,
-            sub = stringResource(R.string.statistics_over_x_days, summary.daysElapsed)
+            value = "summary.averagePerDayFormatted",
+            sub = stringResource(R.string.statistics_over_x_days, 10)
         ),
         StatTile(
             label = stringResource(R.string.statistics_transactions),
@@ -252,7 +255,7 @@ private fun previewStatisticsState(): StatisticsState {
         active = true
     )
 
-    val summary = StatisticsCycleSummary(
+    val summary = CycleSummary(
         cycleId = cycle.id,
         startDate = startDate,
         endDate = endDate,
@@ -261,8 +264,6 @@ private fun previewStatisticsState(): StatisticsState {
         budget = cycle.budget,
         currency = currency,
         transactionCount = 63,
-        daysElapsed = 22,
-        daysTotal = 31
     )
 
     val cycleAmounts = listOf(

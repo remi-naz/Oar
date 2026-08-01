@@ -7,13 +7,16 @@ import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.statistics.domain.model.StatisticsChartMode
 import dev.ridill.oar.statistics.domain.repository.StatisticsRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
+import java.time.Period
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,6 +26,7 @@ class StatisticsViewModel @Inject constructor(
     private val statisticsRepo: StatisticsRepository
 ) : ViewModel(), StatisticsActions {
 
+    private val currentDate = MutableStateFlow(DateUtil.dateNow())
     private val selectedCycleId = savedStateHandle.getStateFlow<Long?>(SELECTED_CYCLE_ID, null)
     private val showExcluded = savedStateHandle.getStateFlow(SHOW_EXCLUDED, false)
     private val chartMode = savedStateHandle.getStateFlow(CHART_MODE, StatisticsChartMode.SPEND)
@@ -34,6 +38,26 @@ class StatisticsViewModel @Inject constructor(
         if (id != null) cycleRepo.getCycleByIdFlow(id)
         else cycleRepo.getActiveCycleFlow()
     }.distinctUntilChanged()
+    private val cycleElapsedDays = combineTuple(
+        currentDate,
+        resolvedCycle
+    ).mapLatest { (currentDate, cycle) ->
+        when {
+            cycle == null -> 0
+            currentDate.isBefore(cycle.startDate) -> 0
+            currentDate.isAfter(cycle.endDate) -> Period.between(
+                cycle.startDate,
+                cycle.endDate
+            ).days
+
+            else -> Period.between(cycle.startDate, currentDate).days
+        }
+    }.distinctUntilChanged()
+    private val cycleTotalDays = resolvedCycle
+        .mapLatest {
+            if (it == null) 0
+            else Period.between(it.startDate, it.endDate).days
+        }.distinctUntilChanged()
 
     private val resolvedCycleId = resolvedCycle
         .mapLatest { it?.id ?: OarDatabase.INVALID_ID_LONG }
@@ -45,11 +69,25 @@ class StatisticsViewModel @Inject constructor(
             else statisticsRepo.getCycleSummary(cycleId, addExcluded)
         }
 
+    private val isCycleOnPace = combineTuple(
+        summary,
+        cycleElapsedDays,
+        cycleTotalDays
+    ).mapLatest { (summary, elapsedDays, totalDays) ->
+        if (summary == null || totalDays <= 0) return@mapLatest true
+        val projectedSpend = (summary.budget.toDouble() / totalDays) * elapsedDays
+        summary.spent <= projectedSpend
+    }.distinctUntilChanged()
+
     private val cycleBars = combineTuple(resolvedCycleId, showExcluded)
         .flatMapLatest { (cycleId, addExcluded) ->
             if (cycleId == OarDatabase.INVALID_ID_LONG) flowOf(emptyList())
-            else statisticsRepo.getRecentCycleBars(cycleId = cycleId, addExcluded = addExcluded)
+            else statisticsRepo.getRecentCycleBars(
+                cycleId = cycleId,
+                addExcluded = addExcluded
+            )
         }
+
     private val selectedCycleBar = combineTuple(selectedBarCycleId, cycleBars)
         .mapLatest { (selectedBarCycleId, cycleBars) ->
             cycleBars.find { it.cycleId == selectedBarCycleId }
@@ -75,6 +113,9 @@ class StatisticsViewModel @Inject constructor(
     val state = combineTuple(
         resolvedCycle,
         summary,
+        cycleElapsedDays,
+        cycleTotalDays,
+        isCycleOnPace,
         cycleBars,
         selectedCycleBar,
         chartMode,
@@ -85,6 +126,9 @@ class StatisticsViewModel @Inject constructor(
     ).mapLatest { (
                       cycle,
                       summary,
+                      cycleElapsedDays,
+                      cycleTotalDays,
+                      isCycleOnPace,
                       cycleBars,
                       selectedCycleBar,
                       chartMode,
@@ -96,6 +140,9 @@ class StatisticsViewModel @Inject constructor(
         StatisticsState(
             selectedCycle = cycle,
             summary = summary,
+            cycleElapsedDays = cycleElapsedDays,
+            cycleTotalDays = cycleTotalDays,
+            isCycleOnPace = isCycleOnPace,
             cycleBars = cycleBars,
             selectedCycleBar = selectedCycleBar,
             chartMode = chartMode,
@@ -124,7 +171,9 @@ class StatisticsViewModel @Inject constructor(
             .takeIf { selectedTagId.value != tagId }
     }
 
-    override fun onCycleSelect(cycleId: Long?) {
+    override fun onCycleSelect(
+        cycleId: Long?
+    ) {
         savedStateHandle[SELECTED_CYCLE_ID] = cycleId
         savedStateHandle[SELECTED_BAR_CYCLE_ID] = null
         savedStateHandle[SELECTED_TAG_ID] = null

@@ -34,12 +34,15 @@ import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PositiveGreen
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.folders.domain.model.AggregateType
-import dev.ridill.oar.statistics.domain.model.StatisticsCycleSummary
+import dev.ridill.oar.statistics.domain.model.CycleSummary
 import kotlin.math.absoluteValue
 
 @Composable
 internal fun CycleSummaryCard(
-    summary: StatisticsCycleSummary,
+    summary: CycleSummary,
+    isOnPace: Boolean,
+    currentDay: Int,
+    daysTotal: Int,
     modifier: Modifier = Modifier
 ) {
     val netColor = AggregateType.fromAmount(summary.net).color
@@ -74,10 +77,10 @@ internal fun CycleSummaryCard(
                     )
                     TitleMediumText(
                         text = stringResource(
-                            if (summary.isOnPace) R.string.statistics_on_track
+                            if (isOnPace) R.string.statistics_on_track
                             else R.string.statistics_over_pace
                         ),
-                        color = if (summary.isOnPace) PositiveGreen else NegativeRed
+                        color = if (isOnPace) PositiveGreen else NegativeRed
                     )
                 }
             }
@@ -86,7 +89,7 @@ internal fun CycleSummaryCard(
 
             UsageProgress(
                 usageFraction = summary.usageFraction,
-                isOnPace = summary.isOnPace
+                isOnPace = isOnPace
             )
 
             SpacerSmall()
@@ -105,8 +108,8 @@ internal fun CycleSummaryCard(
                 BodySmallText(
                     text = stringResource(
                         R.string.statistics_day_x_of_y,
-                        summary.daysElapsed,
-                        summary.daysTotal
+                        currentDay,
+                        daysTotal
                     ),
                     color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
                 )
@@ -191,7 +194,7 @@ private fun PreviewCycleSummaryCard() {
     OarTheme {
         Surface {
             CycleSummaryCard(
-                summary = StatisticsCycleSummary(
+                summary = CycleSummary(
                     cycleId = 1L,
                     startDate = DateUtil.dateNow().withDayOfMonth(1),
                     endDate = DateUtil.dateNow().withDayOfMonth(1).plusMonths(1).minusDays(1),
@@ -200,9 +203,10 @@ private fun PreviewCycleSummaryCard() {
                     budget = 60_000L,
                     currency = LocaleUtil.currencyForCode("INR"),
                     transactionCount = 63,
-                    daysElapsed = 22,
-                    daysTotal = 31
                 ),
+                isOnPace = true,
+                currentDay = 12,
+                daysTotal = 31,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(MaterialTheme.spacing.medium)
@@ -217,7 +221,7 @@ private fun PreviewCycleSummaryCardOverBudget() {
     OarTheme {
         Surface {
             CycleSummaryCard(
-                summary = StatisticsCycleSummary(
+                summary = CycleSummary(
                     cycleId = 1L,
                     startDate = DateUtil.dateNow().withDayOfMonth(1),
                     endDate = DateUtil.dateNow().withDayOfMonth(1).plusMonths(1).minusDays(1),
@@ -226,9 +230,10 @@ private fun PreviewCycleSummaryCardOverBudget() {
                     budget = 60_000L,
                     currency = LocaleUtil.currencyForCode("INR"),
                     transactionCount = 48,
-                    daysElapsed = 12,
-                    daysTotal = 31
                 ),
+                isOnPace = false,
+                currentDay = 12,
+                daysTotal = 31,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(MaterialTheme.spacing.medium)

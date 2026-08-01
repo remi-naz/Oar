@@ -5,6 +5,7 @@ import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.statistics.data.local.relation.CycleTotalsRelation
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -65,4 +66,22 @@ interface AggregationsDao {
     """
     )
     suspend fun getAggregateAmountForCycle(cycleId: Long): Double
+
+    @Query(
+        """
+        SELECT
+            IFNULL(SUM(CASE WHEN fundMovement = 'OUT' THEN transactionAmount END), 0) as spent,
+            IFNULL(SUM(CASE WHEN fundMovement = 'IN' THEN transactionAmount END), 0) as received,
+            COUNT(*) as transactionCount
+        FROM transaction_details_view
+        WHERE cycleId = :cycleId
+            AND currencyCode = :currencyCode
+            AND (:addExcluded = 1 OR excluded = 0)
+    """
+    )
+    fun getCycleTotals(
+        cycleId: Long,
+        currencyCode: String,
+        addExcluded: Boolean
+    ): Flow<CycleTotalsRelation>
 }

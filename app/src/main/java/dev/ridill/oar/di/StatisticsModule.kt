@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dev.ridill.oar.aggregations.data.local.AggregationsDao
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.statistics.data.local.StatisticsDao
@@ -20,9 +21,11 @@ object StatisticsModule {
     @Provides
     fun provideStatisticsRepository(
         statisticsDao: StatisticsDao,
+        aggDao: AggregationsDao,
         cycleRepo: BudgetCycleRepository
     ): StatisticsRepository = StatisticsRepositoryImpl(
         dao = statisticsDao,
+        aggDao = aggDao,
         cycleRepo = cycleRepo
     )
 }

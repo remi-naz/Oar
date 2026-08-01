@@ -1,5 +1,6 @@
 package dev.ridill.oar.statistics.data.repository
 
+import dev.ridill.oar.aggregations.data.local.AggregationsDao
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.statistics.data.local.StatisticsDao
 import dev.ridill.oar.statistics.data.local.relation.CycleAggregateRelation
@@ -9,7 +10,7 @@ import dev.ridill.oar.statistics.data.toStatisticsCycleSummary
 import dev.ridill.oar.statistics.data.toTagSpendEntry
 import dev.ridill.oar.statistics.domain.model.CycleBarEntry
 import dev.ridill.oar.statistics.domain.model.LargestSpend
-import dev.ridill.oar.statistics.domain.model.StatisticsCycleSummary
+import dev.ridill.oar.statistics.domain.model.CycleSummary
 import dev.ridill.oar.statistics.domain.model.TagSpendEntry
 import dev.ridill.oar.statistics.domain.repository.StatisticsRepository
 import kotlinx.coroutines.flow.Flow
@@ -20,19 +21,20 @@ import kotlinx.coroutines.flow.mapLatest
 
 internal class StatisticsRepositoryImpl(
     private val dao: StatisticsDao,
+    private val aggDao: AggregationsDao,
     private val cycleRepo: BudgetCycleRepository
 ) : StatisticsRepository {
 
     override fun getCycleSummary(
         cycleId: Long,
         addExcluded: Boolean
-    ): Flow<StatisticsCycleSummary?> = cycleRepo.getCycleByIdFlow(cycleId)
+    ): Flow<CycleSummary?> = cycleRepo.getCycleByIdFlow(cycleId)
         .flatMapLatest { cycle ->
             if (cycle == null) flowOf(null)
-            else dao.getCycleTotals(
+            else aggDao.getCycleTotals(
                 cycleId = cycleId,
                 currencyCode = cycle.currency.currencyCode,
-                addExcluded = addExcluded
+                addExcluded = addExcluded,
             ).mapLatest { totals -> totals.toStatisticsCycleSummary(cycle) }
         }.distinctUntilChanged()
 

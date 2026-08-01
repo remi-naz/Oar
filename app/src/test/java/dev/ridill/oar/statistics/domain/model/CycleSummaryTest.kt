@@ -5,7 +5,7 @@ import dev.ridill.oar.core.domain.util.LocaleUtil
 import org.junit.Test
 import java.time.LocalDate
 
-class StatisticsCycleSummaryTest {
+class CycleSummaryTest {
 
     private val currency = LocaleUtil.currencyForCode("INR")
 
@@ -16,7 +16,7 @@ class StatisticsCycleSummaryTest {
         transactionCount: Int = 10,
         daysElapsed: Int = 15,
         daysTotal: Int = 30
-    ) = StatisticsCycleSummary(
+    ) = CycleSummary(
         cycleId = 1L,
         startDate = LocalDate.of(2026, 1, 1),
         endDate = LocalDate.of(2026, 1, 30),
