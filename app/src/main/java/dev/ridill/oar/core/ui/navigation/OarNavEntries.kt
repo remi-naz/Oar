@@ -8,6 +8,7 @@ import dev.ridill.oar.folders.presentation.nav.folderEntries
 import dev.ridill.oar.onboarding.presentation.nav.onboardingEntries
 import dev.ridill.oar.schedules.presentation.nav.scheduleEntries
 import dev.ridill.oar.settings.presentation.nav.settingsEntries
+import dev.ridill.oar.statistics.presentation.nav.statisticsEntries
 import dev.ridill.oar.tags.presentation.nav.tagEntries
 import dev.ridill.oar.transactions.presentation.nav.transactionEntries
 
@@ -22,4 +23,5 @@ fun buildOarEntryProvider(
     tagEntries(navigator = navigator)
     scheduleEntries(navigator = navigator, motionScheme = motionScheme)
     settingsEntries(navigator = navigator)
+    statisticsEntries(navigator = navigator)
 }

@@ -90,6 +90,7 @@ import dev.ridill.oar.core.ui.components.scrollableLayout.ScrollableLayoutDefaul
 import dev.ridill.oar.core.ui.navigation.AllFoldersRoute
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.SettingsRoute
+import dev.ridill.oar.core.ui.navigation.StatisticsRoute
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -252,6 +253,11 @@ private fun FeatureMenu(
                 AllFoldersRoute,
                 R.drawable.ic_outlined_folder,
                 R.string.destination_folders_graph
+            ),
+            Triple(
+                StatisticsRoute,
+                R.drawable.ic_outlined_chart,
+                R.string.destination_statistics
             ),
             Triple(
                 SettingsRoute,

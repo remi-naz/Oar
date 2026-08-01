@@ -34,6 +34,7 @@
     <string name="destination_edit_folder">Edit Folder</string>
     <string name="destination_budget_cycles">Budget Cycles</string>
     <string name="destination_budget_cycle_selection">Select Cycle</string>
+    <string name="destination_statistics">Statistics</string>
 
     <!-- App Shortcuts -->
     <string name="shortcut_add_new_transaction_label">Add New Transaction</string>
@@ -556,4 +557,42 @@
     <string name="search_eg_placeholder_gas_money">e.g. Gas money</string>
     <string name="search_eg_placeholder_amount_decimal">e.g. 45.99</string>
     <string name="search_eg_placeholder_amount_round">e.g. 1200</string>
+    <!-- Statistics -->
+    <string name="statistics_net_this_cycle">Net this cycle</string>
+    <string name="statistics_of_budget">of %s</string>
+    <string name="statistics_on_track">On track</string>
+    <string name="statistics_over_pace">Over pace</string>
+    <string name="statistics_budget_used">%s of budget used</string>
+    <string name="statistics_day_x_of_y">Day %1$d of %2$d</string>
+    <string name="statistics_spent">Spent</string>
+    <string name="statistics_received">Received</string>
+    <string name="statistics_across_cycles">Across cycles</string>
+    <string name="statistics_mode_spend">Spend</string>
+    <string name="statistics_mode_in_vs_out">In vs out</string>
+    <string name="statistics_budget_line">Budget</string>
+    <string name="statistics_under_budget_of">%1$s under a %2$s budget</string>
+    <string name="statistics_over_budget_of">%1$s over a %2$s budget</string>
+    <string name="statistics_received_and_net">%1$s received · net %2$s</string>
+    <string name="statistics_x_spent">%s spent</string>
+    <string name="statistics_by_tag">By tag</string>
+    <string name="statistics_tag_count">%1$d tags</string>
+    <string name="statistics_untagged">Untagged</string>
+    <string name="statistics_total_spent">Total spent</string>
+    <string name="statistics_tap_a_slice">tap a slice</string>
+    <string name="statistics_percent_of_spend">%d%% of spend</string>
+    <string name="statistics_average_per_day">Average per day</string>
+    <string name="statistics_over_x_days">over %d days</string>
+    <string name="statistics_transactions">Transactions</string>
+    <string name="statistics_including_excluded">including excluded</string>
+    <string name="statistics_excluding_excluded">excluding excluded</string>
+    <string name="statistics_largest_spend">Largest spend</string>
+    <string name="statistics_busiest_tag">Busiest tag</string>
+    <string name="statistics_x_transactions">%d transactions</string>
+    <string name="statistics_empty_title">Nothing to chart yet</string>
+    <string name="statistics_empty_message">This cycle has no transactions. Log a spend or pick an earlier cycle to see how your money moved.</string>
+    <string name="statistics_choose_another_cycle">Choose another cycle</string>
+    <string name="excluded_on">Excluded on</string>
+    <string name="excluded_off">Excluded off</string>
+    <string name="cd_view_statistics">View Statistics</string>
+    <string name="cd_toggle_excluded">Toggle excluded transactions</string>
 </resources>

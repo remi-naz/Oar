@@ -18,6 +18,7 @@ import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.local.CurrencyListDao
 import dev.ridill.oar.settings.data.local.entity.ConfigEntity
 import dev.ridill.oar.settings.data.local.entity.CurrencyListEntity
+import dev.ridill.oar.statistics.data.local.StatisticsDao
 import dev.ridill.oar.tags.data.local.TagsDao
 import dev.ridill.oar.tags.data.local.entity.TagEntity
 import dev.ridill.oar.transactions.data.local.TransactionDao
@@ -67,6 +68,7 @@ abstract class OarDatabase : RoomDatabase() {
     abstract fun schedulesDao(): SchedulesDao
     abstract fun currencyListDao(): CurrencyListDao
     abstract fun configDao(): ConfigDao
+    abstract fun statisticsDao(): StatisticsDao
 }
 
 val MIGRATION_5_6 = object : Migration(5, 6) {

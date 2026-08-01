@@ -40,6 +40,7 @@ import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
+import dev.ridill.oar.core.ui.navigation.StatisticsRoute
 import dev.ridill.oar.core.ui.navigation.TagSelectedResult
 import dev.ridill.oar.core.ui.navigation.TagSelectionSheetRoute
 import dev.ridill.oar.transactions.presentation.addEditTransaction.AddEditTransactionScreen
@@ -134,7 +135,8 @@ fun EntryProviderScope<NavKey>.transactionEntries(
                 )
             },
             navigateToCreateSchedule = { navigator.navigate(AddEditScheduleRoute()) },
-            navigateToCreateFolder = { navigator.navigate(AddEditFolderSheetRoute()) }
+            navigateToCreateFolder = { navigator.navigate(AddEditFolderSheetRoute()) },
+            navigateToStatistics = { navigator.navigate(StatisticsRoute) }
         )
     }
 
