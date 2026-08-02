@@ -475,7 +475,7 @@ private fun PileActionsBar(
                     onClick = onWithdrawClick,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(stringResource(R.string.pile_action_withdraw))
+                    Text(stringResource(R.string.withdraw))
                 }
             }
             Button(

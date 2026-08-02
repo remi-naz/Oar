@@ -596,11 +596,11 @@
     <string name="pile_lock_help">Hide withdraw until you hit the goal</string>
     <string name="pile_starter_amount_optional">Starter (optional)</string>
     <string name="pile_target_amount_optional">Target (optional)</string>
-    <string name="add_recommended_amount">Add recommended amount: %s</string>
+    <string name="recommended_colon_amount">Recommended: %s</string>
     <string name="fund_added_to_pile">Fund added to pile</string>
     <string name="fund_withdrawn_from_pile">Fund withdrawn from pile</string>
     <string name="pile_action_add">Add to pile</string>
-    <string name="pile_action_withdraw">Withdraw</string>
+    <string name="pile_action_withdraw">Withdraw from pile</string>
     <string name="pile_history_entry_type_starter">Starter amount</string>
     <string name="pile_history_entry_type_auto_contribution">Auto contribution</string>
     <string name="pile_history_entry_type_deposit">Added to pile</string>
@@ -613,6 +613,7 @@
     <string name="pile_saving_freely_label">Saving freely, no goal</string>
     <string name="pile_progress_label">Progress</string>
     <string name="pile_projected_completion_label">On track for</string>
+    <string name="withdraw">Withdraw</string>
 
     <plurals name="transaction_deleted">
         <item quantity="one">Transaction Deleted</item>
