@@ -1,20 +1,35 @@
 package dev.ridill.oar.moneyPiles.presentation.nav
 
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.metadata
+import androidx.navigation3.ui.NavDisplay
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.ridill.oar.application.NAV_ANIM_SCALE
 import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.components.slideInVerticallyWithFadeIn
+import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileRoute
 import dev.ridill.oar.core.ui.navigation.AllMoneyPilesRoute
-import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
+import dev.ridill.oar.core.ui.navigation.CycleSelectedResult
+import dev.ridill.oar.core.ui.navigation.CycleSelectionSheetRoute
+import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.MoneyPileDetailsRoute
 import dev.ridill.oar.core.ui.navigation.MoneyPileFundMovementRoute
@@ -25,7 +40,7 @@ import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileScreen
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileViewModel
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesScreen
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesViewModel
-import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundSheetContent
+import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundScreen
 import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundViewModel
 import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailScreen
 import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailViewModel
@@ -162,7 +177,43 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
     }
 
     entry<MoneyPileFundMovementRoute>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
+        metadata = metadata {
+            val slideAnimationSpec: FiniteAnimationSpec<IntOffset> = motionScheme.slowSpatialSpec()
+            val fadeAnimationSpec: FiniteAnimationSpec<Float> = motionScheme.slowSpatialSpec()
+            put(NavDisplay.TransitionKey) {
+                slideInVerticallyWithFadeIn(
+                    initialOffsetY = { it },
+                    slideAnimationSpec = slideAnimationSpec,
+                    fadeAnimationSpec = fadeAnimationSpec,
+                ) togetherWith scaleOut(
+                    animationSpec = fadeAnimationSpec,
+                    targetScale = NAV_ANIM_SCALE,
+                    transformOrigin = TransformOrigin.Center,
+                ) + fadeOut(animationSpec = fadeAnimationSpec)
+            }
+            put(NavDisplay.PopTransitionKey) {
+                scaleIn(
+                    animationSpec = fadeAnimationSpec,
+                    initialScale = NAV_ANIM_SCALE,
+                    transformOrigin = TransformOrigin.Center,
+                ) + fadeIn(animationSpec = fadeAnimationSpec) togetherWith slideOutVerticallyWithFadeOut(
+                    targetOffsetY = { it },
+                    slideAnimationSpec = slideAnimationSpec,
+                    fadeAnimationSpec = fadeAnimationSpec,
+                )
+            }
+            put(NavDisplay.PredictivePopTransitionKey) {
+                scaleIn(
+                    animationSpec = fadeAnimationSpec,
+                    initialScale = NAV_ANIM_SCALE,
+                    transformOrigin = TransformOrigin.Center,
+                ) + fadeIn(animationSpec = fadeAnimationSpec) togetherWith slideOutVerticallyWithFadeOut(
+                    targetOffsetY = { it },
+                    slideAnimationSpec = slideAnimationSpec,
+                    fadeAnimationSpec = fadeAnimationSpec,
+                )
+            }
+        }
     ) { route ->
         val viewModel: MovePileFundViewModel =
             hiltViewModel<MovePileFundViewModel, MovePileFundViewModel.Factory>(
@@ -170,7 +221,8 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
             )
         val state by viewModel.state.collectAsStateWithLifecycle()
         val resultBus = LocalResultBus.current
-        CollectFlowEffect(viewModel.events, resultBus) { event ->
+        val snackbarController = rememberSnackbarController()
+        CollectFlowEffect(viewModel.events, resultBus, snackbarController) { event ->
             when (event) {
                 is MovePileFundViewModel.MovePileFundEvent.FundMoved -> {
                     resultBus.sendResult(
@@ -181,13 +233,31 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
                     )
                     navigator.goBack()
                 }
+
+                is MovePileFundViewModel.MovePileFundEvent.ShowUiMessage -> {
+                    snackbarController.showSnackbar(event.uiText)
+                }
             }
         }
-        MovePileFundSheetContent(
+
+        ResultEffect<CycleSelectedResult> { result ->
+            viewModel.onCycleSelect(result.id)
+        }
+
+        MovePileFundScreen(
             movement = route.movement,
             state = state,
             amountInputState = viewModel.amountInputState,
             actions = viewModel,
+            navigateUp = navigator::goBack,
+            navigateToCycleSelection = {
+                navigator.navigate(
+                    CycleSelectionSheetRoute(
+                        preselectedId = state.selectedCycleId ?: INVALID_ID_LONG
+                    )
+                )
+            },
+            snackbarController = snackbarController
         )
     }
 }
