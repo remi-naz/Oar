@@ -169,6 +169,9 @@ private fun CycleBarColumn(
     val animatedOutgoingFraction = animateFloatAsState(
         targetValue = (outgoing / maxValue).toFloat()
     )
+    val animatedIncomingFraction = animateFloatAsState(
+        targetValue = (incoming / maxValue).toFloat()
+    )
     val containerColorAlpha = animateFloatAsState(
         if (selected) 1f else ContentAlpha.PERCENT_50
     )
@@ -191,7 +194,7 @@ private fun CycleBarColumn(
                 .clickable(onClick = onClick)
                 .drawWithCache {
                     val outgoingHeightPx = size.height * animatedOutgoingFraction.value
-                    val incomingHeightPx = size.height - outgoingHeightPx
+                    val incomingHeightPx = size.height * animatedIncomingFraction.value
                     onDrawBehind {
                         translate(
                             top = size.height - outgoingHeightPx
@@ -207,15 +210,19 @@ private fun CycleBarColumn(
                             )
                         }
 
-                        drawOutline(
-                            outline = barShape.createOutline(
-                                size = size.copy(height = incomingHeightPx),
-                                layoutDirection = layoutDirection,
-                                density = this
-                            ),
-                            color = PositiveGreen,
-                            alpha = containerColorAlpha.value,
-                        )
+                        translate(
+                            top = size.height - outgoingHeightPx - incomingHeightPx
+                        ) {
+                            drawOutline(
+                                outline = barShape.createOutline(
+                                    size = size.copy(height = incomingHeightPx),
+                                    layoutDirection = layoutDirection,
+                                    density = this
+                                ),
+                                color = PositiveGreen,
+                                alpha = containerColorAlpha.value,
+                            )
+                        }
                     }
                 }
         )
