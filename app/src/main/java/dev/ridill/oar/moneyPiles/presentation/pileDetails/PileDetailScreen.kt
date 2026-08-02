@@ -54,7 +54,7 @@ import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.orZero
-import dev.ridill.oar.core.ui.components.AmountWithTypeIndicator
+import dev.ridill.oar.core.ui.components.AmountWithMovementIndicator
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.BodyMediumText
 import dev.ridill.oar.core.ui.components.DisplaySmallText
@@ -475,7 +475,7 @@ private fun PileActionsBar(
                     onClick = onWithdrawClick,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(stringResource(R.string.pile_action_withdraw))
+                    Text(stringResource(R.string.withdraw))
                 }
             }
             Button(
@@ -534,9 +534,9 @@ private fun PileHistoryItem(
                 Text(timestamp.format(DateUtil.Formatters.MMM_ddth_spaceSep))
             },
             trailingContent = {
-                AmountWithTypeIndicator(
+                AmountWithMovementIndicator(
                     value = TextFormat.currency(amount, currency),
-                    type = movement,
+                    movement = movement,
                 )
             }
         ) {

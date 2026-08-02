@@ -6,6 +6,7 @@ import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
 import dev.ridill.oar.moneyPiles.domain.repository.MoneyPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.PileFundMovementRepository
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 internal class PileFundMovementRepositoryImpl(
     private val pileRepo: MoneyPileRepository,
@@ -16,13 +17,15 @@ internal class PileFundMovementRepositoryImpl(
     override suspend fun movePileFund(
         pileId: Long,
         amount: Double,
-        movement: FundMovement
+        movement: FundMovement,
+        timestamp: LocalDateTime
     ) {
         pileRepo.addEntryToPile(
             pileId = pileId,
             amount = amount,
             movement = movement,
-            source = ContributionSource.MANUAL
+            source = ContributionSource.MANUAL,
+            timestamp = timestamp
         )
     }
 }
