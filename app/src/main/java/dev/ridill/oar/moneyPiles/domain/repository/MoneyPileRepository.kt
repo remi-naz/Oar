@@ -15,6 +15,7 @@ interface MoneyPileRepository {
         amount: Double,
         movement: FundMovement,
         source: ContributionSource,
-        timestamp: LocalDateTime = DateUtil.now()
+        timestamp: LocalDateTime = DateUtil.now(),
+        transactionId: Long? = null,
     ): Long
 }

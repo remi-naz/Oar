@@ -644,4 +644,7 @@
     <string name="pile_progress_label">Progress</string>
     <string name="pile_projected_completion_label">On track for</string>
     <string name="withdraw">Withdraw</string>
+    <string name="error_pile_not_found">Pile not found</string>
+    <string name="pile_tx_linked_tx_note">Contribution to \'%s\'</string>
+    <string name="error_no_cycle_selected">Cycle not selected</string>
 </resources>

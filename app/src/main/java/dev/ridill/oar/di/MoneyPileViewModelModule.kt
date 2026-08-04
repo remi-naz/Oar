@@ -1,9 +1,11 @@
 package dev.ridill.oar.di
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ridill.oar.aggregations.domain.repository.AggregationsRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.EventBus
@@ -23,6 +25,7 @@ import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileViewModel
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesViewModel
 import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundViewModel
 import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailViewModel
+import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 
 @Module
@@ -77,9 +80,15 @@ object MoneyPileViewModelModule {
 
     @Provides
     fun provideMPileFundMovementRepository(
+        db: OarDatabase,
         pileRepo: MoneyPileRepository,
+        transactionRepo: TransactionRepository,
+        @ApplicationContext context: Context,
     ): PileFundMovementRepository = PileFundMovementRepositoryImpl(
+        db = db,
         pileRepo = pileRepo,
+        transactionRepo = transactionRepo,
+        context = context,
     )
 
     @Provides

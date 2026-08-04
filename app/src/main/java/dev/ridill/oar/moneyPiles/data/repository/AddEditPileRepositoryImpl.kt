@@ -39,7 +39,8 @@ internal class AddEditPileRepositoryImpl(
                     amount = starterAmount,
                     movement = FundMovement.IN,
                     contributionSource = ContributionSource.STARTER,
-                    createdTimestamp = DateUtil.now()
+                    createdTimestamp = DateUtil.now(),
+                    transactionId = null,
                 )
                 pileTransactionDao.upsert(transaction)
             }
