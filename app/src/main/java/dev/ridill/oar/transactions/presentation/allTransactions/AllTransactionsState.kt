@@ -6,7 +6,7 @@ import dev.ridill.oar.transactions.domain.model.AggregateAmountItem
 import dev.ridill.oar.transactions.domain.model.TransactionTypeFilter
 
 data class AllTransactionsState(
-    val searchModeActive: Boolean = false,
+    val searchBarPlaceholder: UiText = UiText.DynamicString(""),
     val selectedCycleIds: Set<Long> = emptySet(),
     val selectedTransactionTypeFilter: TransactionTypeFilter = TransactionTypeFilter.ALL,
     val aggregatesList: List<AggregateAmountItem> = emptyList(),

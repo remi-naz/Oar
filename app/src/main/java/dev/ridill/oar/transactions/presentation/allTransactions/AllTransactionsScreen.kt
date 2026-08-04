@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,14 +30,17 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarState
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SheetValue
@@ -50,22 +51,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
@@ -73,7 +76,6 @@ import dev.ridill.oar.R
 import dev.ridill.oar.aggregations.presentation.AmountAggregatesList
 import dev.ridill.oar.budgetCycles.domain.model.CycleIndicator
 import dev.ridill.oar.core.domain.util.DateUtil
-import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.ConfirmationDialog
 import dev.ridill.oar.core.ui.components.CreateFloatingActionMenu
@@ -131,10 +133,13 @@ fun AllTransactionsScreen(
         onBack = actions::onDismissMultiSelectionMode
     )
 
-    BackHandler(
-        enabled = state.searchModeActive,
-        onBack = { actions.onSearchModeToggle(false) }
-    )
+    val searchBarState = rememberSearchBarState()
+    LaunchedEffect(searchBarState) {
+        snapshotFlow { searchBarState.currentValue }
+            .collect {
+                actions.onSearchBarValueChange(it)
+            }
+    }
 
     val coroutineScope = rememberCoroutineScope()
     var listScrollJob: Job? = remember { null }
@@ -147,8 +152,8 @@ fun AllTransactionsScreen(
         snackbarController = snackbarController,
         topBar = {
             AllTransactionsTopAppBar(
-                searchModeActive = state.searchModeActive,
-                onSearchModeToggle = actions::onSearchModeToggle,
+                placeholder = state.searchBarPlaceholder,
+                searchBarState = searchBarState,
                 searchQueryState = searchQueryState,
                 onClearSearchQuery = actions::onClearSearchQuery,
                 searchResults = searchResultsLazyPagingItems,
@@ -162,25 +167,23 @@ fun AllTransactionsScreen(
             )
         },
         floatingActionButton = {
-            FadedVisibility(!state.searchModeActive) {
-                CreateFloatingActionMenu(
-                    onOptionClick = { option ->
-                        when (option) {
-                            CreateOption.CREATE_TRANSACTION -> {
-                                navigateToAddEditTransaction(null)
-                            }
+            CreateFloatingActionMenu(
+                onOptionClick = { option ->
+                    when (option) {
+                        CreateOption.CREATE_TRANSACTION -> {
+                            navigateToAddEditTransaction(null)
+                        }
 
-                            CreateOption.CREATE_SCHEDULE -> {
-                                navigateToCreateSchedule()
-                            }
+                        CreateOption.CREATE_SCHEDULE -> {
+                            navigateToCreateSchedule()
+                        }
 
-                            CreateOption.CREATE_FOLDER -> {
-                                navigateToCreateFolder()
-                            }
+                        CreateOption.CREATE_FOLDER -> {
+                            navigateToCreateFolder()
                         }
                     }
-                )
-            }
+                }
+            )
         },
         bottomBar = {
             AnimatedVisibility(
@@ -359,8 +362,8 @@ fun AllTransactionsScreen(
 
 @Composable
 private fun AllTransactionsTopAppBar(
-    searchModeActive: Boolean,
-    onSearchModeToggle: (Boolean) -> Unit,
+    placeholder: UiText,
+    searchBarState: SearchBarState,
     searchQueryState: TextFieldState,
     onClearSearchQuery: () -> Unit,
     searchResults: LazyPagingItems<TransactionEntry>,
@@ -376,27 +379,63 @@ private fun AllTransactionsTopAppBar(
     val isQueryNotEmpty by remember {
         derivedStateOf { searchQueryState.text.isNotEmpty() }
     }
-    val searchBarHorizontalPadding by animateDpAsState(
-        targetValue = if (searchModeActive) Dp.Zero else MaterialTheme.spacing.medium,
-        label = "SearchBarHorizontalPadding"
-    )
+    val coroutineScope = rememberCoroutineScope()
+    val inputField = @Composable {
+        SearchBarDefaults.InputField(
+            textFieldState = searchQueryState,
+            searchBarState = searchBarState,
+            onSearch = {
+                coroutineScope.launch { searchBarState.animateToCollapsed() }
+            },
+            placeholder = {
+                if (searchBarState.currentValue == SearchBarValue.Expanded) {
+                    Text(
+                        text = stringResource(R.string.all_transaction_search_placeholder),
+                        modifier = Modifier
+                            .clearAndSetSemantics {}
+                    )
+                } else {
+                    AnimatedContent(
+                        targetState = placeholder.asString(),
+                        label = "SearchBarPlaceholder",
+                        transitionSpec = {
+                            slideInVerticallyWithFadeIn(
+                                initialOffsetY = { it / 5 }
+                            ) togetherWith slideOutVerticallyWithFadeOut(
+                                targetOffsetY = { it / 5 }
+                            )
+                        },
+                    ) { text ->
+                        Text(
+                            text = text,
+                            modifier = Modifier
+                                .clearAndSetSemantics {}
+                        )
+                    }
+                }
+            },
+            trailingIcon = if (isQueryNotEmpty) {
+                {
+                    IconButton(onClick = onClearSearchQuery) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = stringResource(R.string.cd_clear_search_query)
+                        )
+                    }
+                }
+            } else null,
+            leadingIcon = if (searchBarState.currentValue == SearchBarValue.Expanded) {
+                {
+                    BackArrowButton(
+                        onClick = { coroutineScope.launch { searchBarState.animateToCollapsed() } }
+                    )
+                }
+            } else null
+        )
+    }
     AnimatedContent(
         targetState = multiSelectionModeActive,
-        transitionSpec = {
-            if (targetState) {
-                slideInVerticallyWithFadeIn { it / 2 }
-                    .togetherWith(
-                        slideOutVerticallyWithFadeOut { -it / 2 }
-                    )
-            } else {
-                slideInVerticallyWithFadeIn { -it / 2 }
-                    .togetherWith(
-                        slideOutVerticallyWithFadeOut { it / 2 }
-                    )
-            }
-        },
-        label = "MultiSelectionModeActive",
-        modifier = modifier
+        modifier = modifier,
     ) { active ->
         if (active) {
             TopAppBar(
@@ -426,64 +465,27 @@ private fun AllTransactionsTopAppBar(
                 }
             )
         } else {
-            SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        state = searchQueryState,
-                        onSearch = {},
-                        expanded = searchModeActive,
-                        onExpandedChange = onSearchModeToggle,
-                        leadingIcon = {
-                            BackArrowButton(
-                                onClick = {
-                                    if (searchModeActive) onSearchModeToggle(false)
-                                    else navigateUp()
-                                }
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchModeActive) {
-                                FadedVisibility(
-                                    visible = isQueryNotEmpty,
-                                    label = "ClearQueryButton"
-                                ) {
-                                    IconButton(onClick = onClearSearchQuery) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Close,
-                                            contentDescription = stringResource(R.string.cd_clear_search_query)
-                                        )
-                                    }
-                                }
-                            } else {
-                                IconButton(onClick = onFilterOptionsClick) {
-                                    Icon(
-                                        imageVector = Icons.Default.FilterList,
-                                        contentDescription = stringResource(id = R.string.cd_filter_options)
-                                    )
-                                }
-                            }
-                        },
-                        placeholder = { Text(stringResource(R.string.destination_all_transactions)) },
+            AppBarWithSearch(
+                state = searchBarState,
+                inputField = inputField,
+                navigationIcon = {
+                    BackArrowButton(
+                        onClick = navigateUp,
                     )
                 },
-                expanded = searchModeActive,
-                onExpandedChange = onSearchModeToggle,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .imePadding()
-                    .layout { measurable, constraints ->
-                        val searchbarWidth =
-                            constraints.maxWidth - (searchBarHorizontalPadding * 2f).roundToPx()
-                        val searchBarPlaceable = measurable.measure(
-                            constraints = constraints.copy(
-                                maxWidth = searchbarWidth,
-                                minWidth = searchbarWidth
-                            )
+                actions = {
+                    IconButton(onClick = onFilterOptionsClick) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = stringResource(id = R.string.cd_filter_options)
                         )
-                        layout(searchBarPlaceable.width, searchBarPlaceable.height) {
-                            searchBarPlaceable.placeRelative(0, 0)
-                        }
                     }
+                }
+            )
+
+            ExpandedFullScreenSearchBar(
+                state = searchBarState,
+                inputField = inputField,
             ) {
                 LazyColumn(
                     contentPadding = PaddingValues(

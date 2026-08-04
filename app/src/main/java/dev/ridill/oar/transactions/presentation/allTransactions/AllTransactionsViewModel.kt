@@ -2,6 +2,7 @@ package dev.ridill.oar.transactions.presentation.allTransactions
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.material3.SearchBarValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,12 +25,17 @@ import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.transactions.domain.model.AllTransactionsMultiSelectionOption
 import dev.ridill.oar.transactions.domain.model.TransactionTypeFilter
 import dev.ridill.oar.transactions.domain.repository.AllTransactionsRepository
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class AllTransactionsViewModel @Inject constructor(
@@ -39,7 +45,9 @@ class AllTransactionsViewModel @Inject constructor(
     private val eventBus: EventBus<AllTransactionsEvent>
 ) : ViewModel(), AllTransactionsActions {
 
-    private val searchModeActive = savedStateHandle.getStateFlow(SEARCH_MODE_ACTIVE, false)
+    private val searchBarPlaceholder =
+        MutableStateFlow<UiText>(UiText.StringResource(R.string.all_transaction_search_placeholder))
+
     val searchQueryState = savedStateHandle.saveable(
         key = "SEARCH_QUERY_STATE",
         saver = TextFieldState.Saver,
@@ -118,7 +126,7 @@ class AllTransactionsViewModel @Inject constructor(
         .getStateFlow(SHOW_FILTER_OPTIONS, false)
 
     val state = combineTuple(
-        searchModeActive,
+        searchBarPlaceholder,
         selectedCycleIds,
         transactionTypeFilter,
         aggregatesList,
@@ -133,7 +141,7 @@ class AllTransactionsViewModel @Inject constructor(
         selectedTagIds,
         showAggregates
     ).mapLatest { (
-                      searchModeActive,
+                      searchBarPlaceholder,
                       selectedCycleIds,
                       transactionTypeFilter,
                       aggregatesList,
@@ -149,7 +157,7 @@ class AllTransactionsViewModel @Inject constructor(
                       showAggregates
                   ) ->
         AllTransactionsState(
-            searchModeActive = searchModeActive,
+            searchBarPlaceholder = searchBarPlaceholder,
             selectedCycleIds = selectedCycleIds,
             selectedTransactionTypeFilter = transactionTypeFilter,
             aggregatesList = aggregatesList,
@@ -164,19 +172,41 @@ class AllTransactionsViewModel @Inject constructor(
             selectedTagFilterIds = selectedTagIds,
             showAggregates = showAggregates
         )
-    }.asStateFlow(viewModelScope, AllTransactionsState())
+    }
+        .onStart { runPlaceholderChanges() }
+        .asStateFlow(viewModelScope, AllTransactionsState())
 
     val events = eventBus.eventFlow
 
-    override fun onSearchClick() {
-        savedStateHandle[SEARCH_MODE_ACTIVE] = true
+
+    private fun runPlaceholderChanges() {
+        viewModelScope.launch {
+            delay(2.seconds)
+            val selection = listOf(
+                R.string.search_eg_placeholder_food_out_with_friends,
+                R.string.search_eg_placeholder_dumb_purchase,
+                R.string.search_eg_placeholder_not_regrettable_purchase,
+                R.string.search_eg_placeholder_rent_and_utils,
+                R.string.search_eg_placeholder_coffee_run,
+                R.string.search_eg_placeholder_weekly_groceries,
+                R.string.search_eg_placeholder_subscription_i_forgot_about,
+                R.string.search_eg_placeholder_gift_for_someone,
+                R.string.search_eg_placeholder_weekend_getaway,
+                R.string.search_eg_placeholder_late_night_snack,
+                R.string.search_eg_placeholder_online_shopping_spree,
+                R.string.search_eg_placeholder_gas_money,
+                R.string.search_eg_placeholder_amount_decimal,
+                R.string.search_eg_placeholder_amount_round,
+            ).random()
+
+            searchBarPlaceholder.update { UiText.StringResource(selection) }
+            delay(2.seconds)
+            searchBarPlaceholder.update { UiText.StringResource(R.string.all_transaction_search_placeholder) }
+        }
     }
 
-    override fun onSearchModeToggle(active: Boolean) {
-        savedStateHandle[SEARCH_MODE_ACTIVE] = active
-        if (!active) {
-            searchQueryState.clearText()
-        }
+    override fun onSearchBarValueChange(value: SearchBarValue) {
+        searchQueryState.clearText()
     }
 
     override fun onClearSearchQuery() {
@@ -431,7 +461,6 @@ class AllTransactionsViewModel @Inject constructor(
     }
 }
 
-private const val SEARCH_MODE_ACTIVE = "SEARCH_MODE_ACTIVE"
 private const val SELECTED_CYCLE_IDS = "SELECTED_CYCLE_IDS"
 private const val TRANSACTION_TYPE_FILTER = "TRANSACTION_TYPE_FILTER"
 private const val SELECTED_TAG_IDS = "SELECTED_TAG_IDS"
