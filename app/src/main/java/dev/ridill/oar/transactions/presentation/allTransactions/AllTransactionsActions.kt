@@ -1,11 +1,11 @@
 package dev.ridill.oar.transactions.presentation.allTransactions
 
+import androidx.compose.material3.SearchBarValue
 import dev.ridill.oar.transactions.domain.model.AllTransactionsMultiSelectionOption
 import dev.ridill.oar.transactions.domain.model.TransactionTypeFilter
 
 interface AllTransactionsActions {
-    fun onSearchClick()
-    fun onSearchModeToggle(active: Boolean)
+    fun onSearchBarValueChange(value: SearchBarValue)
     fun onClearSearchQuery()
     fun onClearAllFiltersClick()
     fun onTypeFilterSelect(filter: TransactionTypeFilter)

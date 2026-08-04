@@ -241,6 +241,15 @@
         <item quantity="one">Remove Transaction from Folder?</item>
         <item quantity="other">Remove Transactions from Folder?</item>
     </plurals>
+    <plurals name="transaction_deleted">
+        <item quantity="one">Transaction Deleted</item>
+        <item quantity="other">Transactions Deleted</item>
+    </plurals>
+    <plurals name="transaction_removed_from_this_folder">
+        <item quantity="one">Transaction removed from this folder</item>
+        <item quantity="other">Transactions removed from this folder</item>
+    </plurals>
+
     <string name="delete_transaction_confirmation_note">Note: If this transaction was created by a schedule, deleting will not revert the schedule state</string>
     <string name="delete_tag_confirmation_note">Note: Transactions assigned with this tag will not be deleted</string>
     <string name="delete_folder_confirmation_note">Note: Deleting folder alone will not delete the transactions associated with this folder</string>
@@ -526,12 +535,19 @@
     <string name="create_colon_label">Create: %s</string>
     <string name="cd_tap_to_see_cycle_aggregate">Tap to see cycle aggregate</string>
     <string name="repeats">Repeats</string>
-    <plurals name="transaction_deleted">
-        <item quantity="one">Transaction Deleted</item>
-        <item quantity="other">Transactions Deleted</item>
-    </plurals>
-    <plurals name="transaction_removed_from_this_folder">
-        <item quantity="one">Transaction removed from this folder</item>
-        <item quantity="other">Transactions removed from this folder</item>
-    </plurals>
+    <string name="all_transaction_search_placeholder">Search by note or amount</string>
+    <string name="search_eg_placeholder_food_out_with_friends">e.g. Food out with friends</string>
+    <string name="search_eg_placeholder_dumb_purchase">e.g. That dumb thing I bought</string>
+    <string name="search_eg_placeholder_not_regrettable_purchase">e.g. Not a regrettable purchase</string>
+    <string name="search_eg_placeholder_rent_and_utils">e.g. Rent &amp; Utils</string>
+    <string name="search_eg_placeholder_coffee_run">e.g. Coffee run</string>
+    <string name="search_eg_placeholder_weekly_groceries">e.g. Weekly groceries</string>
+    <string name="search_eg_placeholder_subscription_i_forgot_about">e.g. That subscription I forgot about</string>
+    <string name="search_eg_placeholder_gift_for_someone">e.g. Gift for someone</string>
+    <string name="search_eg_placeholder_weekend_getaway">e.g. Weekend getaway</string>
+    <string name="search_eg_placeholder_late_night_snack">e.g. Late night snack</string>
+    <string name="search_eg_placeholder_online_shopping_spree">e.g. Online shopping spree</string>
+    <string name="search_eg_placeholder_gas_money">e.g. Gas money</string>
+    <string name="search_eg_placeholder_amount_decimal">e.g. 45.99</string>
+    <string name="search_eg_placeholder_amount_round">e.g. 1200</string>
 </resources>
