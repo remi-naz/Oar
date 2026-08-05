@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "10619b522c109ae2488e133caf37e125",
+    "identityHash": "028816447cf7f21ed8b0f3313ec81bf7",
     "entities": [
       {
         "tableName": "budget_cycle_table",
@@ -514,7 +514,7 @@
       },
       {
         "tableName": "money_pile_transactions_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pile_id` INTEGER NOT NULL, `amount` REAL NOT NULL, `movement` TEXT NOT NULL, `contribution_source` TEXT NOT NULL, `created_timestamp` TEXT NOT NULL, FOREIGN KEY(`pile_id`) REFERENCES `money_pile_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pile_id` INTEGER NOT NULL, `amount` REAL NOT NULL, `movement` TEXT NOT NULL, `contribution_source` TEXT NOT NULL, `created_timestamp` TEXT NOT NULL, `transaction_id` INTEGER, FOREIGN KEY(`pile_id`) REFERENCES `money_pile_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`transaction_id`) REFERENCES `transaction_table`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "id",
@@ -551,6 +551,11 @@
             "columnName": "created_timestamp",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transaction_id",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -569,6 +574,15 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_money_pile_transactions_table_pile_id_created_timestamp` ON `${TABLE_NAME}` (`pile_id`, `created_timestamp`)"
+          },
+          {
+            "name": "index_money_pile_transactions_table_transaction_id",
+            "unique": false,
+            "columnNames": [
+              "transaction_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_money_pile_transactions_table_transaction_id` ON `${TABLE_NAME}` (`transaction_id`)"
           }
         ],
         "foreignKeys": [
@@ -582,6 +596,17 @@
             "referencedColumns": [
               "id"
             ]
+          },
+          {
+            "table": "transaction_table",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "transaction_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
           }
         ]
       }
@@ -589,7 +614,7 @@
     "views": [
       {
         "viewName": "transaction_details_view",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT tx.id AS transactionId,\n        tx.note AS transactionNote,\n        tx.amount AS transactionAmount,\n        tx.timestamp AS transactionTimestamp,\n        tx.type AS fundMovement,\n        tx.currency_code AS currencyCode,\n        cyc.id AS cycleId,\n        cyc.start_date AS cycleStartDate,\n        cyc.end_date AS cycleEndDate,\n        tag.id AS tagId,\n        tag.name AS tagName,\n        tag.color_code AS tagColorCode,\n        tag.created_timestamp AS tagCreatedTimestamp,\n        folder.id AS folderId,\n        folder.name AS folderName,\n        folder.created_timestamp AS folderCreatedTimestamp,\n        tx.schedule_id as scheduleId,\n        (CASE WHEN 1 IN (tx.is_excluded, tag.is_excluded, folder.is_excluded) THEN 1 ELSE 0 END) AS excluded\n        FROM transaction_table tx\n        JOIN budget_cycle_table cyc ON tx.cycle_id = cyc.id\n        LEFT OUTER JOIN tag_table tag ON tx.tag_id = tag.id\n        LEFT OUTER JOIN folder_table folder ON tx.folder_id = folder.id"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT tx.id AS transactionId,\n        tx.note AS transactionNote,\n        tx.amount AS transactionAmount,\n        tx.timestamp AS transactionTimestamp,\n        tx.type AS fundMovement,\n        tx.currency_code AS currencyCode,\n        cyc.id AS cycleId,\n        cyc.start_date AS cycleStartDate,\n        cyc.end_date AS cycleEndDate,\n        tag.id AS tagId,\n        tag.name AS tagName,\n        tag.color_code AS tagColorCode,\n        tag.created_timestamp AS tagCreatedTimestamp,\n        folder.id AS folderId,\n        folder.name AS folderName,\n        folder.created_timestamp AS folderCreatedTimestamp,\n        tx.schedule_id AS scheduleId,\n        pile.id AS pileId,\n        pile.name AS pileName,\n        pile.icon AS pileIcon,\n        pile.color AS pileColorCode,\n        (CASE WHEN 1 IN (tx.is_excluded, tag.is_excluded, folder.is_excluded) THEN 1 ELSE 0 END) AS excluded\n        FROM transaction_table tx\n        JOIN budget_cycle_table cyc ON tx.cycle_id = cyc.id\n        LEFT OUTER JOIN tag_table tag ON tx.tag_id = tag.id\n        LEFT OUTER JOIN folder_table folder ON tx.folder_id = folder.id\n        LEFT OUTER JOIN money_pile_transactions_table ptx ON tx.id = ptx.transaction_id\n        LEFT OUTER JOIN money_pile_table pile ON ptx.pile_id = pile.id"
       },
       {
         "viewName": "money_pile_aggregate_view",
@@ -602,7 +627,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '10619b522c109ae2488e133caf37e125')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '028816447cf7f21ed8b0f3313ec81bf7')"
     ]
   }
 }

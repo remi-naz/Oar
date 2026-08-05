@@ -1,8 +1,8 @@
 package dev.ridill.oar.transactions.domain.repository
 
 import androidx.paging.PagingData
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
@@ -16,11 +16,11 @@ interface AllTransactionsRepository {
         tagIds: Set<Long>? = null,
         folderId: Long? = null,
         currency: Currency? = null
-    ): Flow<PagingData<TransactionListItemUIModel>>
+    ): Flow<PagingData<DateSeparatedTransactionEntryUiModel>>
 
     fun getSearchResults(
         query: String?
-    ): Flow<PagingData<TransactionEntry>>
+    ): Flow<PagingData<TransactionEntryUiModel>>
 
     suspend fun deleteTransactionsByIds(ids: Set<Long>)
     suspend fun setTagIdToTransactions(tagId: Long?, transactionIds: Set<Long>)

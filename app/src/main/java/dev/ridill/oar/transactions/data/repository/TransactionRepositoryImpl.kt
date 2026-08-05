@@ -14,11 +14,12 @@ import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.TransactionPagingSource
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import dev.ridill.oar.transactions.data.local.views.TransactionDetailsView
+import dev.ridill.oar.transactions.data.toDateSeparatedTransactionEntryUiModel
 import dev.ridill.oar.transactions.data.toTransaction
-import dev.ridill.oar.transactions.data.toTransactionListItem
+import dev.ridill.oar.transactions.data.toTransactionEntryUiModel
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.model.Transaction
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,12 +29,12 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.util.Currency
 
-class TransactionRepositoryImpl(
+internal class TransactionRepositoryImpl(
     private val dao: TransactionDao,
     private val db: OarDatabase,
     @ApplicationScope private val applicationScope: CoroutineScope
 ) : TransactionRepository {
-    override fun getAllTransactionsPaged(
+    override fun getTransactionEntriesPaged(
         query: String?,
         cycleIds: Set<Long>?,
         type: FundMovement?,
@@ -41,7 +42,7 @@ class TransactionRepositoryImpl(
         tagIds: Set<Long>?,
         folderId: Long?,
         currency: Currency?
-    ): Flow<PagingData<TransactionEntry>> = Pager(
+    ): Flow<PagingData<TransactionEntryUiModel>> = Pager(
         config = PagingConfig(pageSize = UtilConstants.DEFAULT_PAGE_SIZE),
         pagingSourceFactory = {
             TransactionPagingSource(
@@ -58,9 +59,9 @@ class TransactionRepositoryImpl(
             )
         }
     ).flow
-        .mapLatest { it.map(TransactionDetailsView::toTransactionListItem) }
+        .mapLatest { it.map(TransactionDetailsView::toTransactionEntryUiModel) }
 
-    override fun getDateSeparatedTransactions(
+    override fun getDateSeparatedTransactionEntriesPaged(
         query: String?,
         cycleIds: Set<Long>?,
         type: FundMovement?,
@@ -68,25 +69,33 @@ class TransactionRepositoryImpl(
         tagIds: Set<Long>?,
         folderId: Long?,
         currency: Currency?
-    ): Flow<PagingData<TransactionListItemUIModel>> = getAllTransactionsPaged(
-        query = query,
-        cycleIds = cycleIds,
-        type = type,
-        showExcluded = showExcluded,
-        tagIds = tagIds,
-        folderId = folderId,
-        currency = currency
-    ).mapLatest { pagingData ->
-        pagingData.map { TransactionListItemUIModel.TransactionItem(it) }
-    }.mapLatest { pagingData ->
-        pagingData
-            .insertSeparators<TransactionListItemUIModel.TransactionItem, TransactionListItemUIModel>
-            { before, after ->
-                if (before?.cycleEntry?.id != after?.cycleEntry?.id) after?.cycleEntry
-                    ?.let { TransactionListItemUIModel.CycleSeparator(it) }
-                else null
-            }
-    }
+    ): Flow<PagingData<DateSeparatedTransactionEntryUiModel>> = Pager(
+        config = PagingConfig(pageSize = UtilConstants.DEFAULT_PAGE_SIZE),
+        pagingSourceFactory = {
+            TransactionPagingSource(
+                dao = dao,
+                db = db,
+                applicationScope = applicationScope,
+                query = query,
+                cycleIds = cycleIds?.takeIf { it.isNotEmpty() },
+                type = type,
+                showExcluded = showExcluded,
+                tagIds = tagIds?.takeIf { it.isNotEmpty() },
+                folderId = folderId,
+                currencyCode = currency?.currencyCode
+            )
+        }
+    ).flow
+        .mapLatest { pagingData -> pagingData.map(TransactionDetailsView::toDateSeparatedTransactionEntryUiModel) }
+        .mapLatest { pagingData ->
+            pagingData
+                .insertSeparators<DateSeparatedTransactionEntryUiModel, DateSeparatedTransactionEntryUiModel>
+                { before, after ->
+                    if (before?.cycle?.id != after?.cycle?.id) after?.cycle
+                        ?.let { DateSeparatedTransactionEntryUiModel.CycleSeparator(it) }
+                    else null
+                }
+        }
 
     override suspend fun saveTransaction(
         cycleId: Long,

@@ -7,6 +7,7 @@ import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.aggregations.domain.repository.AggregationsRepository
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.dashboard.domain.repository.DashboardRepository
@@ -14,8 +15,7 @@ import dev.ridill.oar.schedules.data.local.SchedulesDao
 import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
 import dev.ridill.oar.schedules.data.toActiveSchedule
 import dev.ridill.oar.schedules.domain.model.ActiveSchedule
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlin.math.absoluteValue
 
-class DashboardRepositoryImpl(
+internal class DashboardRepositoryImpl(
     private val cycleRepo: BudgetCycleRepository,
     private val authRepo: AuthRepository,
     private val aggRepo: AggregationsRepository,
@@ -78,9 +78,9 @@ class DashboardRepositoryImpl(
         }
         .mapLatest { entities -> entities.map(ScheduleEntity::toActiveSchedule) }
 
-    override fun getTransactionsThisCycle(): Flow<PagingData<TransactionEntry>> = activeCycle()
-        .flatMapLatest { cycle ->
-            transactionRepo.getAllTransactionsPaged(
+    override fun getTransactionsThisCycle(): Flow<PagingData<TransactionEntryUiModel>> =
+        activeCycle().flatMapLatest { cycle ->
+            transactionRepo.getTransactionEntriesPaged(
                 cycleIds = cycle?.id?.let { setOf(it) }.orEmpty(),
                 type = FundMovement.OUT,
                 showExcluded = false,

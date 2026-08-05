@@ -77,9 +77,9 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.folders.domain.model.FolderTransactionsMultiSelectionOption
+import dev.ridill.oar.moneyPiles.presentation.components.ContributionTransactionItem
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.model.TagIndicator
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
 import dev.ridill.oar.transactions.presentation.components.NewTransactionFab
 import dev.ridill.oar.transactions.presentation.components.TransactionListItem
 import kotlinx.coroutines.flow.flowOf
@@ -87,10 +87,10 @@ import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun FolderDetailsScreen(
+internal fun FolderDetailsScreen(
     snackbarController: SnackbarController,
     state: FolderDetailsState,
-    transactionPagingItems: LazyPagingItems<TransactionListItemUIModel>,
+    transactionPagingItems: LazyPagingItems<DateSeparatedTransactionEntryUiModel>,
     actions: FolderDetailsActions,
     navigateToEditFolder: () -> Unit,
     navigateToAddEditTransaction: (Long?) -> Unit,
@@ -239,10 +239,10 @@ fun FolderDetailsScreen(
                 repeat(transactionPagingItems.itemCount) { index ->
                     transactionPagingItems[index]?.let { item ->
                         when (item) {
-                            is TransactionListItemUIModel.CycleSeparator -> {
+                            is DateSeparatedTransactionEntryUiModel.CycleSeparator -> {
                                 stickyHeader(
                                     key = "CycleId-${item.cycle.id}",
-                                    contentType = CycleIndicator::class
+                                    contentType = DateSeparatedTransactionEntryUiModel.CycleSeparator::class
                                 ) {
                                     ListSeparator(
                                         label = item.cycle.description,
@@ -256,10 +256,10 @@ fun FolderDetailsScreen(
                                 }
                             }
 
-                            is TransactionListItemUIModel.TransactionItem -> {
+                            is DateSeparatedTransactionEntryUiModel.DateSeparatedTransactionItem -> {
                                 item(
                                     key = item.id,
-                                    contentType = TransactionEntry::class
+                                    contentType = DateSeparatedTransactionEntryUiModel.DateSeparatedTransactionItem::class
                                 ) {
                                     val selected = item.id in state.selectedTransactionIds
                                     TransactionInFolderItem(
@@ -283,6 +283,26 @@ fun FolderDetailsScreen(
                                         showSwipePreview = state.shouldShowActionPreview && index == 1,
                                         modifier = Modifier
                                             .fillParentMaxWidth()
+                                            .animateItem()
+                                    )
+                                }
+                            }
+
+                            is DateSeparatedTransactionEntryUiModel.PileContribution -> {
+                                item(
+                                    key = item.id,
+                                    contentType = DateSeparatedTransactionEntryUiModel.PileContribution::class
+                                ) {
+                                    ContributionTransactionItem(
+                                        pileName = item.pileName,
+                                        pileColor = item.pileColor,
+                                        amount = TextFormat.currency(
+                                            item.amount,
+                                            item.currency
+                                        ),
+                                        timestamp = item.timestamp,
+                                        movement = item.movement,
+                                        modifier = Modifier
                                             .animateItem()
                                     )
                                 }
@@ -504,10 +524,10 @@ private fun PreviewFolderDetailsScreen() {
     val transactionPagingItems = flowOf(
         PagingData.from(
             listOf(
-                TransactionListItemUIModel.CycleSeparator(
+                DateSeparatedTransactionEntryUiModel.CycleSeparator(
                     CycleIndicator(1L, "August 2023")
                 ),
-                TransactionListItemUIModel.TransactionItem(
+                DateSeparatedTransactionEntryUiModel.DateSeparatedTransactionItem(
                     id = 1L,
                     note = "Sample Transaction",
                     amount = 100.0,
@@ -515,7 +535,7 @@ private fun PreviewFolderDetailsScreen() {
                     timestamp = LocalDateTime.now(),
                     type = FundMovement.OUT,
                     excluded = false,
-                    cycleEntry = CycleIndicator(1L, "August 2023"),
+                    cycle = CycleIndicator(1L, "August 2023"),
                     tag = null,
                     folder = null,
                     scheduleId = null
