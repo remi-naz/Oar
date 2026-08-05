@@ -32,7 +32,8 @@ internal class MoneyPileRepositoryImpl(
         amount: Double,
         movement: FundMovement,
         source: ContributionSource,
-        timestamp: LocalDateTime
+        timestamp: LocalDateTime,
+        transactionId: Long?
     ): Long = withContext(Dispatchers.IO) {
         val entity = MoneyPileTransactionsEntity(
             id = OarDatabase.DEFAULT_ID_LONG,
@@ -40,7 +41,8 @@ internal class MoneyPileRepositoryImpl(
             amount = amount,
             movement = movement,
             contributionSource = source,
-            createdTimestamp = timestamp
+            createdTimestamp = timestamp,
+            transactionId = transactionId
         )
 
         transactionDao.upsert(entity).first()

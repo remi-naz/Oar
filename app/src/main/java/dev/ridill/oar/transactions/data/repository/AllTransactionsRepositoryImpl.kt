@@ -6,14 +6,14 @@ import dev.ridill.oar.aggregations.data.local.AggregationsDao
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.repository.AllTransactionsRepository
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ import java.time.LocalDateTime
 import java.util.Currency
 import kotlin.math.absoluteValue
 
-class AllTransactionsRepositoryImpl(
+internal class AllTransactionsRepositoryImpl(
     private val db: OarDatabase,
     private val transactionsDao: TransactionDao,
     private val aggregationsDao: AggregationsDao,
@@ -41,7 +41,7 @@ class AllTransactionsRepositoryImpl(
         tagIds: Set<Long>?,
         folderId: Long?,
         currency: Currency?
-    ): Flow<PagingData<TransactionListItemUIModel>> = repo.getDateSeparatedTransactions(
+    ): Flow<PagingData<DateSeparatedTransactionEntryUiModel>> = repo.getDateSeparatedTransactionEntriesPaged(
         cycleIds = cycleIds,
         type = fundMovement,
         showExcluded = showExcluded,
@@ -50,8 +50,8 @@ class AllTransactionsRepositoryImpl(
         currency = currency
     )
 
-    override fun getSearchResults(query: String?): Flow<PagingData<TransactionEntry>> = repo
-        .getAllTransactionsPaged(query = query)
+    override fun getSearchResults(query: String?): Flow<PagingData<TransactionEntryUiModel>> = repo
+        .getTransactionEntriesPaged(query = query)
 
     override suspend fun setTagIdToTransactions(
         tagId: Long?,
