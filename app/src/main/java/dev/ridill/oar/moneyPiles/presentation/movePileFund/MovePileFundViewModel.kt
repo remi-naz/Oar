@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.Zero
@@ -176,15 +177,36 @@ class MovePileFundViewModel @AssistedInject constructor(
                 return@launch
             }
 
+            val cycleId = selectedCycleId.value
+            if (cycleId == null) {
+                eventBus.send(
+                    MovePileFundEvent.ShowUiMessage(
+                        UiText.StringResource(R.string.error_no_cycle_selected, isErrorText = true)
+                    )
+                )
+                return@launch
+            }
+
             _isLoading.update { true }
-            repo.movePileFund(
+
+            val result = repo.movePileFund(
                 pileId = route.pileId,
                 amount = amount,
                 movement = route.movement,
-                timestamp = timestamp.value
+                timestamp = timestamp.value,
+                cycleId = cycleId
             )
+
             _isLoading.update { false }
-            eventBus.send(MovePileFundEvent.FundMoved(movement = route.movement))
+            when (result) {
+                is Result.Error -> {
+                    eventBus.send(MovePileFundEvent.ShowUiMessage(result.message))
+                }
+
+                is Result.Success -> {
+                    eventBus.send(MovePileFundEvent.FundMoved(movement = route.movement))
+                }
+            }
         }
     }
 

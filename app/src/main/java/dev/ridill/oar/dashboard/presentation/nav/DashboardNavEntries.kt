@@ -19,6 +19,7 @@ import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.AllTransactionsRoute
 import dev.ridill.oar.core.ui.navigation.DashboardRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
+import dev.ridill.oar.core.ui.navigation.MoneyPileDetailsRoute
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.dashboard.presentation.DashboardScreen
@@ -72,6 +73,9 @@ fun EntryProviderScope<NavKey>.dashboardEntries(navigator: OarNavigator) {
             },
             navigateToAddEditSchedule = { id ->
                 navigator.navigate(AddEditScheduleRoute(scheduleId = id))
+            },
+            navigateToPileDetails = { id ->
+                navigator.navigate(MoneyPileDetailsRoute(id))
             },
             navigateTo = { navigator.navigate(it) }
         )

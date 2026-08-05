@@ -60,6 +60,7 @@
     <string name="cd_balance_and_budget_amounts">You have a balance of %1$s from your budget of %2$s</string>
     <string name="cd_debit_of_amount_for_note">Debit of %1$s for %2$s</string>
     <string name="cd_credit_of_amount_for_note">Credit of %1$s for %2$s</string>
+    <string name="cd_pile_contribution_of_amount_towards_pile">Pile contribution of %1$s towards %2$s</string>
     <string name="cd_debit_of_amount">Debit of %1$s</string>
     <string name="cd_credit_of_amount">Credit of %1$s</string>
     <string name="cd_content_desc_on_date_append">on %s</string>
@@ -644,4 +645,8 @@
     <string name="pile_progress_label">Progress</string>
     <string name="pile_projected_completion_label">On track for</string>
     <string name="withdraw">Withdraw</string>
+    <string name="error_pile_not_found">Pile not found</string>
+    <string name="pile_tx_linked_tx_note">Contribution to \'%s\'</string>
+    <string name="error_no_cycle_selected">Cycle not selected</string>
+    <string name="pile_contribution_transaction_supporting_text">Contributed to pile</string>
 </resources>
