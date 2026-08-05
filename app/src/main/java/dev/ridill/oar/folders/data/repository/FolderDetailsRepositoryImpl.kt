@@ -7,7 +7,7 @@ import dev.ridill.oar.folders.data.toFolderDetails
 import dev.ridill.oar.folders.domain.model.FolderDetails
 import dev.ridill.oar.folders.domain.repository.FolderDetailsRepository
 import dev.ridill.oar.transactions.data.local.TransactionDao
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 
-class FolderDetailsRepositoryImpl(
+internal class FolderDetailsRepositoryImpl(
     private val dao: FolderDao,
     private val transactionDao: TransactionDao,
     private val transactionRepo: TransactionRepository,
@@ -26,8 +26,8 @@ class FolderDetailsRepositoryImpl(
 
     override fun getTransactionsInFolderPaged(
         folderId: Long
-    ): Flow<PagingData<TransactionListItemUIModel>> = transactionRepo
-        .getDateSeparatedTransactions(folderId = folderId)
+    ): Flow<PagingData<DateSeparatedTransactionEntryUiModel>> = transactionRepo
+        .getDateSeparatedTransactionEntriesPaged(folderId = folderId)
 
     override suspend fun addTransactionsToFolderByIds(folderId: Long, transactionIds: Set<Long>) =
         withContext(Dispatchers.IO) {

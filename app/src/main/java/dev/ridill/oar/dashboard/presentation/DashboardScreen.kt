@@ -99,22 +99,24 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.core.ui.util.mergedContentDescription
+import dev.ridill.oar.moneyPiles.presentation.components.ContributionTransactionItem
 import dev.ridill.oar.schedules.domain.model.ActiveSchedule
 import dev.ridill.oar.schedules.presentation.components.ActiveScheduleItem
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import dev.ridill.oar.transactions.presentation.components.NewTransactionFab
 import dev.ridill.oar.transactions.presentation.components.TransactionListItem
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
-fun DashboardScreen(
+internal fun DashboardScreen(
     snackbarController: SnackbarController,
-    recentSpends: LazyPagingItems<TransactionEntry>,
+    recentSpends: LazyPagingItems<TransactionEntryUiModel>,
     state: DashboardState,
     navigateToAllTransactions: () -> Unit,
     navigateToAddEditTransaction: (id: Long?) -> Unit,
     navigateToAddEditSchedule: (id: Long) -> Unit,
-    navigateTo: (NavKey) -> Unit
+    navigateToPileDetails: (id: Long) -> Unit,
+    navigateTo: (NavKey) -> Unit,
 ) {
     val areActiveSchedulesEmpty by remember(state.activeSchedules) {
         derivedStateOf { state.activeSchedules.isEmpty() }
@@ -201,21 +203,49 @@ fun DashboardScreen(
                             items(
                                 count = recentSpends.itemCount,
                                 key = recentSpends.itemKey { it.id },
-                                contentType = recentSpends.itemContentType { "RecentSpendCard" }
+                                contentType = recentSpends.itemContentType {
+                                    when (it) {
+                                        is TransactionEntryUiModel.TransactionItem -> TransactionEntryUiModel.TransactionItem::class
+                                        is TransactionEntryUiModel.PileContribution -> TransactionEntryUiModel.PileContribution::class
+                                    }
+                                }
                             ) { index ->
-                                recentSpends[index]?.let { transaction ->
-                                    TransactionListItem(
-                                        onClick = { navigateToAddEditTransaction(transaction.id) },
-                                        note = transaction.note,
-                                        amount = transaction.amountFormatted,
-                                        timestamp = transaction.timestamp,
-                                        movement = transaction.type,
-                                        tag = transaction.tag,
-                                        folder = transaction.folder,
-                                        modifier = Modifier
-                                            .fillParentMaxWidth()
-                                            .animateItem(),
-                                    )
+                                recentSpends[index]?.let { item ->
+                                    when (item) {
+                                        is TransactionEntryUiModel.TransactionItem -> {
+                                            TransactionListItem(
+                                                onClick = { navigateToAddEditTransaction(item.id) },
+                                                note = item.note,
+                                                amount = TextFormat.currencyAmount(
+                                                    item.amount,
+                                                    item.currency
+                                                ),
+                                                timestamp = item.timestamp,
+                                                movement = item.type,
+                                                tag = item.tag,
+                                                folder = item.folder,
+                                                modifier = Modifier
+                                                    .fillParentMaxWidth()
+                                                    .animateItem(),
+                                            )
+                                        }
+
+                                        is TransactionEntryUiModel.PileContribution -> {
+                                            ContributionTransactionItem(
+                                                onClick = { navigateToPileDetails(item.pileId) },
+                                                pileName = item.pileName,
+                                                pileColor = item.pileColor,
+                                                amount = TextFormat.currency(
+                                                    item.amount,
+                                                    item.currency
+                                                ),
+                                                timestamp = item.timestamp,
+                                                movement = item.movement,
+                                                modifier = Modifier
+                                                    .animateItem()
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -629,7 +659,8 @@ private fun PreviewDashboardScreen() {
             navigateToAddEditSchedule = {},
             snackbarController = rememberSnackbarController(),
             navigateTo = {},
-            recentSpends = flowOf(PagingData.empty<TransactionEntry>()).collectAsLazyPagingItems(),
+            navigateToPileDetails = {},
+            recentSpends = flowOf(PagingData.empty<TransactionEntryUiModel>()).collectAsLazyPagingItems(),
         )
     }
 }

@@ -3,7 +3,7 @@ package dev.ridill.oar.dashboard.domain.repository
 import androidx.paging.PagingData
 import dev.ridill.oar.account.domain.model.UserAccount
 import dev.ridill.oar.schedules.domain.model.ActiveSchedule
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import kotlinx.coroutines.flow.Flow
 
 interface DashboardRepository {
@@ -12,5 +12,5 @@ interface DashboardRepository {
     fun getTotalDebitsForActiveCycle(): Flow<Double>
     fun getTotalCreditsForActiveCycle(): Flow<Double>
     fun getSchedulesActiveThisCycle(): Flow<List<ActiveSchedule>>
-    fun getTransactionsThisCycle(): Flow<PagingData<TransactionEntry>>
+    fun getTransactionsThisCycle(): Flow<PagingData<TransactionEntryUiModel>>
 }
