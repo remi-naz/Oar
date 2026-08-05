@@ -15,15 +15,81 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import dev.ridill.oar.R
+import dev.ridill.oar.core.domain.util.DateUtil
+import dev.ridill.oar.core.domain.util.WhiteSpace
+import dev.ridill.oar.core.ui.components.BooleanPreviewParameterProvider
 import dev.ridill.oar.core.ui.components.ExcludedIconSmall
-import dev.ridill.oar.core.ui.components.ListItemLeadingContentContainer
-import dev.ridill.oar.core.ui.theme.elevation
+import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
+import dev.ridill.oar.core.ui.util.mergedContentDescription
 
 @Composable
-fun TagListItem(
+private fun LeadingContent(
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Icon(
+        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_tag),
+        contentDescription = null,
+        tint = color,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun OverlineContent(
+    createdTimestamp: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = stringResource(
+            R.string.created_colon_timestamp_value,
+            createdTimestamp
+        ),
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun Content(
+    name: String,
+    excluded: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+        modifier = modifier
+    ) {
+        if (excluded) {
+            ExcludedIconSmall()
+        }
+        Text(name)
+    }
+}
+
+@Composable
+private fun buildTagContentDesc(
+    name: String,
+    excluded: Boolean,
+    createdTimestamp: String,
+): String = buildString {
+    append(stringResource(R.string.cd_tag_list_item, name, createdTimestamp))
+
+    if (excluded) {
+        append(",")
+        append(String.WhiteSpace)
+        append(stringResource(R.string.cd_excluded_append))
+    }
+}
+
+@Composable
+internal fun TagListItem(
     name: String,
     color: Color,
     excluded: Boolean,
@@ -31,39 +97,27 @@ fun TagListItem(
     modifier: Modifier = Modifier,
     elevation: ListItemElevation = ListItemDefaults.elevation()
 ) {
+    val tagContentDescription = buildTagContentDesc(
+        name = name,
+        excluded = excluded,
+        createdTimestamp = createdTimestamp,
+    )
     ListItem(
         modifier = modifier
+            .mergedContentDescription(tagContentDescription)
             .exclusionGraphicsLayer(excluded),
         leadingContent = {
-            ListItemLeadingContentContainer(
-                tonalElevation = MaterialTheme.elevation.level0
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_tag),
-                    contentDescription = null,
-                    tint = color
-                )
-            }
+            LeadingContent(color = color)
         },
-        supportingContent = {
-            Text(
-                text = stringResource(
-                    R.string.created_colon_timestamp_value,
-                    createdTimestamp
-                )
-            )
+        overlineContent = {
+            OverlineContent(createdTimestamp = createdTimestamp)
         },
         elevation = elevation,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-        ) {
-            if (excluded) {
-                ExcludedIconSmall()
-            }
-            Text(name)
-        }
+        Content(
+            name = name,
+            excluded = excluded
+        )
     }
 }
 
@@ -80,42 +134,45 @@ fun TagListItem(
     onLongClick: (() -> Unit)? = null,
     onLongClickLabel: String? = null,
 ) {
+    val tagContentDescription = buildTagContentDesc(
+        name = name,
+        excluded = excluded,
+        createdTimestamp = createdTimestamp,
+    )
     ListItem(
         onClick = onClick,
         modifier = modifier
+            .mergedContentDescription(tagContentDescription)
             .exclusionGraphicsLayer(excluded),
         leadingContent = {
-            ListItemLeadingContentContainer(
-                tonalElevation = MaterialTheme.elevation.level0
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_tag),
-                    contentDescription = null,
-                    tint = color
-                )
-            }
+            LeadingContent(color = color)
         },
-        supportingContent = {
-            Text(
-                text = stringResource(
-                    R.string.created_colon_timestamp_value,
-                    createdTimestamp
-                )
-            )
+        overlineContent = {
+            OverlineContent(createdTimestamp = createdTimestamp)
         },
         selected = selected,
         elevation = elevation,
         onLongClick = onLongClick,
         onLongClickLabel = onLongClickLabel,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-        ) {
-            if (excluded) {
-                ExcludedIconSmall()
-            }
-            Text(name)
-        }
+        Content(
+            name = name,
+            excluded = excluded
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewTagListItem(
+    @PreviewParameter(BooleanPreviewParameterProvider::class) excluded: Boolean
+) {
+    OarTheme {
+        TagListItem(
+            name = LoremIpsum(2).values.joinToString(),
+            color = Color.Red,
+            excluded = excluded,
+            createdTimestamp = DateUtil.dateNow().format(DateUtil.Formatters.localizedDateMedium)
+        )
     }
 }

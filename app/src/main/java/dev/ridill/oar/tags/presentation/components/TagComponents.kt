@@ -38,10 +38,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.core.domain.util.One
+import dev.ridill.oar.core.ui.components.BooleanPreviewParameterProvider
 import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
@@ -50,7 +52,7 @@ import dev.ridill.oar.core.ui.theme.contentColor
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 
 @Composable
-fun TagChip(
+internal fun TagChip(
     name: String,
     color: Color,
     excluded: Boolean,
@@ -215,35 +217,23 @@ private fun <T> rememberRetainedState(targetValue: T?): State<T?> {
 
 @PreviewLightDark
 @Composable
-private fun PreviewTagChip() {
+private fun PreviewTagChip(
+    @PreviewParameter(BooleanPreviewParameterProvider::class) excluded: Boolean
+) {
     OarTheme {
         Surface {
             Column {
                 TagChip(
                     name = LoremIpsum(1).values.joinToString(),
                     color = SelectableColorsList.first(),
-                    excluded = true,
+                    excluded = excluded,
                     selected = true,
                     onClick = {}
                 )
                 TagChip(
                     name = LoremIpsum(1).values.joinToString(),
                     color = SelectableColorsList.first(),
-                    excluded = true,
-                    selected = false,
-                    onClick = {}
-                )
-                TagChip(
-                    name = LoremIpsum(1).values.joinToString(),
-                    color = SelectableColorsList.first(),
-                    excluded = false,
-                    selected = true,
-                    onClick = {}
-                )
-                TagChip(
-                    name = LoremIpsum(1).values.joinToString(),
-                    color = SelectableColorsList.first(),
-                    excluded = false,
+                    excluded = excluded,
                     selected = false,
                     onClick = {}
                 )

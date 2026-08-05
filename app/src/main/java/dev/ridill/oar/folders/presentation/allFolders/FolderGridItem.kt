@@ -41,12 +41,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.DateUtil
+import dev.ridill.oar.core.domain.util.WhiteSpace
 import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 import kotlin.math.roundToInt
+
+@Composable
+private fun buildFolderContentDesc(
+    name: String,
+    created: String,
+    excluded: Boolean,
+): String = buildString {
+    append(stringResource(R.string.cd_folder_list_item, name, created))
+
+    if (excluded) {
+        append(",")
+        append(String.WhiteSpace)
+        append(stringResource(R.string.cd_excluded_append))
+    }
+}
 
 @Composable
 internal fun FolderCard(
@@ -62,10 +78,10 @@ internal fun FolderCard(
             .copy(alpha = ContentAlpha.SUB_CONTENT)
     )
 
-    val folderContentDescription = stringResource(
-        R.string.cd_folder_list_item,
-        name,
-        created
+    val folderContentDescription = buildFolderContentDesc(
+        name = name,
+        created = created,
+        excluded = excluded,
     )
 
     val border = CardDefaults.outlinedCardBorder()

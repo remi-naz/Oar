@@ -54,7 +54,6 @@ import dev.ridill.oar.R
 import dev.ridill.oar.aggregations.presentation.AmountAggregatesList
 import dev.ridill.oar.budgetCycles.domain.model.CycleIndicator
 import dev.ridill.oar.core.domain.model.FundMovement
-import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.ConfirmationDialog
@@ -464,10 +463,8 @@ private fun TransactionInFolderItem(
             onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
             note = note,
             amount = amount,
-            timeStamp = timestamp,
-            leadingContentLine1 = timestamp.format(DateUtil.Formatters.ddth),
-            leadingContentLine2 = timestamp.format(DateUtil.Formatters.EEE),
-            type = type,
+            timestamp = timestamp,
+            movement = type,
             selected = selected,
             tag = tag,
             excluded = excluded,

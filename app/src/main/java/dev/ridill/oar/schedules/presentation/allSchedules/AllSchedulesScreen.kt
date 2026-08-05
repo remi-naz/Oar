@@ -296,7 +296,7 @@ private fun ScheduleItem(
             onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
             note = note,
             amount = amount,
-            type = type,
+            movement = type,
             nextPaymentTimestamp = nextPaymentTimestamp,
             lastPaymentTimestamp = lastPaymentTimestamp,
             selected = selected,
