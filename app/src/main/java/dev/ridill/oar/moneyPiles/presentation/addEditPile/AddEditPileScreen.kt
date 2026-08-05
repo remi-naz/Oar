@@ -114,6 +114,7 @@ fun AddEditPileScreen(
                     CurrencySelectionButton(
                         currency = state.currency,
                         onCurrencySelect = actions::onCurrencySelect,
+                        enabled = !isEditMode
                     )
                 }
             )
@@ -191,6 +192,7 @@ fun AddEditPileScreen(
                                 onCheckedChange = { actions.onModeChange(mode) },
                                 shapes = if (index == 0) ButtonGroupDefaults.connectedLeadingButtonShapes()
                                 else ButtonGroupDefaults.connectedTrailingButtonShapes(),
+                                enabled = !isEditMode,
                                 modifier = Modifier
                                     .weight(1f),
                             ) {
@@ -229,18 +231,22 @@ fun AddEditPileScreen(
                                 .weight(1f)
                         )
                     }
-                    AmountInput(
-                        inputState = targetAmountState,
-                        currency = state.currency,
-                        label = stringResource(R.string.pile_target_amount_optional),
-                        colors = TextFieldDefaults.colors(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal,
-                            imeAction = ImeAction.Next
-                        ),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        modifier = Modifier.weight(1f)
-                    )
+
+                    if (!isEditMode || targetAmountState.text.isNotEmpty()) {
+                        AmountInput(
+                            inputState = targetAmountState,
+                            currency = state.currency,
+                            label = stringResource(R.string.pile_target_amount_optional),
+                            colors = TextFieldDefaults.colors(),
+                            enabled = !isEditMode,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal,
+                                imeAction = ImeAction.Next
+                            ),
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
                 HorizontalDivider()

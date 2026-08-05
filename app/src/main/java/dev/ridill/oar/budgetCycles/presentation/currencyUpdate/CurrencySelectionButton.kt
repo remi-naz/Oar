@@ -41,6 +41,7 @@ fun CurrencySelectionButton(
     currency: Currency,
     onCurrencySelect: (Currency) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     if (LocalInspectionMode.current) {
         CurrencySelectionButton(
@@ -55,7 +56,8 @@ fun CurrencySelectionButton(
             CurrencySelectionButton(
                 currency = currency,
                 onClick = { showCurrencySelectionSheet = true },
-                modifier = modifier
+                modifier = modifier,
+                enabled = enabled,
             )
 
             if (showCurrencySelectionSheet) {
@@ -82,6 +84,7 @@ private fun CurrencySelectionButton(
     currency: Currency,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     shape: CornerBasedShape = MaterialTheme.shapes.small,
     color: Color = MaterialTheme.colorScheme.surfaceContainer,
     contentPadding: PaddingValues = ContentPadding,
@@ -91,7 +94,8 @@ private fun CurrencySelectionButton(
         modifier = modifier,
         onClick = onClick,
         shape = containerShape,
-        color = color
+        color = color,
+        enabled = enabled,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

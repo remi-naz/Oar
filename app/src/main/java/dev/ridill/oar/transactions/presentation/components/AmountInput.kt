@@ -56,6 +56,7 @@ fun AmountInput(
     currency: Currency,
     onCurrencySelect: (Currency) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     label: String? = null,
     placeholder: String? = stringResource(R.string.amount_zero),
     colors: TextFieldColors = DefaultColors,
@@ -85,6 +86,7 @@ fun AmountInput(
             state = inputState,
             modifier = modifier
                 .defaultMinSize(minWidth = InputMinWidth),
+            enabled = enabled,
             leadingIcon = {
                 FilledTonalIconButton(
                     onClick = { showCurrencySelectionSheet = true },
@@ -193,6 +195,7 @@ fun AmountInput(
     inputState: TextFieldState,
     currency: Currency,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     label: String? = null,
     placeholder: String? = stringResource(R.string.amount_zero),
     colors: TextFieldColors = DefaultColors,
@@ -241,6 +244,7 @@ fun AmountInput(
             keyboardOptions = keyboardOptions.copy(
                 keyboardType = KeyboardType.Phone,
             ),
+            enabled = enabled,
             colors = colors,
             onKeyboardAction = onKeyboardAction,
             lineLimits = lineLimits,
