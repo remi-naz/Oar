@@ -271,10 +271,8 @@ fun AllTransactionsScreen(
                                                 item.amount,
                                                 item.currency
                                             ),
-                                            timeStamp = item.timestamp,
-                                            leadingContentLine1 = item.timestamp.format(DateUtil.Formatters.ddth),
-                                            leadingContentLine2 = item.timestamp.format(DateUtil.Formatters.EEE),
-                                            type = item.type,
+                                            timestamp = item.timestamp,
+                                            movement = item.type,
                                             tag = item.tag,
                                             folder = item.folder,
                                             excluded = item.excluded,
@@ -502,10 +500,10 @@ private fun AllTransactionsTopAppBar(
                             TransactionListItem(
                                 note = item.note,
                                 amount = item.amountFormatted,
-                                timeStamp = item.timestamp,
+                                timestamp = item.timestamp,
                                 leadingContentLine1 = item.timestamp.format(DateUtil.Formatters.ddth),
                                 leadingContentLine2 = item.timestamp.format(DateUtil.Formatters.MMM),
-                                type = item.type,
+                                movement = item.type,
                                 tag = item.tag,
                                 folder = item.folder,
                                 colors = ListItemDefaults.colors(

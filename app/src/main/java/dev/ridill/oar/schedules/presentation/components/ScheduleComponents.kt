@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
@@ -38,63 +37,141 @@ import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.model.creditOrDebitLabel
 import dev.ridill.oar.core.domain.util.DateUtil
-import dev.ridill.oar.core.domain.util.NewLine
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.domain.util.WhiteSpace
-import dev.ridill.oar.core.ui.components.AmountWithTypeIndicator
+import dev.ridill.oar.core.ui.components.AmountWithMovementIndicator
 import dev.ridill.oar.core.ui.components.BodyMediumText
 import dev.ridill.oar.core.ui.components.BodySmallText
-import dev.ridill.oar.core.ui.components.ListItemLeadingContentContainer
+import dev.ridill.oar.core.ui.components.ListItemLeadingContentWithColorIndicator
+import dev.ridill.oar.core.ui.components.MovementIndicatorIcon
+import dev.ridill.oar.core.ui.components.TwoLineDateText
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.mergedContentDescription
-import dev.ridill.oar.transactions.presentation.components.TypeIndicatorIcon
 import java.time.LocalDateTime
 
 @Composable
-fun ScheduleListItem(
+private fun LeadingContent(
+    nextPaymentTimestamp: LocalDateTime?,
+    modifier: Modifier = Modifier
+) {
+    ListItemLeadingContentWithColorIndicator(color = null, modifier = modifier) {
+        if (nextPaymentTimestamp != null) {
+            TwoLineDateText(
+                dateLine1 = nextPaymentTimestamp.format(DateUtil.Formatters.MMM),
+                dateLine2 = nextPaymentTimestamp.format(DateUtil.Formatters.dayOfMonthOrdinal)
+            )
+        } else {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_wallet_done),
+                contentDescription = null,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListItemContent(
+    note: String?,
+    modifier: Modifier = Modifier
+) {
+    val isNoteNullOrEmpty = remember(note) { note.isNullOrEmpty() }
+    Text(
+        text = note.orEmpty()
+            .ifEmpty { stringResource(R.string.generic_schedule_title) },
+        fontStyle = if (isNoteNullOrEmpty) FontStyle.Italic
+        else null,
+        color = LocalContentColor.current
+            .copy(
+                alpha = if (isNoteNullOrEmpty) ContentAlpha.SUB_CONTENT
+                else Float.One
+            ),
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun buildScheduleContentDesc(
     note: String?,
     amount: String,
-    type: FundMovement,
+    movement: FundMovement,
+    nextPaymentTimestamp: LocalDateTime?,
+    lastPaymentTimestamp: LocalDateTime?,
+): String = buildString {
+    if (!note.isNullOrEmpty()) {
+        append(
+            stringResource(
+                when (movement) {
+                    FundMovement.IN -> R.string.cd_credit_of_amount_for_note
+                    FundMovement.OUT -> R.string.cd_debit_of_amount_for_note
+                },
+                amount,
+                note
+            )
+        )
+    } else {
+        append(
+            stringResource(
+                when (movement) {
+                    FundMovement.IN -> R.string.cd_credit_of_amount
+                    FundMovement.OUT -> R.string.cd_debit_of_amount
+                },
+                amount
+            )
+        )
+    }
+
+    nextPaymentTimestamp?.let {
+        append(",")
+        append(String.WhiteSpace)
+        append(
+            stringResource(
+                R.string.cd_schedule_list_item_due_append,
+                it.format(DateUtil.Formatters.localizedDateLong)
+            )
+        )
+    }
+
+    lastPaymentTimestamp?.let {
+        append(",")
+        append(String.WhiteSpace)
+        append(
+            stringResource(
+                R.string.cd_schedule_list_item_last_payment_append,
+                it.format(DateUtil.Formatters.localizedDateLong)
+            )
+        )
+    }
+}
+
+@Composable
+internal fun ScheduleListItem(
+    note: String?,
+    amount: String,
+    movement: FundMovement,
     nextPaymentTimestamp: LocalDateTime?,
     lastPaymentTimestamp: LocalDateTime?,
     modifier: Modifier = Modifier,
     colors: ListItemColors = ListItemDefaults.colors(),
     elevation: ListItemElevation = ListItemDefaults.elevation(),
 ) {
-    val nextPaymentDateFormatted = remember(nextPaymentTimestamp) {
-        nextPaymentTimestamp?.format(DateUtil.Formatters.MMM_ddth_spaceSep)
-            ?.replace(String.WhiteSpace, String.NewLine)
-    }
-    val scheduleItemContentDescription = stringResource(
-        R.string.cd_schedule_of_amount_for_date,
-        amount,
-        nextPaymentDateFormatted.orEmpty()
+    val scheduleItemContentDescription = buildScheduleContentDesc(
+        note = note,
+        amount = amount,
+        movement = movement,
+        nextPaymentTimestamp = nextPaymentTimestamp,
+        lastPaymentTimestamp = lastPaymentTimestamp,
     )
 
     ListItem(
         modifier = modifier
             .mergedContentDescription(scheduleItemContentDescription),
-        leadingContent = {
-            ListItemLeadingContentContainer {
-                if (!nextPaymentDateFormatted.isNullOrEmpty()) {
-                    BodyMediumText(
-                        text = nextPaymentDateFormatted,
-                        textAlign = TextAlign.Center
-                    )
-                } else {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_wallet_done),
-                        contentDescription = null
-                    )
-                }
-            }
-        },
+        leadingContent = { LeadingContent(nextPaymentTimestamp) },
         trailingContent = {
-            AmountWithTypeIndicator(
+            AmountWithMovementIndicator(
                 value = amount,
-                type = type
+                movement = movement
             )
         },
         supportingContent = lastPaymentTimestamp?.let { timestamp ->
@@ -110,27 +187,16 @@ fun ScheduleListItem(
         colors = colors,
         elevation = elevation,
     ) {
-        val isNoteNullOrEmpty = remember(note) { note.isNullOrEmpty() }
-        Text(
-            text = note.orEmpty()
-                .ifEmpty { stringResource(R.string.generic_schedule_title) },
-            fontStyle = if (isNoteNullOrEmpty) FontStyle.Italic
-            else null,
-            color = LocalContentColor.current
-                .copy(
-                    alpha = if (isNoteNullOrEmpty) ContentAlpha.SUB_CONTENT
-                    else Float.One
-                )
-        )
+        ListItemContent(note)
     }
 }
 
 @Composable
-fun ScheduleListItem(
+internal fun ScheduleListItem(
     onClick: () -> Unit,
     note: String?,
     amount: String,
-    type: FundMovement,
+    movement: FundMovement,
     nextPaymentTimestamp: LocalDateTime?,
     lastPaymentTimestamp: LocalDateTime?,
     modifier: Modifier = Modifier,
@@ -140,39 +206,23 @@ fun ScheduleListItem(
     onLongClick: (() -> Unit)? = null,
     onLongClickLabel: String? = null,
 ) {
-    val nextPaymentDateFormatted = remember(nextPaymentTimestamp) {
-        nextPaymentTimestamp?.format(DateUtil.Formatters.MMM_ddth_spaceSep)
-            ?.replace(String.WhiteSpace, String.NewLine)
-    }
-    val scheduleItemContentDescription = stringResource(
-        R.string.cd_schedule_of_amount_for_date,
-        amount,
-        nextPaymentDateFormatted.orEmpty()
+    val scheduleItemContentDescription = buildScheduleContentDesc(
+        note = note,
+        amount = amount,
+        movement = movement,
+        nextPaymentTimestamp = nextPaymentTimestamp,
+        lastPaymentTimestamp = lastPaymentTimestamp,
     )
 
     ListItem(
         onClick = onClick,
         modifier = modifier
             .mergedContentDescription(scheduleItemContentDescription),
-        leadingContent = {
-            ListItemLeadingContentContainer {
-                if (!nextPaymentDateFormatted.isNullOrEmpty()) {
-                    BodyMediumText(
-                        text = nextPaymentDateFormatted,
-                        textAlign = TextAlign.Center
-                    )
-                } else {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_wallet_done),
-                        contentDescription = null
-                    )
-                }
-            }
-        },
+        leadingContent = { LeadingContent(nextPaymentTimestamp) },
         trailingContent = {
-            AmountWithTypeIndicator(
+            AmountWithMovementIndicator(
                 value = amount,
-                type = type
+                movement = movement
             )
         },
         supportingContent = lastPaymentTimestamp?.let { timestamp ->
@@ -191,18 +241,7 @@ fun ScheduleListItem(
         onLongClick = onLongClick,
         onLongClickLabel = onLongClickLabel,
     ) {
-        val isNoteNullOrEmpty = remember(note) { note.isNullOrEmpty() }
-        Text(
-            text = note.orEmpty()
-                .ifEmpty { stringResource(R.string.generic_schedule_title) },
-            fontStyle = if (isNoteNullOrEmpty) FontStyle.Italic
-            else null,
-            color = LocalContentColor.current
-                .copy(
-                    alpha = if (isNoteNullOrEmpty) ContentAlpha.SUB_CONTENT
-                    else Float.One
-                )
-        )
+        ListItemContent(note)
     }
 }
 
@@ -210,7 +249,7 @@ fun ScheduleListItem(
 fun ActiveScheduleItem(
     note: String?,
     amount: String,
-    type: FundMovement,
+    movement: FundMovement,
     paymentDay: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -239,7 +278,7 @@ fun ActiveScheduleItem(
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                TypeIndicatorIcon(type)
+                MovementIndicatorIcon(movement)
             }
 
             Column(
@@ -248,7 +287,7 @@ fun ActiveScheduleItem(
             ) {
                 BodyMediumText(
                     text = note.orEmpty()
-                        .ifEmpty { stringResource(type.creditOrDebitLabel) },
+                        .ifEmpty { stringResource(movement.creditOrDebitLabel) },
                     color = LocalContentColor.current.copy(
                         alpha = if (note.isNullOrEmpty()) ContentAlpha.SUB_CONTENT
                         else Float.One
@@ -263,9 +302,9 @@ fun ActiveScheduleItem(
                 )
             }
 
-            AmountWithTypeIndicator(
+            AmountWithMovementIndicator(
                 value = amount,
-                type = type,
+                movement = movement,
                 showTypeIndicator = false,
                 textStyle = MaterialTheme.typography.titleLarge
             )
@@ -283,7 +322,7 @@ private fun PreviewScheduleListItemCard() {
         ScheduleListItem(
             amount = "100",
             note = "Test",
-            type = FundMovement.OUT,
+            movement = FundMovement.OUT,
             nextPaymentTimestamp = DateUtil.now(),
             lastPaymentTimestamp = DateUtil.now(),
             modifier = Modifier
@@ -299,7 +338,7 @@ private fun PreviewActiveScheduleCard() {
         ActiveScheduleItem(
             note = LoremIpsum().values.joinToString(),
             amount = "Rs.100",
-            type = FundMovement.OUT,
+            movement = FundMovement.OUT,
             paymentDay = "10th Wed",
             onClick = {},
             modifier = Modifier

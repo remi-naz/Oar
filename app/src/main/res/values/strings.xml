@@ -51,10 +51,15 @@
 
     <!-- Content Description -->
     <string name="cd_balance_and_budget_amounts">You have a balance of %1$s from your budget of %2$s</string>
-    <string name="cd_transaction_list_item_debit">You have spent %1$s with note %2$s on %3$s</string>
-    <string name="cd_transaction_list_item_credit">You have received %1$s with note %2$s on %3$s</string>
+    <string name="cd_debit_of_amount_for_note">Debit of %1$s for %2$s</string>
+    <string name="cd_credit_of_amount_for_note">Credit of %1$s for %2$s</string>
+    <string name="cd_debit_of_amount">Debit of %1$s</string>
+    <string name="cd_credit_of_amount">Credit of %1$s</string>
+    <string name="cd_content_desc_on_date_append">on %s</string>
+    <string name="cd_excluded_append">excluded from expenditure</string>
     <string name="cd_transaction_list_item_folder_append">part of %s folder</string>
     <string name="cd_transaction_list_item_tag_append">tagged as %s</string>
+    <string name="cd_tag_list_item">Tag %1$s created on %2$s</string>
     <string name="cd_new_transaction_fab">Add new transaction</string>
     <string name="cd_navigate_back">Navigate Back</string>
     <string name="cd_save_transaction">Save transaction</string>
@@ -93,7 +98,8 @@
     <string name="cd_click_to_change_folder">Click to change folder</string>
     <string name="cd_total_transaction_sum">%1$s amounts to %2$s</string>
     <string name="cd_transaction_repeat_mode">Repeat transaction</string>
-    <string name="cd_schedule_of_amount_for_date">Schedule of amount %1$s for next %2$s</string>
+    <string name="cd_schedule_list_item_due_append">due on %s</string>
+    <string name="cd_schedule_list_item_last_payment_append">last paid on %s</string>
     <string name="cd_new_schedule_fab">Create new schedule</string>
     <string name="cd_delete_selected_schedules">Delete Selected Schedules</string>
     <string name="cd_notification_off_warning">Warning! Notifications permission is required but is currently off</string>

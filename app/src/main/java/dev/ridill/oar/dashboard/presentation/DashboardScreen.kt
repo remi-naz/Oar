@@ -207,10 +207,8 @@ fun DashboardScreen(
                                         onClick = { navigateToAddEditTransaction(transaction.id) },
                                         note = transaction.note,
                                         amount = transaction.amountFormatted,
-                                        timeStamp = transaction.timestamp,
-                                        leadingContentLine1 = transaction.timestamp.format(DateUtil.Formatters.ddth),
-                                        leadingContentLine2 = transaction.timestamp.format(DateUtil.Formatters.EEE),
-                                        type = transaction.type,
+                                        timestamp = transaction.timestamp,
+                                        movement = transaction.type,
                                         tag = transaction.tag,
                                         folder = transaction.folder,
                                         modifier = Modifier
@@ -586,7 +584,7 @@ private fun ActiveSchedulesRow(
             ActiveScheduleItem(
                 note = schedule.note,
                 amount = schedule.amountFormatted,
-                type = schedule.type,
+                movement = schedule.type,
                 paymentDay = schedule.dayFormatted,
                 onClick = { onScheduleClick(schedule) },
                 modifier = Modifier
