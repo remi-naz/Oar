@@ -330,6 +330,7 @@ private fun PreviewMovePileFundScreen() {
                     createdTimestamp = DateUtil.now(),
                     targetDate = null,
                     currency = LocaleUtil.defaultCurrency,
+                    completionTimestamp = null,
                 ),
                 cycleDescription = "Aug 1 - Aug 31"
             ),

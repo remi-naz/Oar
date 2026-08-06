@@ -51,9 +51,15 @@ data class MoneyPileEntity(
     @ColumnInfo(name = "target_amount")
     val targetAmount: Double?,
 
+    @ColumnInfo(name = "target_remaining_amount")
+    val targetRemainingAmount: Double?,
+
     @ColumnInfo(name = "target_date")
     val targetDate: LocalDate?,
 
     @ColumnInfo(name = "created_timestamp")
     val createdTimestamp: LocalDateTime,
+
+    @ColumnInfo(name = "completion_timestamp")
+    val completionTimestamp: LocalDateTime?,
 )

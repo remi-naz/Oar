@@ -649,4 +649,13 @@
     <string name="pile_tx_linked_tx_note">Contribution to \'%s\'</string>
     <string name="error_no_cycle_selected">Cycle not selected</string>
     <string name="pile_contribution_transaction_supporting_text">Contributed to pile</string>
+    <string name="pile_history_entry_type_sweep_out">Swept Out</string>
+    <string name="cd_tap_to_sweep_out_pile">Tap to sweep out pile</string>
+    <string name="pile_sweep_out_confirmation_title">Sweep out</string>
+    <string name="pile_sweep_out_confirmation_message">Money leaves this pile for what you were saving towards. Activity up to now becomes read-only.</string>
+    <string name="pile_sweep_out_max_amount_hint">Max %1$s</string>
+    <string name="pile_sweep_out_create_linked_transaction_label">Record as an expense</string>
+    <string name="pile_sweep_out_confirm_button">Confirm Sweep</string>
+    <string name="pile_swept_out">Pile swept out</string>
+    <string name="error_amount_greater_than_pile_aggregate">You can\'t sweep out money you haven\'t set aside</string>
 </resources>

@@ -49,6 +49,9 @@ data class MoneyPileTransactionsEntity(
     @ColumnInfo(name = "created_timestamp")
     val createdTimestamp: LocalDateTime,
 
+    @ColumnInfo(name = "locked")
+    val locked: Boolean = false,
+
     @ColumnInfo("transaction_id")
-    val transactionId: Long?
+    val transactionId: Long?,
 )

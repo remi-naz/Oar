@@ -24,6 +24,11 @@ import dev.ridill.oar.budgetCycles.domain.model.CycleSelector
 import dev.ridill.oar.budgetCycles.domain.model.CycleStartDay
 import dev.ridill.oar.budgetCycles.domain.model.CycleStartDayType
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
+import dev.ridill.oar.budgetCycles.domain.repository.CycleEntryCreationFailedThrowable
+import dev.ridill.oar.budgetCycles.domain.repository.CycleNotActiveThrowable
+import dev.ridill.oar.budgetCycles.domain.repository.CycleNotFoundThrowable
+import dev.ridill.oar.budgetCycles.domain.repository.IllegalCycleThrowable
+import dev.ridill.oar.budgetCycles.domain.repository.NoActiveCycleThrowable
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.DateUtil
@@ -69,6 +74,11 @@ class BudgetCycleRepositoryImpl(
 
     override suspend fun getActiveCycle(): BudgetCycleEntry? = withContext(Dispatchers.IO) {
         cycleDao.getActiveCycleDetailsView()?.toEntry()
+    }
+
+    override suspend fun requireActiveCycle(): BudgetCycleEntry = withContext(Dispatchers.IO) {
+        cycleDao.getActiveCycleDetailsView()?.toEntry()
+            ?: throw NoActiveCycleThrowable()
     }
 
     override suspend fun getCycleConfig(): BudgetCycleConfig = withContext(Dispatchers.IO) {
@@ -517,14 +527,3 @@ class BudgetCycleRepositoryImpl(
             pagingData.map { it.toHistoryEntry() }
         }
 }
-
-class CycleEntryCreationFailedThrowable(entity: BudgetCycleEntry) :
-    IllegalStateException("Failed to create cycle entity $entity")
-
-class CycleNotFoundThrowable(val id: Long) :
-    IllegalStateException("Cycle not found for ID = $id")
-
-class CycleNotActiveThrowable(val id: Long) :
-    IllegalStateException("Cycle with ID = $id is not ACTIVE")
-
-class IllegalCycleThrowable : IllegalStateException("Illegal cycle")

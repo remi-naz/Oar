@@ -44,7 +44,8 @@ internal class PileFundMovementRepositoryImpl(
                 val pile = pileRepo.getPileDetails(pileId)
                     ?: throw PileFundMovementThrowable(PileFundMovementError.PileNotFound)
                 var linkedTxId: Long? = null
-                if (pile.contributionMode == PileContributionMode.FROM_BALANCE) {
+                // Only add linked transaction if movement is into pile, and contribution mode is from balance
+                if (movement == FundMovement.IN && pile.contributionMode == PileContributionMode.FROM_BALANCE) {
                     linkedTxId = transactionRepo.saveTransaction(
                         cycleId = cycleId,
                         amount = amount,
