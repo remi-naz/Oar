@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,7 +68,6 @@ import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.SpacerSmall
 import dev.ridill.oar.core.ui.components.SwipeActionsContainer
 import dev.ridill.oar.core.ui.components.VerticalNumberSpinnerContent
-import dev.ridill.oar.core.ui.components.VerticalSpacer
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
@@ -94,13 +94,14 @@ import java.util.Currency
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PileDetailScreen(
+internal fun PileDetailScreen(
     state: PileDetailState,
     actions: PileDetailActions,
     transactionPagingItems: LazyPagingItems<PileTransactionEntry>,
     navigateUp: () -> Unit,
     navigateToEditPile: () -> Unit,
     navigateToFundMovement: (FundMovement) -> Unit,
+    navigateToSweepOut: () -> Unit,
     modifier: Modifier = Modifier,
     snackbarController: SnackbarController = rememberSnackbarController(),
 ) {
@@ -132,8 +133,9 @@ fun PileDetailScreen(
                     canWithdraw = state.canWithdraw,
                     onWithdrawClick = { navigateToFundMovement(FundMovement.OUT) },
                     onAddClick = { navigateToFundMovement(FundMovement.IN) },
+                    onSweepOutClick = navigateToSweepOut,
                     modifier = Modifier
-                        .padding(vertical = MaterialTheme.spacing.medium)
+                        .padding(vertical = MaterialTheme.spacing.large)
                 )
             }
         },
@@ -168,13 +170,6 @@ fun PileDetailScreen(
                 }
 
                 item(
-                    key = "Spacer_Header_PileState",
-                    contentType = "Spacer",
-                ) {
-                    VerticalSpacer(MaterialTheme.spacing.medium)
-                }
-
-                item(
                     key = "PileStatRow",
                     contentType = "PileStatRow"
                 ) {
@@ -184,15 +179,9 @@ fun PileDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = MaterialTheme.spacing.medium)
+                            .padding(top = MaterialTheme.spacing.medium)
                             .animateItem()
                     )
-                }
-
-                item(
-                    key = "Spacer_PileState_ReminderRow",
-                    contentType = "Spacer",
-                ) {
-                    VerticalSpacer(MaterialTheme.spacing.small)
                 }
 
                 item(
@@ -224,6 +213,8 @@ fun PileDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = MaterialTheme.spacing.medium)
+                            .padding(top = MaterialTheme.spacing.small)
+                            .animateItem()
                     )
                 }
             }
@@ -235,8 +226,8 @@ fun PileDetailScreen(
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(top = MaterialTheme.spacing.medium)
                             .padding(horizontal = MaterialTheme.spacing.medium)
+                            .padding(top = MaterialTheme.spacing.medium)
                             .animateItem()
 
                     ) {
@@ -255,15 +246,16 @@ fun PileDetailScreen(
                     key = transactionPagingItems.itemKey { it.id },
                     contentType = transactionPagingItems.itemContentType { PileTransactionEntry::class },
                 ) { index ->
-                    transactionPagingItems[index]?.let {
+                    transactionPagingItems[index]?.let { item ->
                         PileHistoryItem(
-                            source = it.contributionSource,
-                            movement = it.movement,
-                            amount = it.amount,
-                            timestamp = it.timestamp,
+                            source = item.contributionSource,
+                            movement = item.movement,
+                            amount = item.amount,
+                            timestamp = item.timestamp,
                             currency = pile?.currency ?: LocaleUtil.defaultCurrency,
-                            onDelete = { actions.onTransactionDelete(it.id) },
+                            onDelete = { actions.onTransactionDelete(item.id) },
                             onActionRevealed = actions::onTransactionActionRevealed,
+                            locked = item.locked,
                             modifier = Modifier
                                 .animateItem()
                         )
@@ -461,19 +453,32 @@ private fun PileActionsBar(
     canWithdraw: Boolean,
     onWithdrawClick: () -> Unit,
     onAddClick: () -> Unit,
+    onSweepOutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface {
         Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = MaterialTheme.spacing.medium)
+                .then(modifier)
         ) {
             if (canWithdraw) {
+                FilledTonalIconButton(
+                    onClick = onSweepOutClick,
+                    modifier = Modifier
+                        .weight(0.5f)
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_sweep),
+                        contentDescription = stringResource(R.string.cd_tap_to_sweep_out_pile)
+                    )
+                }
+
                 OutlinedButton(
                     onClick = onWithdrawClick,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1.5f)
                 ) {
                     Text(stringResource(R.string.withdraw))
                 }
@@ -497,6 +502,7 @@ private fun PileHistoryItem(
     timestamp: LocalDateTime,
     onDelete: () -> Unit,
     onActionRevealed: () -> Unit,
+    locked: Boolean,
     modifier: Modifier = Modifier
 ) {
     var isRevealed by remember { mutableStateOf(false) }
@@ -525,6 +531,7 @@ private fun PileHistoryItem(
                 }
             }
         },
+        gesturesEnabled = !locked,
         modifier = Modifier
             .fillMaxWidth()
     ) {
@@ -533,6 +540,7 @@ private fun PileHistoryItem(
             supportingContent = {
                 Text(timestamp.format(DateUtil.Formatters.MMM_ddth_spaceSep))
             },
+            enabled = !locked,
             trailingContent = {
                 AmountWithMovementIndicator(
                     value = TextFormat.currency(amount, currency),
@@ -565,21 +573,24 @@ private fun PreviewPileDetailScreen() {
                     amount = 1000.0,
                     movement = FundMovement.IN,
                     contributionSource = ContributionSource.STARTER,
-                    timestamp = LocalDateTime.now().minusMonths(2)
+                    timestamp = LocalDateTime.now().minusMonths(2),
+                    locked = false,
                 ),
                 PileTransactionEntry(
                     id = 2L,
                     amount = 150.0,
                     movement = FundMovement.IN,
                     contributionSource = ContributionSource.AUTO,
-                    timestamp = LocalDateTime.now().minusWeeks(1)
+                    timestamp = LocalDateTime.now().minusWeeks(1),
+                    locked = false,
                 ),
                 PileTransactionEntry(
                     id = 3L,
                     amount = 100.0,
                     movement = FundMovement.OUT,
                     contributionSource = ContributionSource.MANUAL,
-                    timestamp = LocalDateTime.now()
+                    timestamp = LocalDateTime.now(),
+                    locked = false,
                 ),
             )
         )
@@ -602,6 +613,7 @@ private fun PreviewPileDetailScreen() {
                     reminderAmount = 150.0,
                     createdTimestamp = DateUtil.now(),
                     targetDate = null,
+                    completionTimestamp = null,
                 ),
                 progressState = PileProgressState.SavingFreely,
                 canWithdraw = true,
@@ -614,6 +626,7 @@ private fun PreviewPileDetailScreen() {
             navigateUp = {},
             navigateToEditPile = {},
             navigateToFundMovement = {},
+            navigateToSweepOut = {},
         )
     }
 }

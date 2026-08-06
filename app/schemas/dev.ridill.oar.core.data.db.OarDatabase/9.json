@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "028816447cf7f21ed8b0f3313ec81bf7",
+    "identityHash": "dea729fcc982a3a372536c471afe9d43",
     "entities": [
       {
         "tableName": "budget_cycle_table",
@@ -416,7 +416,7 @@
       },
       {
         "tableName": "money_pile_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `color` INTEGER NOT NULL, `contribution_mode` TEXT NOT NULL, `reminder_cadence` TEXT NOT NULL, `reminder_behavior` TEXT NOT NULL, `reminder_amount` REAL, `locked` INTEGER NOT NULL, `currency_code` TEXT NOT NULL, `target_amount` REAL, `target_date` TEXT, `created_timestamp` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `color` INTEGER NOT NULL, `contribution_mode` TEXT NOT NULL, `reminder_cadence` TEXT NOT NULL, `reminder_behavior` TEXT NOT NULL, `reminder_amount` REAL, `locked` INTEGER NOT NULL, `currency_code` TEXT NOT NULL, `target_amount` REAL, `target_remaining_amount` REAL, `target_date` TEXT, `created_timestamp` TEXT NOT NULL, `completion_timestamp` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -483,6 +483,11 @@
             "affinity": "REAL"
           },
           {
+            "fieldPath": "targetRemainingAmount",
+            "columnName": "target_remaining_amount",
+            "affinity": "REAL"
+          },
+          {
             "fieldPath": "targetDate",
             "columnName": "target_date",
             "affinity": "TEXT"
@@ -492,6 +497,11 @@
             "columnName": "created_timestamp",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "completionTimestamp",
+            "columnName": "completion_timestamp",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -514,7 +524,7 @@
       },
       {
         "tableName": "money_pile_transactions_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pile_id` INTEGER NOT NULL, `amount` REAL NOT NULL, `movement` TEXT NOT NULL, `contribution_source` TEXT NOT NULL, `created_timestamp` TEXT NOT NULL, `transaction_id` INTEGER, FOREIGN KEY(`pile_id`) REFERENCES `money_pile_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`transaction_id`) REFERENCES `transaction_table`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pile_id` INTEGER NOT NULL, `amount` REAL NOT NULL, `movement` TEXT NOT NULL, `contribution_source` TEXT NOT NULL, `created_timestamp` TEXT NOT NULL, `locked` INTEGER NOT NULL, `transaction_id` INTEGER, FOREIGN KEY(`pile_id`) REFERENCES `money_pile_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`transaction_id`) REFERENCES `transaction_table`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "id",
@@ -550,6 +560,12 @@
             "fieldPath": "createdTimestamp",
             "columnName": "created_timestamp",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "locked",
+            "columnName": "locked",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -618,7 +634,7 @@
       },
       {
         "viewName": "money_pile_aggregate_view",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        pile.id AS id,\n        pile.name AS name,\n        pile.icon AS icon,\n        pile.color AS color,\n        pile.contribution_mode AS contributionMode,\n        pile.reminder_cadence AS reminderCadence,\n        pile.reminder_behavior AS reminderBehavior,\n        pile.locked AS locked,\n        pile.currency_code AS currencyCode,\n        pile.target_amount AS targetAmount,\n        pile.target_date AS targetDate,\n        pile.created_timestamp AS createdTimestamp,\n        IFNULL(SUM(\n            CASE\n                WHEN tx.movement = 'OUT' THEN -tx.amount\n                WHEN tx.movement = 'IN' THEN tx.amount\n            END\n        ), 0) as aggregate\n        FROM money_pile_table pile\n        LEFT JOIN money_pile_transactions_table tx ON pile.id = tx.pile_id\n        GROUP BY pile.id"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        pile.id AS id,\n        pile.name AS name,\n        pile.icon AS icon,\n        pile.color AS color,\n        pile.contribution_mode AS contributionMode,\n        pile.reminder_cadence AS reminderCadence,\n        pile.reminder_behavior AS reminderBehavior,\n        pile.locked AS locked,\n        pile.currency_code AS currencyCode,\n        pile.target_remaining_amount AS remainingAmount,\n        pile.target_date AS targetDate,\n        pile.created_timestamp AS createdTimestamp,\n        pile.completion_timestamp AS completionTimestamp,\n        IFNULL(SUM(\n            CASE\n                WHEN tx.movement = 'OUT' THEN -tx.amount\n                WHEN tx.movement = 'IN' THEN tx.amount\n            END\n        ), 0) as aggregate\n        FROM money_pile_table pile\n        LEFT JOIN money_pile_transactions_table tx ON (pile.id = tx.pile_id and tx.locked = 0)\n        GROUP BY pile.id"
       },
       {
         "viewName": "budget_cycle_details_view",
@@ -627,7 +643,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '028816447cf7f21ed8b0f3313ec81bf7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dea729fcc982a3a372536c471afe9d43')"
     ]
   }
 }

@@ -77,6 +77,9 @@ data class MoneyPileFundMovementRoute(
     val movement: FundMovement,
 ) : NavKey
 
+@Serializable
+data class PileSweepOutConfirmationSheetRoute(val pileId: Long) : NavKey
+
 // --- Settings ---
 @Serializable
 data object SettingsRoute : NavKey

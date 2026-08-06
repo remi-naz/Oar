@@ -8,5 +8,6 @@ enum class ContributionSource(
 ) {
     STARTER(labelRes = R.string.pile_history_entry_type_starter),
     AUTO(labelRes = R.string.pile_history_entry_type_auto_contribution),
-    MANUAL(labelRes = R.string.pile_history_entry_type_deposit)
+    MANUAL(labelRes = R.string.pile_history_entry_type_deposit),
+    SWEEP_OUT(labelRes = R.string.pile_history_entry_type_sweep_out)
 }

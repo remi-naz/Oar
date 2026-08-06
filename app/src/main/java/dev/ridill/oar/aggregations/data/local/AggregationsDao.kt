@@ -74,7 +74,8 @@ interface AggregationsDao {
                 WHEN movement = 'IN' THEN amount
             END
         ), 0) as amount
-        FROM money_pile_transactions_table WHERE pile_id = :pileId
+        FROM money_pile_transactions_table
+        WHERE pile_id = :pileId AND locked = 0
     """
     )
     fun getAggregateAmountForMoneyPileFlow(pileId: Long): Flow<Double>
