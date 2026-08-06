@@ -637,6 +637,8 @@
     <string name="pile_history_entry_type_deposit">Added to pile</string>
     <string name="cd_tap_to_edit_pile">Tap to edit pile</string>
     <string name="pile_activity_label">Activity</string>
+    <string name="pile_menu_show_locked">Show Locked</string>
+    <string name="pile_menu_hide_locked">Hide Locked</string>
     <string name="pile_goal_reached">Goal reached</string>
     <string name="pile_no_goal_label">No goal</string>
     <string name="pile_target_label">of %1$s</string>

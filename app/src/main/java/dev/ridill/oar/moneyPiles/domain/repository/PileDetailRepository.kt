@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 interface PileDetailRepository {
     fun getPileDetailById(id: Long): Flow<MoneyPileDetails?>
     fun getSavedAmount(id: Long): Flow<Double>
-    fun getTransactionsInPilePaged(pileId: Long): Flow<PagingData<PileTransactionEntry>>
+    fun getTransactionsInPilePaged(
+        pileId: Long,
+        includeLocked: Boolean = true,
+    ): Flow<PagingData<PileTransactionEntry>>
     suspend fun deleteTransaction(id: Long)
 }
