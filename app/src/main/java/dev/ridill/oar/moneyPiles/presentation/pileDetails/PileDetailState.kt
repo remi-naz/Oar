@@ -12,6 +12,7 @@ data class PileDetailState(
     val progressState: PileProgressState = PileProgressState.SavingFreely,
     val projectedCompletion: LocalDate? = null,
     val canWithdraw: Boolean = false,
+    val includeLockedTransactions: Boolean = true,
 )
 
 sealed interface PileProgressState {

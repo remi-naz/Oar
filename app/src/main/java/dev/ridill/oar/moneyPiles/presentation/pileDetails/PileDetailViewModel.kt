@@ -1,5 +1,6 @@
 package dev.ridill.oar.moneyPiles.presentation.pileDetails
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
@@ -21,6 +22,7 @@ import dev.ridill.oar.moneyPiles.domain.model.PileReminderCadence
 import dev.ridill.oar.moneyPiles.domain.repository.PileDetailRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,6 +32,7 @@ import kotlin.math.roundToLong
 @HiltViewModel(assistedFactory = PileDetailViewModel.Factory::class)
 class PileDetailViewModel @AssistedInject constructor(
     @Assisted val route: MoneyPileDetailsRoute,
+    private val savedStateHandle: SavedStateHandle,
     private val repo: PileDetailRepository,
     private val eventBus: EventBus<PileDetailEvent>,
 ) : ViewModel(), PileDetailActions {
@@ -39,7 +42,16 @@ class PileDetailViewModel @AssistedInject constructor(
         fun create(route: MoneyPileDetailsRoute): PileDetailViewModel
     }
 
-    val transactionPagingData = repo.getTransactionsInPilePaged(route.pileId)
+    private val includeLockedTransactions = savedStateHandle
+        .getStateFlow(SHOW_LOCKED, false)
+
+    val transactionPagingData = includeLockedTransactions
+        .flatMapLatest { includeLocked ->
+            repo.getTransactionsInPilePaged(
+                pileId = route.pileId,
+                includeLocked = includeLocked
+            )
+        }
         .cachedIn(viewModelScope)
 
     private val dateNow = MutableStateFlow(DateUtil.dateNow())
@@ -105,6 +117,7 @@ class PileDetailViewModel @AssistedInject constructor(
         progressState,
         projectedCompletion,
         canWithdraw,
+        includeLockedTransactions,
     ).mapLatest { (
                       details,
                       savedAmount,
@@ -112,6 +125,7 @@ class PileDetailViewModel @AssistedInject constructor(
                       progressState,
                       projectedCompletion,
                       canWithdraw,
+                      includeLockedTransactions,
                   ) ->
         PileDetailState(
             pile = details,
@@ -120,6 +134,7 @@ class PileDetailViewModel @AssistedInject constructor(
             progressState = progressState,
             projectedCompletion = projectedCompletion,
             canWithdraw = canWithdraw,
+            includeLockedTransactions = includeLockedTransactions,
         )
     }.asStateFlow(viewModelScope, PileDetailState())
 
@@ -165,7 +180,13 @@ class PileDetailViewModel @AssistedInject constructor(
         }
     }
 
+    override fun onIncludeLockedTransactionsToggle(includeLocked: Boolean) {
+        savedStateHandle[SHOW_LOCKED] = includeLocked
+    }
+
     sealed interface PileDetailEvent {
         data class ShowUiMessage(val text: UiText) : PileDetailEvent
     }
 }
+
+private const val SHOW_LOCKED = "SHOW_LOCKED"
