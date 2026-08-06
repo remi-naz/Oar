@@ -27,7 +27,7 @@ import java.time.LocalDateTime
             onDelete = ForeignKey.SET_NULL
         ),
     ],
-    indices = [Index(value = ["pile_id", "created_timestamp"]), Index(value = ["transaction_id"])]
+    indices = [Index(value = ["pile_id", "created_timestamp"]), Index(value = ["transaction_id"]), Index(value = ["pile_id", "locked"])]
 )
 data class MoneyPileTransactionsEntity(
     @PrimaryKey(autoGenerate = true)
