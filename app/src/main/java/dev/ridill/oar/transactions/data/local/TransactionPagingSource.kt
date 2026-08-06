@@ -30,7 +30,9 @@ class TransactionPagingSource(
         "transaction_table",
         "budget_cycle_table",
         "tag_table",
-        "folder_table"
+        "folder_table",
+        "money_pile_transactions_table",
+        "money_pile_table"
     )
 ) {
 
