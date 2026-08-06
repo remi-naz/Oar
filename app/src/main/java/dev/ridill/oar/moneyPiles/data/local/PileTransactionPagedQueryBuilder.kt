@@ -18,9 +18,13 @@ object PileTransactionPagedQueryBuilder {
         cursor: PileTransactionKey?,
         direction: PageLoadDirection,
         limit: Int,
+        includeLocked: Boolean = true,
     ): RoomRawQuery {
         val builder = KeysetPagedQuery("money_pile_transactions_table", COLUMNS)
         builder.where("pile_id = ?") { s, i -> s.bindLong(i, pileId); i + 1 }
+        if (!includeLocked) {
+            builder.where("locked = 0")
+        }
 
         return builder.build(cursor, direction, limit)
     }

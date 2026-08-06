@@ -12,6 +12,7 @@ class PileTransactionPagingSource(
     applicationScope: CoroutineScope,
     private val pileId: Long,
     private val dao: MoneyPileTransactionDao,
+    private val includeLocked: Boolean = true,
 ) : KeysetPagingSource<PileTransactionKey, MoneyPileTransactionsEntity>(
     db = db,
     applicationScope = applicationScope,
@@ -27,6 +28,7 @@ class PileTransactionPagingSource(
             cursor = cursor,
             direction = direction,
             limit = loadSize,
+            includeLocked = includeLocked,
         )
 
         return dao.getTransactionsInPilePagedRaw(query)

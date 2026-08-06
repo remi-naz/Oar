@@ -37,7 +37,8 @@ internal class PileDetailRepositoryImpl(
         .getAggregateForMoneyPile(id)
 
     override fun getTransactionsInPilePaged(
-        pileId: Long
+        pileId: Long,
+        includeLocked: Boolean
     ): Flow<PagingData<PileTransactionEntry>> = Pager(
         config = PagingConfig(pageSize = UtilConstants.DEFAULT_PAGE_SIZE),
         pagingSourceFactory = {
@@ -46,6 +47,7 @@ internal class PileDetailRepositoryImpl(
                 applicationScope = applicationScope,
                 pileId = pileId,
                 dao = dao,
+                includeLocked = includeLocked,
             )
         }
     ).flow

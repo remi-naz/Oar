@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -122,6 +125,33 @@ internal fun PileDetailScreen(
                                 contentDescription = stringResource(R.string.cd_tap_to_edit_pile)
                             )
                         }
+                    }
+
+                    var showOptionsMenu by remember { mutableStateOf(false) }
+                    IconButton(onClick = { showOptionsMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.cd_tap_for_more_options)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showOptionsMenu,
+                        onDismissRequest = { showOptionsMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(
+                                        if (state.includeLockedTransactions) R.string.pile_menu_hide_locked
+                                        else R.string.pile_menu_show_locked
+                                    )
+                                )
+                            },
+                            onClick = {
+                                actions.onIncludeLockedTransactionsToggle(!state.includeLockedTransactions)
+                                showOptionsMenu = false
+                            }
+                        )
                     }
                 },
                 scrollBehavior = topAppBarScrollBehavior
@@ -621,6 +651,7 @@ private fun PreviewPileDetailScreen() {
             actions = object : PileDetailActions {
                 override fun onTransactionActionRevealed() {}
                 override fun onTransactionDelete(id: Long) {}
+                override fun onIncludeLockedTransactionsToggle(includeLocked: Boolean) {}
             },
             transactionPagingItems = transactionPagingItems,
             navigateUp = {},
