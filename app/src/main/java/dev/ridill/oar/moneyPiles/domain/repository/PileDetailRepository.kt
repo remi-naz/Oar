@@ -12,5 +12,6 @@ interface PileDetailRepository {
         pileId: Long,
         includeLocked: Boolean = true,
     ): Flow<PagingData<PileTransactionEntry>>
+    fun doLockedEntriesExist(pileId: Long): Flow<Boolean>
     suspend fun deleteTransaction(id: Long)
 }

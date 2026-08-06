@@ -19,6 +19,7 @@ import dev.ridill.oar.moneyPiles.domain.repository.PileDetailRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 
@@ -54,6 +55,10 @@ internal class PileDetailRepositoryImpl(
         .mapLatest { pagingData ->
             pagingData.map(MoneyPileTransactionsEntity::toPileTransactionEntry)
         }
+
+    override fun doLockedEntriesExist(pileId: Long): Flow<Boolean> = dao
+        .doLockedEntriesExistForPile(pileId)
+        .distinctUntilChanged()
 
     override suspend fun deleteTransaction(id: Long) = withContext(Dispatchers.IO) {
         dao.deleteById(id)

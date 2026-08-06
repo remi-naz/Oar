@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "dea729fcc982a3a372536c471afe9d43",
+    "identityHash": "a0b9e19bcf0152ae81708abf3a1f97f6",
     "entities": [
       {
         "tableName": "budget_cycle_table",
@@ -599,6 +599,16 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_money_pile_transactions_table_transaction_id` ON `${TABLE_NAME}` (`transaction_id`)"
+          },
+          {
+            "name": "index_money_pile_transactions_table_pile_id_locked",
+            "unique": false,
+            "columnNames": [
+              "pile_id",
+              "locked"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_money_pile_transactions_table_pile_id_locked` ON `${TABLE_NAME}` (`pile_id`, `locked`)"
           }
         ],
         "foreignKeys": [
@@ -643,7 +653,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dea729fcc982a3a372536c471afe9d43')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a0b9e19bcf0152ae81708abf3a1f97f6')"
     ]
   }
 }

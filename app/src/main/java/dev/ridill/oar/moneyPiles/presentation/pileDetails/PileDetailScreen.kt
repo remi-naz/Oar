@@ -26,11 +26,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,7 +41,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -71,7 +77,9 @@ import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.SpacerSmall
 import dev.ridill.oar.core.ui.components.SwipeActionsContainer
 import dev.ridill.oar.core.ui.components.VerticalNumberSpinnerContent
+import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.theme.BorderWidthStandard
 import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -79,6 +87,7 @@ import dev.ridill.oar.core.ui.theme.SelectableColorsList
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.excludeTop
+import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.core.ui.util.isNotEmpty
 import dev.ridill.oar.core.ui.util.onlyTop
 import dev.ridill.oar.core.ui.util.plus
@@ -292,6 +301,24 @@ internal fun PileDetailScreen(
                     }
                 }
             }
+
+            if (state.includeLockedTransactions.not() && state.lockedEntriesExist) {
+                item(
+                    key = "locked_entries_exist_indicator",
+                    contentType = "locked_entries_exist_indicator",
+                ) {
+                    LockedEntriesExistIndicator(
+                        onShowClick = { actions.onIncludeLockedTransactionsToggle(true) },
+                        modifier = Modifier
+                            .animateItem()
+                    )
+                }
+            }
+
+            listEmptyIndicator(
+                isListEmpty = transactionPagingItems.isEmpty(),
+                messageRes = R.string.pile_transactions_empty_message
+            )
         }
     }
 }
@@ -592,38 +619,60 @@ private fun PileHistoryItem(
 private val PileHeroAvatarSize = 88.dp
 private val PileLockBadgeSize = 26.dp
 
+@Composable
+private fun LockedEntriesExistIndicator(
+    onShowClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = MaterialTheme.shapes.small
+    val contentColor = LocalContentColor.current
+    Box(
+        modifier = modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(MaterialTheme.spacing.medium)
+                .drawWithCache {
+                    val outline = shape.createOutline(size, layoutDirection, this)
+                    onDrawBehind {
+                        drawOutline(
+                            outline = outline,
+                            color = contentColor,
+                            style = Stroke(
+                                width = BorderWidthStandard.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+                            )
+                        )
+                    }
+                }
+                .padding(horizontal = MaterialTheme.spacing.small)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_circle_lock),
+                contentDescription = null
+            )
+            Text(
+                text = stringResource(R.string.locked_entries_exist),
+            )
+
+            TextButton(
+                onClick = onShowClick
+            ) {
+                Text(stringResource(R.string.show))
+            }
+        }
+    }
+}
+
 @PreviewLightDark
 @Composable
 private fun PreviewPileDetailScreen() {
     val transactionPagingItems = flowOf(
-        PagingData.from(
-            listOf(
-                PileTransactionEntry(
-                    id = 1L,
-                    amount = 1000.0,
-                    movement = FundMovement.IN,
-                    contributionSource = ContributionSource.STARTER,
-                    timestamp = LocalDateTime.now().minusMonths(2),
-                    locked = false,
-                ),
-                PileTransactionEntry(
-                    id = 2L,
-                    amount = 150.0,
-                    movement = FundMovement.IN,
-                    contributionSource = ContributionSource.AUTO,
-                    timestamp = LocalDateTime.now().minusWeeks(1),
-                    locked = false,
-                ),
-                PileTransactionEntry(
-                    id = 3L,
-                    amount = 100.0,
-                    movement = FundMovement.OUT,
-                    contributionSource = ContributionSource.MANUAL,
-                    timestamp = LocalDateTime.now(),
-                    locked = false,
-                ),
-            )
-        )
+        PagingData.empty<PileTransactionEntry>()
     ).collectAsLazyPagingItems()
 
     OarTheme {
@@ -647,6 +696,8 @@ private fun PreviewPileDetailScreen() {
                 ),
                 progressState = PileProgressState.SavingFreely,
                 canWithdraw = true,
+                includeLockedTransactions = false,
+                lockedEntriesExist = true
             ),
             actions = object : PileDetailActions {
                 override fun onTransactionActionRevealed() {}
