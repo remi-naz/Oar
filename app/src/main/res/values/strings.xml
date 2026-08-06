@@ -660,4 +660,7 @@
     <string name="pile_sweep_out_confirm_button">Confirm Sweep</string>
     <string name="pile_swept_out">Pile swept out</string>
     <string name="error_amount_greater_than_pile_aggregate">You can\'t sweep out money you haven\'t set aside</string>
+    <string name="locked_entries_exist">Some entries are locked</string>
+    <string name="show">Show</string>
+    <string name="pile_transactions_empty_message">There aren\'t any contributions to this pile yet</string>
 </resources>
