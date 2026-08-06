@@ -16,7 +16,7 @@ internal fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount =
         icon = icon,
         color = Color(color),
         currency = LocaleUtil.currencyForCode(currencyCode),
-        targetAmount = targetAmount,
+        targetAmount = remainingAmount,
         savedAmount = aggregate,
         locked = locked,
         createdTimestamp = createdTimestamp
@@ -28,14 +28,15 @@ internal fun MoneyPileEntity.toMoneyPileDetails(): MoneyPileDetails = MoneyPileD
     icon = icon,
     colorCode = color,
     contributionMode = contributionMode,
-    targetAmount = targetAmount,
+    targetAmount = targetRemainingAmount,
     locked = locked,
     reminderCadence = reminderCadence,
     reminderBehavior = reminderBehavior,
     reminderAmount = reminderAmount,
     createdTimestamp = createdTimestamp,
     currency = LocaleUtil.currencyForCode(currencyCode),
-    targetDate = targetDate
+    targetDate = targetDate,
+    completionTimestamp = completionTimestamp
 )
 
 internal fun MoneyPileTransactionsEntity.toPileTransactionEntry(): PileTransactionEntry =
@@ -45,9 +46,10 @@ internal fun MoneyPileTransactionsEntity.toPileTransactionEntry(): PileTransacti
         movement = movement,
         contributionSource = contributionSource,
         timestamp = createdTimestamp,
+        locked = locked,
     )
 
-internal fun MoneyPileDetails.toEntity(): MoneyPileEntity = MoneyPileEntity(
+internal fun MoneyPileDetails.toEntity(remainingAmount: Double?): MoneyPileEntity = MoneyPileEntity(
     id = id,
     name = name,
     icon = icon,
@@ -61,4 +63,6 @@ internal fun MoneyPileDetails.toEntity(): MoneyPileEntity = MoneyPileEntity(
     targetDate = targetDate,
     createdTimestamp = createdTimestamp,
     reminderAmount = reminderAmount,
+    completionTimestamp = null,
+    targetRemainingAmount = remainingAmount,
 )

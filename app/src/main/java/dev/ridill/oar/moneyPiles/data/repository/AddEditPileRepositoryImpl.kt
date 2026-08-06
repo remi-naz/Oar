@@ -29,9 +29,9 @@ internal class AddEditPileRepositoryImpl(
         starterAmount: Double?
     ): Long = withContext(Dispatchers.IO) {
         db.withTransaction {
-            val insertedPileId = pileDao.upsert(pile.toEntity()).first()
-                .takeIf { it > OarDatabase.DEFAULT_ID_LONG }
-                ?: pile.id
+            val insertedPileId = pileDao.upsert(
+                pile.toEntity(remainingAmount = pile.targetAmount)
+            ).first().takeIf { it > OarDatabase.DEFAULT_ID_LONG } ?: pile.id
 
             if (insertedPileId > OarDatabase.DEFAULT_ID_LONG && starterAmount != null) {
                 val transaction = MoneyPileTransactionsEntity(

@@ -54,3 +54,6 @@ enum class PileFundMovementResult {
     FUND_ADDED,
     FUND_WITHDRAWN
 }
+
+@Parcelize
+data object PileSweptOutResult : Parcelable

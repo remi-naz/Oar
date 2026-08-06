@@ -28,26 +28,36 @@ import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.WhiteSpace
 import dev.ridill.oar.core.ui.components.AmountWithMovementIndicator
+import dev.ridill.oar.core.ui.components.ExcludedIconSmall
 import dev.ridill.oar.core.ui.components.ListItemLeadingTwoLineTextWithColorIndicator
 import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
-import dev.ridill.oar.core.ui.theme.adjustedContentColor
 import dev.ridill.oar.core.ui.theme.spacing
+import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 import dev.ridill.oar.core.ui.util.mergedContentDescription
 import java.time.LocalDateTime
 
 @Composable
-private fun HeadlineContent(
+private fun Content(
     pileName: String,
+    excluded: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = pileName,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-        modifier = modifier
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+        modifier = modifier,
+    ) {
+        if (excluded) {
+            ExcludedIconSmall()
+        }
+        Text(
+            text = pileName,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+        )
+    }
 }
 
 @Composable
@@ -56,7 +66,7 @@ private fun SupportingContent(
     modifier: Modifier = Modifier
 ) {
     CompositionLocalProvider(
-        LocalContentColor provides color.adjustedContentColor(),
+        LocalContentColor provides color,
         LocalTextStyle provides MaterialTheme.typography.bodySmall
     ) {
         Row(
@@ -84,6 +94,7 @@ private fun buildContributionContentDesc(
     pileName: String,
     amount: String,
     timestamp: LocalDateTime,
+    excluded: Boolean = false,
 ): String = buildString {
     append(
         stringResource(
@@ -99,6 +110,12 @@ private fun buildContributionContentDesc(
             timestamp.format(DateUtil.Formatters.localizedDateLong)
         )
     )
+
+    if (excluded) {
+        append(",")
+        append(String.WhiteSpace)
+        append(stringResource(R.string.cd_excluded_append))
+    }
 }
 
 @Composable
@@ -109,6 +126,7 @@ internal fun ContributionTransactionItem(
     timestamp: LocalDateTime,
     movement: FundMovement,
     modifier: Modifier = Modifier,
+    excluded: Boolean = false,
     enabled: Boolean = true,
     leadingContentLine1: String = timestamp.format(DateUtil.Formatters.EEE),
     leadingContentLine2: String = timestamp.format(DateUtil.Formatters.dayOfMonthOrdinal),
@@ -119,6 +137,7 @@ internal fun ContributionTransactionItem(
         pileName = pileName,
         amount = amount,
         timestamp = timestamp,
+        excluded = excluded,
     )
     ListItem(
         modifier = Modifier
@@ -142,7 +161,10 @@ internal fun ContributionTransactionItem(
         colors = colors,
         elevation = elevation,
     ) {
-        HeadlineContent(pileName = pileName)
+        Content(
+            pileName = pileName,
+            excluded = excluded
+        )
     }
 }
 
@@ -155,6 +177,7 @@ internal fun ContributionTransactionItem(
     timestamp: LocalDateTime,
     movement: FundMovement,
     modifier: Modifier = Modifier,
+    excluded: Boolean = false,
     enabled: Boolean = true,
     leadingContentLine1: String = timestamp.format(DateUtil.Formatters.EEE),
     leadingContentLine2: String = timestamp.format(DateUtil.Formatters.dayOfMonthOrdinal),
@@ -165,12 +188,14 @@ internal fun ContributionTransactionItem(
         pileName = pileName,
         amount = amount,
         timestamp = timestamp,
+        excluded = excluded,
     )
     ListItem(
         onClick = onClick,
         modifier = Modifier
             .mergedContentDescription(contributionContentDescription)
-            .then(modifier),
+            .then(modifier)
+            .exclusionGraphicsLayer(excluded),
         leadingContent = {
             ListItemLeadingTwoLineTextWithColorIndicator(
                 line1 = leadingContentLine1,
@@ -189,7 +214,7 @@ internal fun ContributionTransactionItem(
         colors = colors,
         elevation = elevation,
     ) {
-        HeadlineContent(pileName = pileName)
+        Content(pileName = pileName, excluded = excluded)
     }
 }
 

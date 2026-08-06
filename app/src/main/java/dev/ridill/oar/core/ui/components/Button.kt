@@ -53,6 +53,24 @@ fun ButtonWithLoadingIndicator(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors()
+) = ButtonWithLoadingIndicator(
+    text = stringResource(textRes),
+    loading = loading,
+    onClick = onClick,
+    modifier = modifier,
+    enabled = enabled,
+    colors = colors
+)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ButtonWithLoadingIndicator(
+    text: String,
+    loading: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ButtonColors = ButtonDefaults.buttonColors()
 ) {
     Button(
         onClick = {
@@ -73,7 +91,7 @@ fun ButtonWithLoadingIndicator(
                     color = colors.contentColor
                 )
             } else {
-                Text(stringResource(textRes))
+                Text(text)
             }
         }
     }

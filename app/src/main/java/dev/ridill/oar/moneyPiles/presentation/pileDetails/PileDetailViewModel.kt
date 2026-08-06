@@ -147,6 +147,10 @@ class PileDetailViewModel @AssistedInject constructor(
         )
     }
 
+    fun onPileSweptOut() = viewModelScope.launch {
+        eventBus.send(PileDetailEvent.ShowUiMessage(UiText.StringResource(R.string.pile_swept_out)))
+    }
+
     fun refreshDateNow() {
         dateNow.update { DateUtil.dateNow() }
     }
