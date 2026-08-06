@@ -9,7 +9,8 @@ import dev.ridill.oar.core.data.db.SortDirection
 object PileTransactionPagedQueryBuilder {
 
     private val COLUMNS = listOf(
-        KeysetColumn("pile_id", SortDirection.DESC)
+        KeysetColumn("DATETIME(created_timestamp)", SortDirection.DESC),
+        KeysetColumn("id", SortDirection.DESC)
     )
 
     fun build(
