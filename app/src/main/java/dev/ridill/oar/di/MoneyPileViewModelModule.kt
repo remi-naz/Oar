@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ridill.oar.aggregations.domain.repository.AggregationsRepository
+import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
@@ -16,15 +17,18 @@ import dev.ridill.oar.moneyPiles.data.repository.AllPilesRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.MoneyPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.PileDetailRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.PileFundMovementRepositoryImpl
+import dev.ridill.oar.moneyPiles.domain.model.PileSweepOutRepositoryImpl
 import dev.ridill.oar.moneyPiles.domain.repository.AddEditPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.AllPilesRepository
 import dev.ridill.oar.moneyPiles.domain.repository.MoneyPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.PileDetailRepository
 import dev.ridill.oar.moneyPiles.domain.repository.PileFundMovementRepository
+import dev.ridill.oar.moneyPiles.domain.repository.PileSweepOutRepository
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileViewModel
 import dev.ridill.oar.moneyPiles.presentation.allPiles.AllPilesViewModel
 import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundViewModel
 import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailViewModel
+import dev.ridill.oar.moneyPiles.presentation.sweepout.PileSweepOutViewModel
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 
@@ -112,4 +116,27 @@ object MoneyPileViewModelModule {
 
     @Provides
     fun providePileDetailEvent(): EventBus<PileDetailViewModel.PileDetailEvent> = EventBus()
+
+    @Provides
+    fun providePileSweepOutRepository(
+        db: OarDatabase,
+        pileDao: MoneyPileDao,
+        pileTxDao: MoneyPileTransactionDao,
+        pileRepo: MoneyPileRepository,
+        cycleRepo: BudgetCycleRepository,
+        aggRepo: AggregationsRepository,
+        transactionRepo: TransactionRepository,
+    ): PileSweepOutRepository = PileSweepOutRepositoryImpl(
+        db = db,
+        pileDao = pileDao,
+        pileTxDao = pileTxDao,
+        pileRepo = pileRepo,
+        cycleRepo = cycleRepo,
+        aggRepo = aggRepo,
+        transactionRepo = transactionRepo,
+    )
+
+    @Provides
+    fun providePileSweepOutEventBus(): EventBus<PileSweepOutViewModel.PileSweepOutEvent> =
+        EventBus()
 }

@@ -56,11 +56,13 @@ fun AmountInput(
     currency: Currency,
     onCurrencySelect: (Currency) -> Unit,
     modifier: Modifier = Modifier,
+    isError: Boolean = false,
     enabled: Boolean = true,
     label: String? = null,
     placeholder: String? = stringResource(R.string.amount_zero),
     colors: TextFieldColors = DefaultColors,
     prefix: @Composable (() -> Unit)? = { Text(currency.symbol) },
+    supportingText: @Composable (() -> Unit)? = null,
     isInputAnExpression: Boolean = false,
     onExpressionEvalClick: () -> Unit = {},
     focusManager: FocusManager = LocalFocusManager.current,
@@ -100,6 +102,8 @@ fun AmountInput(
             label = label?.let {
                 { Text(it) }
             },
+            isError = isError,
+            supportingText = supportingText,
             placeholder = placeholder?.let {
                 {
                     Text(
@@ -195,11 +199,13 @@ fun AmountInput(
     inputState: TextFieldState,
     currency: Currency,
     modifier: Modifier = Modifier,
+    isError: Boolean = false,
     enabled: Boolean = true,
     label: String? = null,
     placeholder: String? = stringResource(R.string.amount_zero),
     colors: TextFieldColors = DefaultColors,
     prefix: @Composable (() -> Unit)? = { Text(currency.symbol) },
+    supportingText: @Composable (() -> Unit)? = null,
     isInputAnExpression: Boolean = false,
     onExpressionEvalClick: () -> Unit = {},
     focusManager: FocusManager = LocalFocusManager.current,
@@ -229,6 +235,8 @@ fun AmountInput(
             label = label?.let {
                 { Text(it) }
             },
+            isError = isError,
+            supportingText = supportingText,
             placeholder = placeholder?.let {
                 {
                     Text(

@@ -9,4 +9,5 @@ data class PileTransactionEntry(
     val movement: FundMovement,
     val contributionSource: ContributionSource,
     val timestamp: LocalDateTime,
+    val locked: Boolean,
 )

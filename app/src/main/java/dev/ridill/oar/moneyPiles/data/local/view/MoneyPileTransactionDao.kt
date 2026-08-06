@@ -12,6 +12,12 @@ interface MoneyPileTransactionDao : BaseDao<MoneyPileTransactionsEntity> {
     @RawQuery
     suspend fun getTransactionsInPilePagedRaw(query: RoomRawQuery): List<MoneyPileTransactionsEntity>
 
+    @Query("UPDATE money_pile_transactions_table SET locked = 1 WHERE pile_id = :pileId AND locked = 0")
+    suspend fun lockAllEntriesInPile(pileId: Long)
+
+    @Query("UPDATE money_pile_transactions_table SET transaction_id = :transactionId WHERE id = :id")
+    suspend fun setLinkedTransactionId(id: Long, transactionId: Long)
+
     @Query("DELETE FROM money_pile_transactions_table WHERE id = :id")
     suspend fun deleteById(id: Long)
 }

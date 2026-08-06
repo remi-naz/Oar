@@ -27,6 +27,7 @@ import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileRoute
 import dev.ridill.oar.core.ui.navigation.AllMoneyPilesRoute
+import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
 import dev.ridill.oar.core.ui.navigation.CycleSelectedResult
 import dev.ridill.oar.core.ui.navigation.CycleSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
@@ -35,6 +36,8 @@ import dev.ridill.oar.core.ui.navigation.MoneyPileDetailsRoute
 import dev.ridill.oar.core.ui.navigation.MoneyPileFundMovementRoute
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.PileFundMovementResult
+import dev.ridill.oar.core.ui.navigation.PileSweepOutConfirmationSheetRoute
+import dev.ridill.oar.core.ui.navigation.PileSweptOutResult
 import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileScreen
 import dev.ridill.oar.moneyPiles.presentation.addEditPile.AddEditPileViewModel
@@ -44,6 +47,8 @@ import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundScreen
 import dev.ridill.oar.moneyPiles.presentation.movePileFund.MovePileFundViewModel
 import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailScreen
 import dev.ridill.oar.moneyPiles.presentation.pileDetails.PileDetailViewModel
+import dev.ridill.oar.moneyPiles.presentation.sweepout.PileSweepOutConfirmationSheet
+import dev.ridill.oar.moneyPiles.presentation.sweepout.PileSweepOutViewModel
 
 fun EntryProviderScope<NavKey>.moneyPileEntries(
     navigator: OarNavigator,
@@ -113,6 +118,10 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
             viewModel.onPileFundMovementResult(result)
         }
 
+        ResultEffect<PileSweptOutResult> {
+            viewModel.onPileSweptOut()
+        }
+
         OnLifecycleStartEffect(
             viewModel,
             block = viewModel::refreshDateNow
@@ -131,6 +140,9 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
                         movement = it
                     )
                 )
+            },
+            navigateToSweepOut = {
+                navigator.navigate(PileSweepOutConfirmationSheetRoute(route.pileId))
             },
             snackbarController = snackbarController
         )
@@ -258,6 +270,42 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
                 )
             },
             snackbarController = snackbarController
+        )
+    }
+
+    entry<PileSweepOutConfirmationSheetRoute>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) { route ->
+        val viewModel: PileSweepOutViewModel =
+            hiltViewModel<PileSweepOutViewModel, PileSweepOutViewModel.Factory>(
+                creationCallback = { it.create(route) }
+            )
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val resultBus = LocalResultBus.current
+        val snackbarController = rememberSnackbarController()
+
+        CollectFlowEffect(viewModel.events, resultBus, snackbarController) { event ->
+            when (event) {
+                is PileSweepOutViewModel.PileSweepOutEvent.ShowUiMessage -> {
+                    snackbarController.showSnackbar(event.uiText)
+                }
+
+                PileSweepOutViewModel.PileSweepOutEvent.PileSweptOut -> {
+                    resultBus.sendResult(PileSweptOutResult)
+                    navigator.goBack()
+                }
+            }
+        }
+
+        OnLifecycleStartEffect(viewModel) {
+            viewModel.refreshTimestampNow()
+        }
+
+        PileSweepOutConfirmationSheet(
+            sweepAmountState = viewModel.sweepAmountInput,
+            state = state,
+            actions = viewModel,
+            onCancel = navigator::goBack,
         )
     }
 }

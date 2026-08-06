@@ -21,9 +21,10 @@ import java.time.LocalDateTime
         pile.reminder_behavior AS reminderBehavior,
         pile.locked AS locked,
         pile.currency_code AS currencyCode,
-        pile.target_amount AS targetAmount,
+        pile.target_remaining_amount AS remainingAmount,
         pile.target_date AS targetDate,
         pile.created_timestamp AS createdTimestamp,
+        pile.completion_timestamp AS completionTimestamp,
         IFNULL(SUM(
             CASE
                 WHEN tx.movement = 'OUT' THEN -tx.amount
@@ -31,7 +32,7 @@ import java.time.LocalDateTime
             END
         ), 0) as aggregate
         FROM money_pile_table pile
-        LEFT JOIN money_pile_transactions_table tx ON pile.id = tx.pile_id
+        LEFT JOIN money_pile_transactions_table tx ON (pile.id = tx.pile_id and tx.locked = 0)
         GROUP BY pile.id
     """,
     viewName = "money_pile_aggregate_view"
@@ -46,8 +47,9 @@ data class MoneyPileAggregateView(
     val reminderBehavior: PileReminderBehavior,
     val locked: Boolean,
     val currencyCode: String,
-    val targetAmount: Double?,
+    val remainingAmount: Double?,
     val targetDate: LocalDate?,
     val createdTimestamp: LocalDateTime,
+    val completionTimestamp: LocalDateTime?,
     val aggregate: Double,
 )
