@@ -57,6 +57,7 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
     entry<AllMoneyPilesRoute> {
         val viewModel: AllPilesViewModel = hiltViewModel()
         val pilesPagingItems = viewModel.pilesPagingData.collectAsLazyPagingItems()
+        val includeCompletedPiles by viewModel.includeCompletedPiles.collectAsStateWithLifecycle()
         val snackbarController = rememberSnackbarController()
 
         ResultEffect<AddEditMoneyPileResult> { result ->
@@ -78,6 +79,8 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
         AllPilesScreen(
             snackbarController = snackbarController,
             pilesPagingItems = pilesPagingItems,
+            includeCompletedPiles = includeCompletedPiles,
+            onIncludeLockedPilesToggle = viewModel::onIncludeLockedPilesToggle,
             navigateToAddPile = { navigator.navigate(AddEditMoneyPileRoute()) },
             navigateToPileDetails = { navigator.navigate(MoneyPileDetailsRoute(it)) },
             navigateToAddToPile = {

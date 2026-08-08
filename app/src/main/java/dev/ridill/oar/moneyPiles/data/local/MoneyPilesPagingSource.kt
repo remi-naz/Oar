@@ -11,6 +11,7 @@ internal class MoneyPilesPagingSource(
     applicationScope: CoroutineScope,
     private val query: String,
     private val dao: MoneyPileDao,
+    private val includeCompleted: Boolean = true,
 ) : KeysetPagingSource<MoneyPilePageKey, MoneyPileAggregateView>(
     db = db,
     applicationScope = applicationScope,
@@ -26,6 +27,7 @@ internal class MoneyPilesPagingSource(
             cursor = cursor,
             direction = direction,
             limit = loadSize,
+            includeCompleted = includeCompleted,
         )
 
         return dao.getMoneyPilesWithAggregatePagedRaw(query)

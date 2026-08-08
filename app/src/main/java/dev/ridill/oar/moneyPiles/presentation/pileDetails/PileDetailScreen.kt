@@ -1,6 +1,7 @@
 package dev.ridill.oar.moneyPiles.presentation.pileDetails
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
@@ -80,6 +82,7 @@ import dev.ridill.oar.core.ui.components.VerticalNumberSpinnerContent
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.BorderWidthStandard
+import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -127,7 +130,7 @@ internal fun PileDetailScreen(
                 title = { Text(stringResource(R.string.destination_money_pile_details)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
                 actions = {
-                    if (pile != null) {
+                    if (!state.isComplete && pile != null) {
                         IconButton(onClick = navigateToEditPile) {
                             Icon(
                                 imageVector = Icons.Rounded.Edit,
@@ -167,7 +170,7 @@ internal fun PileDetailScreen(
             )
         },
         bottomBar = {
-            if (pile != null) {
+            if (!state.isComplete && pile != null) {
                 PileActionsBar(
                     canWithdraw = state.canWithdraw,
                     onWithdrawClick = { navigateToFundMovement(FundMovement.OUT) },
@@ -208,53 +211,76 @@ internal fun PileDetailScreen(
                     )
                 }
 
-                item(
-                    key = "PileStatRow",
-                    contentType = "PileStatRow"
-                ) {
-                    PileStatRow(
-                        progressPercent = state.progressFraction,
-                        projectedCompletion = state.projectedCompletion,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = MaterialTheme.spacing.medium)
-                            .padding(top = MaterialTheme.spacing.medium)
-                            .animateItem()
-                    )
+                if (state.isComplete) {
+                    item(
+                        key = "PileCompletedBanner",
+                        contentType = "PileCompletedBanner",
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            PileCompletedBanner(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = MaterialTheme.spacing.medium)
+                                    .padding(top = MaterialTheme.spacing.small)
+                            )
+                        }
+                    }
                 }
 
-                item(
-                    key = "PileReminderRow",
-                    contentType = "PileReminderRow",
-                ) {
-                    PileReminderRow(
-                        cadence = pile.reminderCadence,
-                        reminderLabel = when {
-                            pile.reminderCadence == PileReminderCadence.NO_REMIND ->
-                                stringResource(R.string.pile_reminder_none)
+                if (!state.isComplete) {
+                    item(
+                        key = "PileStatRow",
+                        contentType = "PileStatRow"
+                    ) {
+                        PileStatRow(
+                            progressPercent = state.progressFraction,
+                            projectedCompletion = state.projectedCompletion,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = MaterialTheme.spacing.medium)
+                                .padding(top = MaterialTheme.spacing.medium)
+                                .animateItem()
+                        )
+                    }
 
-                            pile.reminderBehavior == PileReminderBehavior.AUTO_ADD ->
-                                stringResource(
-                                    R.string.pile_reminder_auto_add,
-                                    TextFormat.currencyAmount(
-                                        pile.reminderAmount.orZero(),
-                                        pile.currency
-                                    ),
+                    item(
+                        key = "PileReminderRow",
+                        contentType = "PileReminderRow",
+                    ) {
+                        PileReminderRow(
+                            cadence = pile.reminderCadence,
+                            reminderLabel = when {
+                                pile.reminderCadence == PileReminderCadence.NO_REMIND ->
+                                    stringResource(R.string.pile_reminder_none)
+
+                                pile.reminderBehavior == PileReminderBehavior.AUTO_ADD ->
+                                    stringResource(
+                                        R.string.pile_reminder_auto_add,
+                                        TextFormat.currencyAmount(
+                                            pile.reminderAmount.orZero(),
+                                            pile.currency
+                                        ),
+                                        stringResource(pile.reminderCadence.labelRes)
+                                    )
+
+                                else -> stringResource(
+                                    R.string.pile_reminder_remind,
                                     stringResource(pile.reminderCadence.labelRes)
                                 )
-
-                            else -> stringResource(
-                                R.string.pile_reminder_remind,
-                                stringResource(pile.reminderCadence.labelRes)
-                            )
-                        },
-                        modeHelpText = stringResource(pile.contributionMode.helpTextRes),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = MaterialTheme.spacing.medium)
-                            .padding(top = MaterialTheme.spacing.small)
-                            .animateItem()
-                    )
+                            },
+                            modeHelpText = stringResource(pile.contributionMode.helpTextRes),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = MaterialTheme.spacing.medium)
+                                .padding(top = MaterialTheme.spacing.small)
+                                .animateItem()
+                        )
+                    }
                 }
             }
 
@@ -294,7 +320,7 @@ internal fun PileDetailScreen(
                             currency = pile?.currency ?: LocaleUtil.defaultCurrency,
                             onDelete = { actions.onTransactionDelete(item.id) },
                             onActionRevealed = actions::onTransactionActionRevealed,
-                            locked = item.locked,
+                            locked = item.locked || state.isComplete,
                             modifier = Modifier
                                 .animateItem()
                         )
@@ -366,11 +392,13 @@ private fun PileHeroSection(
 
         SpacerSmall()
 
-        VerticalNumberSpinnerContent(savedAmount) { amount ->
-            DisplaySmallText(
-                text = TextFormat.currencyAmount(amount, currency),
-                fontWeight = FontWeight.SemiBold
-            )
+        if (progressState !is PileProgressState.Completed) {
+            VerticalNumberSpinnerContent(savedAmount) { amount ->
+                DisplaySmallText(
+                    text = TextFormat.currencyAmount(amount, currency),
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
 
         Crossfade(progressState) { state ->
@@ -383,6 +411,10 @@ private fun PileHeroSection(
 
                     PileProgressState.GoalReached -> stringResource(R.string.pile_goal_reached)
                     PileProgressState.SavingFreely -> stringResource(R.string.pile_saving_freely_label)
+                    is PileProgressState.Completed -> stringResource(
+                        R.string.completed_on,
+                        state.timestamp.format(DateUtil.Formatters.localizedDateLong)
+                    )
                 },
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -656,13 +688,59 @@ private fun LockedEntriesExistIndicator(
                 contentDescription = null
             )
             Text(
-                text = stringResource(R.string.locked_entries_exist),
+                text = stringResource(R.string.locked_entries_exist_message),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .weight(1f, false)
             )
 
             TextButton(
                 onClick = onShowClick
             ) {
                 Text(stringResource(R.string.show))
+            }
+        }
+    }
+}
+
+@Composable
+private fun PileCompletedBanner(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.secondaryContainer
+            .copy(alpha = ContentAlpha.PERCENT_50),
+        border = BorderStroke(
+            width = BorderWidthStandard,
+            color = MaterialTheme.colorScheme.secondary
+                .copy(alpha = ContentAlpha.PERCENT_50),
+        ),
+        modifier = modifier
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+            modifier = Modifier
+                .padding(MaterialTheme.spacing.medium)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_circle_lock),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier.size(IconSizeMedium)
+            )
+            Column {
+                Text(
+                    text = stringResource(R.string.pile_locked),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                SpacerExtraSmall()
+                Text(
+                    text = stringResource(R.string.pile_locked_banner_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -694,10 +772,11 @@ private fun PreviewPileDetailScreen() {
                     targetDate = null,
                     completionTimestamp = null,
                 ),
-                progressState = PileProgressState.SavingFreely,
+                progressState = PileProgressState.Completed(DateUtil.now()),
                 canWithdraw = true,
                 includeLockedTransactions = false,
-                lockedEntriesExist = true
+                lockedEntriesExist = true,
+                isComplete = true,
             ),
             actions = object : PileDetailActions {
                 override fun onTransactionActionRevealed() {}

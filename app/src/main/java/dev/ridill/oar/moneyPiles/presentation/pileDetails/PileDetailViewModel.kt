@@ -45,17 +45,15 @@ class PileDetailViewModel @AssistedInject constructor(
     private val includeLockedTransactions = savedStateHandle
         .getStateFlow(SHOW_LOCKED, false)
 
-    val transactionPagingData = includeLockedTransactions
-        .flatMapLatest { includeLocked ->
-            repo.getTransactionsInPilePaged(
-                pileId = route.pileId,
-                includeLocked = includeLocked
-            )
-        }
-        .cachedIn(viewModelScope)
-
     private val dateNow = MutableStateFlow(DateUtil.dateNow())
     private val details = repo.getPileDetailById(route.pileId)
+    private val completionTimestamp = details
+        .mapLatest { it?.completionTimestamp }
+        .distinctUntilChanged()
+    private val isComplete = completionTimestamp
+        .mapLatest { it != null }
+        .distinctUntilChanged()
+
     private val targetAmount = details
         .mapLatest { it?.targetAmount }
         .distinctUntilChanged()
@@ -71,8 +69,10 @@ class PileDetailViewModel @AssistedInject constructor(
     private val progressState = combineTuple(
         savedAmount,
         targetAmount,
-    ).mapLatest { (saved, target) ->
+        completionTimestamp,
+    ).mapLatest { (saved, target, completionTimestamp) ->
         return@mapLatest when {
+            completionTimestamp != null -> PileProgressState.Completed(completionTimestamp)
             target == null -> PileProgressState.SavingFreely
             saved >= target -> PileProgressState.GoalReached
             else -> PileProgressState.AmountToGo(target - saved)
@@ -110,6 +110,18 @@ class PileDetailViewModel @AssistedInject constructor(
         }
         .distinctUntilChanged()
 
+    val transactionPagingData = includeLockedTransactions
+        .flatMapLatest { includeLocked ->
+            repo.getTransactionsInPilePaged(
+                pileId = route.pileId,
+                includeLocked = includeLocked
+            )
+        }
+        .cachedIn(viewModelScope)
+
+    private val lockedEntriesExist = repo
+        .doLockedEntriesExist(route.pileId)
+
     val state = combineTuple(
         details,
         savedAmount,
@@ -118,6 +130,9 @@ class PileDetailViewModel @AssistedInject constructor(
         projectedCompletion,
         canWithdraw,
         includeLockedTransactions,
+        lockedEntriesExist,
+        isComplete,
+        completionTimestamp,
     ).mapLatest { (
                       details,
                       savedAmount,
@@ -126,6 +141,9 @@ class PileDetailViewModel @AssistedInject constructor(
                       projectedCompletion,
                       canWithdraw,
                       includeLockedTransactions,
+                      doLockedEntriesExist,
+                      lockedEntriesExist,
+                      completionTimestamp,
                   ) ->
         PileDetailState(
             pile = details,
@@ -135,6 +153,9 @@ class PileDetailViewModel @AssistedInject constructor(
             projectedCompletion = projectedCompletion,
             canWithdraw = canWithdraw,
             includeLockedTransactions = includeLockedTransactions,
+            lockedEntriesExist = doLockedEntriesExist,
+            isComplete = lockedEntriesExist,
+            completionTimestamp = completionTimestamp,
         )
     }.asStateFlow(viewModelScope, PileDetailState())
 

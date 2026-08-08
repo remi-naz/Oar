@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.BuildUtil
+import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.domain.util.Zero
@@ -65,6 +66,7 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import dev.ridill.oar.moneyPiles.presentation.components.PileIconIndicator
+import java.time.LocalDateTime
 import java.util.Currency
 
 @Composable
@@ -79,6 +81,7 @@ internal fun PileGridItem(
     @FloatRange(from = 0.0, to = 1.0) progressFraction: Float,
     onClick: () -> Unit,
     onQuickAddClick: () -> Unit,
+    completionTimestamp: LocalDateTime?,
     modifier: Modifier = Modifier,
     animationSeed: Int = 0,
 ) {
@@ -99,6 +102,7 @@ internal fun PileGridItem(
         label = "time"
     )
     val shape = MaterialTheme.shapes.medium
+    val complete = completionTimestamp != null
     Box(
         modifier = modifier
             .height(IntrinsicSize.Max)
@@ -193,37 +197,49 @@ internal fun PileGridItem(
 
             Spacer(weight = 1f)
 
-            Text(
-                text = TextFormat.currencyAmount(amount = savedAmount, currency = currency),
-                style = MaterialTheme.typography.titleLarge
-            )
-            targetAmount?.let {
+            if (complete) {
                 Text(
                     text = stringResource(
-                        R.string.of_value,
-                        TextFormat.currencyAmount(amount = it, currency = currency)
+                        R.string.completed_on,
+                        completionTimestamp.format(DateUtil.Formatters.localizedDateMedium)
                     ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.bodySmall
                 )
+            } else {
+                Text(
+                    text = TextFormat.currencyAmount(amount = savedAmount, currency = currency),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                targetAmount?.let {
+                    Text(
+                        text = stringResource(
+                            R.string.of_value,
+                            TextFormat.currencyAmount(amount = it, currency = currency)
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
 
-        FilledTonalIconButton(
-            onClick = onQuickAddClick,
-            modifier = Modifier
-                .align(Alignment.BottomEnd),
-            colors = IconButtonDefaults.filledTonalIconButtonColors(
-                containerColor = accent,
-                contentColor = accent.contentColor()
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-            )
+        if (!complete) {
+            FilledTonalIconButton(
+                onClick = onQuickAddClick,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd),
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = accent,
+                    contentColor = accent.contentColor()
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                )
+            }
         }
     }
 }
@@ -299,7 +315,8 @@ private fun PreviewPileGridItem() {
                 currency = LocaleUtil.defaultCurrency,
                 savedAmount = 100.0,
                 targetAmount = 1000.0,
-                progressFraction = 0.80f
+                progressFraction = 0.80f,
+                completionTimestamp = DateUtil.now(),
             )
         }
     }
