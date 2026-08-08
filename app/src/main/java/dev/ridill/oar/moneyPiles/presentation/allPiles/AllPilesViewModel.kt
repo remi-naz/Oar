@@ -1,5 +1,6 @@
 package dev.ridill.oar.moneyPiles.presentation.allPiles
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
@@ -10,19 +11,31 @@ import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.PileFundMovementResult
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.moneyPiles.domain.repository.AllPilesRepository
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AllPilesViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     repo: AllPilesRepository,
     private val eventBus: EventBus<AllPilesEvent>,
 ) : ViewModel() {
 
-    val pilesPagingData = repo.getAllPilesPaged()
+    val includeCompletedPiles = savedStateHandle
+        .getStateFlow(SHOW_COMPLETED, false)
+
+    val pilesPagingData = includeCompletedPiles
+        .flatMapLatest { includeLocked ->
+            repo.getAllPilesPagedGroupedByCompleted(includeCompleted = includeLocked)
+        }
         .cachedIn(viewModelScope)
 
     val events = eventBus.eventFlow
+
+    fun onIncludeLockedPilesToggle(includeLocked: Boolean) {
+        savedStateHandle[SHOW_COMPLETED] = includeLocked
+    }
 
     fun onAddEditPileResult(result: AddEditMoneyPileResult) = viewModelScope.launch {
         val message = when (result) {
@@ -50,3 +63,5 @@ class AllPilesViewModel @Inject constructor(
         data class ShowUiMessage(val text: UiText) : AllPilesEvent
     }
 }
+
+private const val SHOW_COMPLETED = "SHOW_COMPLETED"

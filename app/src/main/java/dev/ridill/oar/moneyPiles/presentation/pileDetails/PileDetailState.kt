@@ -3,6 +3,7 @@ package dev.ridill.oar.moneyPiles.presentation.pileDetails
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class PileDetailState(
     val loading: Boolean = false,
@@ -12,12 +13,15 @@ data class PileDetailState(
     val progressState: PileProgressState = PileProgressState.SavingFreely,
     val projectedCompletion: LocalDate? = null,
     val canWithdraw: Boolean = false,
-    val includeLockedTransactions: Boolean = true,
+    val includeLockedTransactions: Boolean = false,
     val lockedEntriesExist: Boolean = false,
+    val isComplete: Boolean = false,
+    val completionTimestamp: LocalDateTime? = null,
 )
 
 sealed interface PileProgressState {
     data object SavingFreely : PileProgressState
     data object GoalReached : PileProgressState
+    data class Completed(val timestamp: LocalDateTime) : PileProgressState
     data class AmountToGo(val amount: Double) : PileProgressState
 }
