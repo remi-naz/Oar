@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,7 +83,6 @@ import dev.ridill.oar.core.ui.components.VerticalNumberSpinnerContent
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.BorderWidthStandard
-import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -710,37 +710,37 @@ private fun PileCompletedBanner(
 ) {
     Surface(
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.secondaryContainer
-            .copy(alpha = ContentAlpha.PERCENT_50),
+        color = MaterialTheme.colorScheme.tertiaryContainer,
         border = BorderStroke(
             width = BorderWidthStandard,
-            color = MaterialTheme.colorScheme.secondary
-                .copy(alpha = ContentAlpha.PERCENT_50),
+            color = MaterialTheme.colorScheme.tertiary,
         ),
         modifier = modifier
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
-            modifier = Modifier
-                .padding(MaterialTheme.spacing.medium)
+        CompositionLocalProvider(
+            LocalContentColor provides MaterialTheme.colorScheme.onTertiaryContainer
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_circle_lock),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.size(IconSizeMedium)
-            )
-            Column {
-                Text(
-                    text = stringResource(R.string.pile_locked),
-                    style = MaterialTheme.typography.titleSmall,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+                modifier = Modifier
+                    .padding(MaterialTheme.spacing.medium)
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_circle_lock),
+                    contentDescription = null,
+                    modifier = Modifier.size(IconSizeMedium)
                 )
-                SpacerExtraSmall()
-                Text(
-                    text = stringResource(R.string.pile_locked_banner_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Column {
+                    Text(
+                        text = stringResource(R.string.pile_locked),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    SpacerExtraSmall()
+                    Text(
+                        text = stringResource(R.string.pile_locked_banner_description),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
             }
         }
     }
