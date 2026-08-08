@@ -30,9 +30,14 @@ class MarkTransactionExcludedActionReceiver : BroadcastReceiver() {
         val id = intent.getLongExtra(ARG_TRANSACTION_ID, -1L)
         if (id < Long.Zero) return
 
-        applicationScope.launch {
-            repo.toggleExcluded(id, true)
-            notificationHelper.dismissNotification(id.hashCode())
+        val pendingResult = goAsync()
+        try {
+            applicationScope.launch {
+                repo.toggleExcluded(id, true)
+                notificationHelper.dismissNotification(id.hashCode())
+            }
+        } finally {
+            pendingResult.finish()
         }
     }
 }

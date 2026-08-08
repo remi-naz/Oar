@@ -22,8 +22,13 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action != Intent.ACTION_BOOT_COMPLETED) return
+        val pendingResult = goAsync()
         applicationScope.launch {
-            appInitManager.startAlarmsAndReminderInitWorkers()
+            try {
+                appInitManager.startAlarmsAndReminderInitWorkers()
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 }

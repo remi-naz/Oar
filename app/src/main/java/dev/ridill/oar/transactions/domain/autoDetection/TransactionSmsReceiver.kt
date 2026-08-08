@@ -5,10 +5,17 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import dagger.hilt.android.AndroidEntryPoint
+import dev.ridill.oar.di.ApplicationScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class TransactionSmsReceiver : BroadcastReceiver() {
+
+    @ApplicationScope
+    @Inject
+    lateinit var applicationScope: CoroutineScope
 
     @Inject
     lateinit var service: TransactionAutoDetectService
@@ -20,6 +27,13 @@ class TransactionSmsReceiver : BroadcastReceiver() {
             .ifEmpty { return }
             .toList()
 
-        service.detectTransactionsFromMessages(smsMessages)
+        val pendingResult = goAsync()
+        applicationScope.launch {
+            try {
+                service.detectTransactionsFromMessages(smsMessages)
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 }

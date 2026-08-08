@@ -52,13 +52,11 @@ object TransactionSingletonModule {
         transactionRepository: TransactionRepository,
         crashlyticsManager: CrashlyticsManager,
         notificationHelper: NotificationHelper<Transaction>,
-        @ApplicationScope applicationScope: CoroutineScope,
     ): TransactionAutoDetectService = TransactionAutoDetectService(
         extractor = extractor,
         transactionRepo = transactionRepository,
         crashlyticsManager = crashlyticsManager,
         notificationHelper = notificationHelper,
-        applicationScope = applicationScope
     )
 
     @Provides
