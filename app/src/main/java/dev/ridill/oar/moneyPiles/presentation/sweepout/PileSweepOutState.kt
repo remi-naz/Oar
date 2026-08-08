@@ -15,4 +15,5 @@ data class PileSweepOutState(
     val createLinkedTransaction: Boolean = true,
     val previewAmount: Double = Double.Zero,
     val confirmEnabled: Boolean = false,
+    val showCompletionWarning: Boolean = false,
 )

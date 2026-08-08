@@ -659,8 +659,14 @@
     <string name="pile_sweep_out_create_linked_transaction_label">Record as an expense</string>
     <string name="pile_sweep_out_confirm_button">Confirm Sweep</string>
     <string name="pile_swept_out">Pile swept out</string>
+    <string name="pile_sweep_out_will_complete_pile_warning">This pile has reached its target and you\'re performing a full sweep out. This action will mark the pile as \"Completed\" and make it read-only. Are you sure you want to proceed?</string>
     <string name="error_amount_greater_than_pile_aggregate">You can\'t sweep out money you haven\'t set aside</string>
-    <string name="locked_entries_exist">Some entries are locked</string>
+    <string name="locked_entries_exist_message">Locked entries hidden</string>
     <string name="show">Show</string>
     <string name="pile_transactions_empty_message">There aren\'t any contributions to this pile yet</string>
+    <string name="pile_locked_banner_description">This pile hit its goal and the funds have been withdrawn. It\'s now read‑only — kept here as a record.</string>
+    <string name="completed">Completed</string>
+    <string name="completed_on">Completed on %s</string>
+    <string name="show_completed">Show Completed</string>
+    <string name="hide_completed">Hide Completed</string>
 </resources>

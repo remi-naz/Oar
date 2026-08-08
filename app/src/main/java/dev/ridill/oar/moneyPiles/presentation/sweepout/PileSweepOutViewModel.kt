@@ -79,6 +79,15 @@ class PileSweepOutViewModel @AssistedInject constructor(
     ).mapLatest { (amount, limit) -> amount <= limit }
         .distinctUntilChanged()
 
+    private val targetAmount = pile.mapLatest { it?.targetAmount }
+        .distinctUntilChanged()
+    private val showCompletionWarning = combineTuple(
+        targetAmount,
+        amountInputParsed
+    ).mapLatest { (target, amount) ->
+        target != null && amount >= target
+    }.distinctUntilChanged()
+
     val state = combineTuple(
         timestampNow,
         _loading,
@@ -88,6 +97,7 @@ class PileSweepOutViewModel @AssistedInject constructor(
         createLinkedTransaction,
         previewAmount,
         confirmEnabled,
+        showCompletionWarning,
     ).mapLatest { (
                       timestampNow,
                       loading,
@@ -97,6 +107,7 @@ class PileSweepOutViewModel @AssistedInject constructor(
                       createLinkedTransaction,
                       previewAmount,
                       confirmEnabled,
+                      showCompletionWarning,
                   ) ->
         PileSweepOutState(
             timestampNow = timestampNow,
@@ -107,6 +118,7 @@ class PileSweepOutViewModel @AssistedInject constructor(
             createLinkedTransaction = createLinkedTransaction,
             previewAmount = previewAmount,
             confirmEnabled = confirmEnabled,
+            showCompletionWarning = showCompletionWarning,
         )
     }
         .onStart { refreshInputs() }

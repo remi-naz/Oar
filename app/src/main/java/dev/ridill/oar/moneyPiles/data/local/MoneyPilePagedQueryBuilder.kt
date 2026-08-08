@@ -8,6 +8,7 @@ import dev.ridill.oar.core.data.db.SortDirection
 
 object MoneyPilePagedQueryBuilder {
     private val COLUMNS = listOf(
+        KeysetColumn("(completionTimestamp IS NOT NULL)", SortDirection.ASC),
         KeysetColumn("id", SortDirection.DESC)
     )
 
@@ -16,11 +17,15 @@ object MoneyPilePagedQueryBuilder {
         cursor: MoneyPilePageKey?,
         direction: PageLoadDirection,
         limit: Int,
+        includeCompleted: Boolean = true,
     ): RoomRawQuery {
         val builder = KeysetPagedQuery("money_pile_aggregate_view", COLUMNS)
 
         if (query.isNotBlank()) {
             builder.where("name LIKE '%' || ? || '%'") { s, i -> s.bindText(i, query); i + 1 }
+        }
+        if (!includeCompleted) {
+            builder.where("completionTimestamp IS NULL")
         }
 
         return builder.build(cursor, direction, limit)
