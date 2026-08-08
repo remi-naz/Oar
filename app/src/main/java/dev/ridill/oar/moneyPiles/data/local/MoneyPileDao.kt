@@ -29,4 +29,10 @@ interface MoneyPileDao : BaseDao<MoneyPileEntity> {
 
     @Query("DELETE FROM money_pile_table WHERE id = :id")
     suspend fun deletePileById(id: Long)
+
+    @Query("UPDATE money_pile_table SET next_reminder_timestamp = :timestamp WHERE id = :id")
+    suspend fun setNextReminderTimestampForPile(id: Long, timestamp: LocalDateTime?)
+
+    @Query("SELECT * FROM money_pile_table WHERE reminder_cadence != 'NO_REMIND' AND completion_timestamp IS NULL")
+    suspend fun getPilesWithActiveReminders(): List<MoneyPileEntity>
 }

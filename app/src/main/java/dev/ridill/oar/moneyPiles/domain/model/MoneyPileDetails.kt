@@ -28,6 +28,7 @@ data class MoneyPileDetails(
     val reminderAmount: Double?,
     val createdTimestamp: LocalDateTime,
     val completionTimestamp: LocalDateTime?,
+    val nextReminderTimestamp: LocalDateTime?,
 ) : Parcelable {
     val color: Color
         get() = Color(colorCode)
@@ -48,7 +49,8 @@ data class MoneyPileDetails(
                 reminderAmount = 0.0,
                 createdTimestamp = LocalDateTime.now(),
                 currency = LocaleUtil.defaultCurrency,
-                completionTimestamp = null
+                completionTimestamp = null,
+                nextReminderTimestamp = null
             )
     }
 }

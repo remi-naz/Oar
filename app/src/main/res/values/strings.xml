@@ -51,6 +51,7 @@
     <string name="notification_channel_group_schedules_name">Schedules</string>
     <string name="notification_channel_schedule_reminders_name">Schedule Reminders</string>
     <string name="notification_channel_group_others_name">Others</string>
+    <string name="notification_channel_pile_reminders_name">Pile Reminders</string>
     <string name="notification_channel_backups_name">Data backup</string>
     <string name="notification_channel_app_lock_name">App Lock</string>
     <string name="notification_channel_app_init_name">App Init</string>
@@ -621,6 +622,12 @@
     <string name="pile_deleted">Pile Deleted</string>
     <string name="pile_saved">Pile Saved</string>
     <string name="error_invalid_pile_name">Please enter a valid name</string>
+    <string name="error_invalid_pile_reminder_amount">Please enter a valid amount for auto-add</string>
+    <string name="pile_reminder_notification_title">Pile Reminder</string>
+    <string name="pile_reminder_time_to_add_amount_to_pile">Time to add %1$s to \"%2$s\"</string>
+    <string name="pile_reminder_amount_auto_added_to_pile">%1$s was auto-added to \"%2$s\"</string>
+    <string name="restoring_pile_reminders">Restoring Pile Reminders</string>
+    <string name="error_pile_reminders_restore_failed">Failed to restore pile reminders.</string>
     <string name="name">Name</string>
     <string name="pile_name_placeholder">e.g. That new thing I wanna save for</string>
     <string name="pile_lock_label">Make it non-breakable</string>

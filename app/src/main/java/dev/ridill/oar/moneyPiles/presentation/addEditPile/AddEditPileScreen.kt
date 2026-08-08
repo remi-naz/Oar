@@ -63,10 +63,10 @@ import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.OarTextField
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.SpacerExtraSmall
+import dev.ridill.oar.core.ui.components.SpacerSmall
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
-import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.PaddingSide
 import dev.ridill.oar.core.ui.util.exclude
 import dev.ridill.oar.core.ui.util.only
@@ -83,7 +83,7 @@ import java.util.Currency
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AddEditPileScreen(
+internal fun AddEditPileScreen(
     isEditMode: Boolean,
     state: AddEditPileState,
     nameState: TextFieldState,
@@ -278,51 +278,51 @@ fun AddEditPileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                    Column(
                         modifier = maxWidthWithPaddingModifier
                     ) {
-                        PileReminderBehavior.entries.forEachIndexed { index, behavior ->
-                            ToggleButton(
-                                checked = state.reminderBehavior == behavior,
-                                onCheckedChange = { actions.onBehaviorChange(behavior) },
-                                shapes = when (index) {
-                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                    PileReminderBehavior.entries.lastIndex -> ButtonGroupDefaults
-                                        .connectedTrailingButtonShapes()
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            PileReminderBehavior.entries.forEachIndexed { index, behavior ->
+                                ToggleButton(
+                                    checked = state.reminderBehavior == behavior,
+                                    onCheckedChange = { actions.onBehaviorChange(behavior) },
+                                    shapes = when (index) {
+                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        PileReminderBehavior.entries.lastIndex -> ButtonGroupDefaults
+                                            .connectedTrailingButtonShapes()
 
-                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    text = stringResource(behavior.labelRes),
-                                    style = MaterialTheme.typography.labelMedium
-                                )
+                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = stringResource(behavior.labelRes),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
                             }
                         }
-                    }
-                }
 
-                val showReminderAmountInput by remember(state.reminderBehavior) {
-                    derivedStateOf { state.reminderBehavior != PileReminderBehavior.REMIND }
-                }
-                AnimatedVisibility(
-                    visible = showReminderAmountInput,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    OarTextField(
-                        state = reminderAmountState,
-                        label = { Text(stringResource(R.string.pile_reminder_amount_auto_label)) },
-                        prefix = { Text(LocalCurrencyPreference.current.symbol) },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal,
-                            imeAction = ImeAction.Done
-                        ),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        modifier = maxWidthWithPaddingModifier
-                    )
+                        SpacerSmall()
+
+                        AmountInput(
+                            inputState = reminderAmountState,
+                            currency = state.currency,
+                            label = stringResource(R.string.pile_reminder_amount_auto_label),
+                            colors = TextFieldDefaults.colors(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal,
+                                imeAction = ImeAction.Done
+                            ),
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
                 }
 
                 HorizontalDivider()

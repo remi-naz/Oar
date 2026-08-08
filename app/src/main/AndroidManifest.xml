@@ -45,6 +45,7 @@
         <receiver android:name=".settings.domain.notification.LockAppImmediateReceiver" />
         <receiver android:name=".schedules.domain.scheduleReminder.ScheduledPaymentReminderReceiver" />
         <receiver android:name=".schedules.domain.scheduleReminder.MarkScheduleAsPaidActionReceiver" />
+        <receiver android:name=".moneyPiles.domain.pileReminder.PileReminderReceiver" />
         <receiver
             android:name=".transactions.domain.autoDetection.TransactionSmsReceiver"
             android:enabled="false"

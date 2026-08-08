@@ -17,6 +17,7 @@ import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.LocaleUtil
+import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
@@ -170,10 +171,14 @@ class AddEditPileViewModel @AssistedInject constructor(
             savedStateHandle[PILE_INPUT] = pile
             nameState.setTextAndPlaceCursorAtEnd(pile.name)
             targetAmountState.setTextAndPlaceCursorAtEnd(
-                pile.targetAmount?.let(TextFormat::number).orEmpty()
+                pile.targetAmount
+                    ?.takeIf { it > Double.Zero }
+                    ?.let(TextFormat::number).orEmpty()
             )
             reminderAmountState.setTextAndPlaceCursorAtEnd(
-                pile.reminderAmount?.let(TextFormat::number).orEmpty()
+                pile.reminderAmount
+                    ?.takeIf { it > Double.Zero }
+                    ?.let(TextFormat::number).orEmpty()
             )
         }
     }
@@ -231,7 +236,7 @@ class AddEditPileViewModel @AssistedInject constructor(
     override fun onSaveClick() {
         val input = pileInput.value ?: return
         viewModelScope.launch {
-            val name = nameState.text.trim()
+            val name = nameState.text.trim().toString()
             if (name.isEmpty()) {
                 eventBus.send(
                     AddEditPileEvent.ShowUiMessage(
@@ -241,20 +246,45 @@ class AddEditPileViewModel @AssistedInject constructor(
                 return@launch
             }
 
+            val reminderAmount = TextFormat
+                .parseNumber(reminderAmountState.text.toString())
+
+            if (input.reminderCadence != PileReminderCadence.NO_REMIND &&
+                input.reminderBehavior == PileReminderBehavior.AUTO_ADD &&
+                (reminderAmount == null || reminderAmount <= Double.Zero)
+            ) {
+                eventBus.send(
+                    AddEditPileEvent.ShowUiMessage(
+                        UiText.StringResource(
+                            R.string.error_invalid_pile_reminder_amount,
+                            isErrorText = true
+                        )
+                    )
+                )
+                return@launch
+            }
+
             _isLoading.update { true }
 
             val targetAmount = TextFormat
                 .parseNumber(targetAmountState.text.toString())
-            val reminderAmount = TextFormat
-                .parseNumber(reminderAmountState.text.toString())
             val starterAmount = TextFormat
                 .parseNumber(starterAmountState.text.toString())
                 ?.takeIf { !isEditMode }
-            val pileToSave = input.copy(
-                name = name.toString(),
-                targetAmount = targetAmount,
-                reminderAmount = reminderAmount,
-            )
+            val pileToSave = if (input.reminderCadence == PileReminderCadence.NO_REMIND) {
+                input.copy(
+                    name = name,
+                    targetAmount = targetAmount,
+                    reminderAmount = null,
+                    reminderBehavior = PileReminderBehavior.REMIND,
+                )
+            } else {
+                input.copy(
+                    name = name,
+                    targetAmount = targetAmount,
+                    reminderAmount = reminderAmount,
+                )
+            }
 
             repo.savePile(pile = pileToSave, starterAmount = starterAmount)
             _isLoading.update { false }
