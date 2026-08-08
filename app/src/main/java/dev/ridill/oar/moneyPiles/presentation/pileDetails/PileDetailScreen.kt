@@ -771,6 +771,7 @@ private fun PreviewPileDetailScreen() {
                     createdTimestamp = DateUtil.now(),
                     targetDate = null,
                     completionTimestamp = null,
+                    nextReminderTimestamp = null,
                 ),
                 progressState = PileProgressState.Completed(DateUtil.now()),
                 canWithdraw = true,

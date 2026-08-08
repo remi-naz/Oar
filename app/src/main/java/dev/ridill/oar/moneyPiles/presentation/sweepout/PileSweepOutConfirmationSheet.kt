@@ -264,6 +264,7 @@ private fun PreviewPileSweepOutConfirmationSheet() {
                         createdTimestamp = DateUtil.now(),
                         targetDate = null,
                         completionTimestamp = null,
+                        nextReminderTimestamp = null,
                     ),
                     maxLimit = 5000.0,
                     previewAmount = 5000.0,

@@ -18,6 +18,7 @@ import dev.ridill.oar.moneyPiles.data.repository.MoneyPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.PileDetailRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.PileFundMovementRepositoryImpl
 import dev.ridill.oar.moneyPiles.domain.model.PileSweepOutRepositoryImpl
+import dev.ridill.oar.moneyPiles.domain.pileReminder.PileReminder
 import dev.ridill.oar.moneyPiles.domain.repository.AddEditPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.AllPilesRepository
 import dev.ridill.oar.moneyPiles.domain.repository.MoneyPileRepository
@@ -72,11 +73,13 @@ object MoneyPileViewModelModule {
         pileDao: MoneyPileDao,
         pileTransactionDao: MoneyPileTransactionDao,
         pileRepo: MoneyPileRepository,
+        pileReminder: PileReminder,
     ): AddEditPileRepository = AddEditPileRepositoryImpl(
         db = db,
         pileDao = pileDao,
         pileTransactionDao = pileTransactionDao,
         pileRepo = pileRepo,
+        pileReminder = pileReminder,
     )
 
     @Provides

@@ -331,6 +331,7 @@ private fun PreviewMovePileFundScreen() {
                     targetDate = null,
                     currency = LocaleUtil.defaultCurrency,
                     completionTimestamp = null,
+                    nextReminderTimestamp = null,
                 ),
                 cycleDescription = "Aug 1 - Aug 31"
             ),
