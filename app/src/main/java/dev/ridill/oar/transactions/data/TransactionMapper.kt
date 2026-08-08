@@ -76,7 +76,12 @@ fun TransactionDetailsView.toTransactionEntryUiModel(): TransactionEntryUiModel 
         name = folderName,
     ) else null
 
-    return if (pileId != null && !pileName.isNullOrEmpty() && pileColorCode != null && pileIcon != null) TransactionEntryUiModel.PileContribution(
+    return if (pileId != null
+        && !pileName.isNullOrEmpty()
+        && pileColorCode != null
+        && pileIcon != null
+        && contributionSource != null
+    ) TransactionEntryUiModel.PileContribution(
         id = transactionId,
         pileId = pileId,
         pileName = pileName,
@@ -86,7 +91,9 @@ fun TransactionDetailsView.toTransactionEntryUiModel(): TransactionEntryUiModel 
         cycle = cycle,
         timestamp = transactionTimestamp,
         amount = transactionAmount,
-        currency = LocaleUtil.currencyForCode(currencyCode)
+        currency = LocaleUtil.currencyForCode(currencyCode),
+        excluded = excluded,
+        source = contributionSource
     ) else TransactionEntryUiModel.TransactionItem(
         id = transactionId,
         note = transactionNote,
@@ -125,7 +132,12 @@ fun TransactionDetailsView.toDateSeparatedTransactionEntryUiModel(): DateSeparat
         name = folderName,
     ) else null
 
-    return if (pileId != null && !pileName.isNullOrEmpty() && pileColorCode != null && pileIcon != null) DateSeparatedTransactionEntryUiModel.PileContribution(
+    return if (pileId != null
+        && !pileName.isNullOrEmpty()
+        && pileColorCode != null
+        && pileIcon != null
+        && contributionSource != null
+    ) DateSeparatedTransactionEntryUiModel.PileContribution(
         id = transactionId,
         pileId = pileId,
         pileName = pileName,
@@ -135,7 +147,9 @@ fun TransactionDetailsView.toDateSeparatedTransactionEntryUiModel(): DateSeparat
         cycle = cycle,
         timestamp = transactionTimestamp,
         amount = transactionAmount,
-        currency = LocaleUtil.currencyForCode(currencyCode)
+        currency = LocaleUtil.currencyForCode(currencyCode),
+        excluded = excluded,
+        source = contributionSource
     ) else DateSeparatedTransactionEntryUiModel.DateSeparatedTransactionItem(
         id = transactionId,
         note = transactionNote,

@@ -639,7 +639,7 @@ private fun PileHistoryItem(
         ) {
             Text(
                 text = stringResource(
-                    if (movement == FundMovement.OUT) R.string.pile_action_withdraw
+                    if (source != ContributionSource.SWEEP_OUT && movement == FundMovement.OUT) R.string.pile_action_withdraw
                     else source.labelRes
                 ),
                 fontWeight = FontWeight.SemiBold,

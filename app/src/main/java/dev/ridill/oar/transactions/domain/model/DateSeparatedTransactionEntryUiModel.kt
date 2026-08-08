@@ -3,6 +3,7 @@ package dev.ridill.oar.transactions.domain.model
 import androidx.compose.ui.graphics.Color
 import dev.ridill.oar.budgetCycles.domain.model.CycleIndicator
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.moneyPiles.domain.model.ContributionSource
 import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import java.time.LocalDateTime
 import java.util.Currency
@@ -34,6 +35,8 @@ sealed class DateSeparatedTransactionEntryUiModel(
         val timestamp: LocalDateTime,
         val amount: Double,
         val currency: Currency,
+        val excluded: Boolean,
+        val source: ContributionSource,
         override val cycle: CycleIndicator,
     ) : DateSeparatedTransactionEntryUiModel(cycle)
 

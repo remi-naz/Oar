@@ -99,7 +99,7 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.core.ui.util.mergedContentDescription
-import dev.ridill.oar.moneyPiles.presentation.components.ContributionTransactionItem
+import dev.ridill.oar.moneyPiles.presentation.components.PileContributionItem
 import dev.ridill.oar.schedules.domain.model.ActiveSchedule
 import dev.ridill.oar.schedules.presentation.components.ActiveScheduleItem
 import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
@@ -231,7 +231,7 @@ internal fun DashboardScreen(
                                         }
 
                                         is TransactionEntryUiModel.PileContribution -> {
-                                            ContributionTransactionItem(
+                                            PileContributionItem(
                                                 onClick = { navigateToPileDetails(item.pileId) },
                                                 pileName = item.pileName,
                                                 pileColor = item.pileColor,
@@ -240,6 +240,8 @@ internal fun DashboardScreen(
                                                     item.currency
                                                 ),
                                                 timestamp = item.timestamp,
+                                                excluded = item.excluded,
+                                                source = item.source,
                                                 movement = item.movement,
                                                 modifier = Modifier
                                                     .animateItem()

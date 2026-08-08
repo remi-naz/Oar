@@ -77,7 +77,7 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.folders.domain.model.FolderTransactionsMultiSelectionOption
-import dev.ridill.oar.moneyPiles.presentation.components.ContributionTransactionItem
+import dev.ridill.oar.moneyPiles.presentation.components.PileContributionItem
 import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.model.TagIndicator
 import dev.ridill.oar.transactions.presentation.components.NewTransactionFab
@@ -293,7 +293,7 @@ internal fun FolderDetailsScreen(
                                     key = item.id,
                                     contentType = DateSeparatedTransactionEntryUiModel.PileContribution::class
                                 ) {
-                                    ContributionTransactionItem(
+                                    PileContributionItem(
                                         pileName = item.pileName,
                                         pileColor = item.pileColor,
                                         amount = TextFormat.currency(
@@ -302,6 +302,7 @@ internal fun FolderDetailsScreen(
                                         ),
                                         timestamp = item.timestamp,
                                         movement = item.movement,
+                                        source = item.source,
                                         modifier = Modifier
                                             .animateItem()
                                     )

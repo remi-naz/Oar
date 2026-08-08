@@ -641,7 +641,8 @@
     <string name="pile_action_withdraw">Withdraw from pile</string>
     <string name="pile_history_entry_type_starter">Starter amount</string>
     <string name="pile_history_entry_type_auto_contribution">Auto contribution</string>
-    <string name="pile_history_entry_type_deposit">Added to pile</string>
+    <string name="pile_history_entry_type_manual">Manual deposit</string>
+    <string name="pile_history_entry_type_sweep_out">Sweep out</string>
     <string name="cd_tap_to_edit_pile">Tap to edit pile</string>
     <string name="pile_activity_label">Activity</string>
     <string name="pile_menu_show_locked">Show Locked</string>
@@ -658,7 +659,6 @@
     <string name="pile_tx_linked_tx_note">Contribution to \'%s\'</string>
     <string name="error_no_cycle_selected">Cycle not selected</string>
     <string name="pile_contribution_transaction_supporting_text">Contributed to pile</string>
-    <string name="pile_history_entry_type_sweep_out">Swept Out</string>
     <string name="cd_tap_to_sweep_out_pile">Tap to sweep out pile</string>
     <string name="pile_sweep_out_confirmation_title">Sweep out</string>
     <string name="pile_sweep_out_confirmation_message">Money leaves this pile for what you were saving towards. Activity up to now becomes read-only.</string>
@@ -676,4 +676,6 @@
     <string name="completed_on">Completed on %s</string>
     <string name="show_completed">Show Completed</string>
     <string name="hide_completed">Hide Completed</string>
+    <string name="contribution_source_to_pile">%1$s towards %2$s</string>
+    <string name="contribution_source_from_pile">%1$s from %2$s</string>
 </resources>

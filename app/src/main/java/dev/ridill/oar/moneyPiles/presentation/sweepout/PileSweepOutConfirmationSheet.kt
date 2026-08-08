@@ -42,12 +42,13 @@ import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
+import dev.ridill.oar.moneyPiles.domain.model.ContributionSource
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
 import dev.ridill.oar.moneyPiles.domain.model.PileContributionMode
 import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderBehavior
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderCadence
-import dev.ridill.oar.moneyPiles.presentation.components.ContributionTransactionItem
+import dev.ridill.oar.moneyPiles.presentation.components.PileContributionItem
 import dev.ridill.oar.moneyPiles.presentation.components.PileIconIndicator
 import dev.ridill.oar.transactions.presentation.components.AmountInput
 import java.time.LocalDateTime
@@ -192,12 +193,13 @@ private fun ExpensePreviewCard(
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
     ) {
-        ContributionTransactionItem(
+        PileContributionItem(
             pileName = pile.name,
             pileColor = pile.color,
             amount = formattedAmount,
             excluded = pile.contributionMode == PileContributionMode.FROM_BALANCE,
             timestamp = timestamp,
+            source = ContributionSource.SWEEP_OUT,
             movement = FundMovement.OUT,
         )
     }

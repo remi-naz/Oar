@@ -2,6 +2,7 @@ package dev.ridill.oar.transactions.data.local.views
 
 import androidx.room.DatabaseView
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.moneyPiles.domain.model.ContributionSource
 import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,6 +29,7 @@ import java.time.LocalDateTime
         pile.name AS pileName,
         pile.icon AS pileIcon,
         pile.color AS pileColorCode,
+        ptx.contribution_source AS contributionSource,
         (CASE WHEN 1 IN (tx.is_excluded, tag.is_excluded, folder.is_excluded) THEN 1 ELSE 0 END) AS excluded
         FROM transaction_table tx
         JOIN budget_cycle_table cyc ON tx.cycle_id = cyc.id
@@ -60,5 +62,6 @@ data class TransactionDetailsView(
     val pileName: String?,
     val pileIcon: PileIcon?,
     val pileColorCode: Int?,
-    val excluded: Boolean
+    val contributionSource: ContributionSource?,
+    val excluded: Boolean,
 )

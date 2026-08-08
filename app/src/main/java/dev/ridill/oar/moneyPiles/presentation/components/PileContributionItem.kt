@@ -35,11 +35,13 @@ import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.exclusionGraphicsLayer
 import dev.ridill.oar.core.ui.util.mergedContentDescription
+import dev.ridill.oar.moneyPiles.domain.model.ContributionSource
 import java.time.LocalDateTime
 
 @Composable
 private fun Content(
     pileName: String,
+    source: ContributionSource,
     excluded: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -52,7 +54,12 @@ private fun Content(
             ExcludedIconSmall()
         }
         Text(
-            text = pileName,
+            text = stringResource(
+                if (source == ContributionSource.SWEEP_OUT) R.string.contribution_source_from_pile
+                else R.string.contribution_source_to_pile,
+                stringResource(source.labelRes),
+                pileName
+            ),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
@@ -119,12 +126,13 @@ private fun buildContributionContentDesc(
 }
 
 @Composable
-internal fun ContributionTransactionItem(
+internal fun PileContributionItem(
     pileName: String,
     pileColor: Color,
     amount: String,
     timestamp: LocalDateTime,
     movement: FundMovement,
+    source: ContributionSource,
     modifier: Modifier = Modifier,
     excluded: Boolean = false,
     enabled: Boolean = true,
@@ -163,21 +171,23 @@ internal fun ContributionTransactionItem(
     ) {
         Content(
             pileName = pileName,
+            source = source,
             excluded = excluded
         )
     }
 }
 
 @Composable
-internal fun ContributionTransactionItem(
+internal fun PileContributionItem(
     onClick: () -> Unit,
     pileName: String,
     pileColor: Color,
     amount: String,
     timestamp: LocalDateTime,
     movement: FundMovement,
+    excluded: Boolean,
+    source: ContributionSource,
     modifier: Modifier = Modifier,
-    excluded: Boolean = false,
     enabled: Boolean = true,
     leadingContentLine1: String = timestamp.format(DateUtil.Formatters.EEE),
     leadingContentLine2: String = timestamp.format(DateUtil.Formatters.dayOfMonthOrdinal),
@@ -214,21 +224,26 @@ internal fun ContributionTransactionItem(
         colors = colors,
         elevation = elevation,
     ) {
-        Content(pileName = pileName, excluded = excluded)
+        Content(
+            pileName = pileName,
+            excluded = excluded,
+            source = source
+        )
     }
 }
 
 @PreviewLightDark
 @Composable
-private fun PreviewContributionTransactionItem() {
+private fun PreviewPileContributionItem() {
     OarTheme {
-        ContributionTransactionItem(
+        PileContributionItem(
             pileName = "Emergency Fund 2026",
             pileColor = Color(0xFF457BE6),
             amount = "$200",
             timestamp = LocalDateTime.now(),
             movement = FundMovement.OUT,
-            modifier = Modifier
+            modifier = Modifier,
+            source = ContributionSource.MANUAL
         )
     }
 }

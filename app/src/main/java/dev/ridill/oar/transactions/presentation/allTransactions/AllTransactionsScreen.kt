@@ -98,7 +98,7 @@ import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.core.ui.util.isEmpty
-import dev.ridill.oar.moneyPiles.presentation.components.ContributionTransactionItem
+import dev.ridill.oar.moneyPiles.presentation.components.PileContributionItem
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
 import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionField
 import dev.ridill.oar.transactions.domain.model.AllTransactionsMultiSelectionOption
@@ -290,7 +290,7 @@ internal fun AllTransactionsScreen(
                                         key = item.id,
                                         contentType = DateSeparatedTransactionEntryUiModel.PileContribution::class
                                     ) {
-                                        ContributionTransactionItem(
+                                        PileContributionItem(
                                             onClick = { navigateToPileDetails(item.pileId) },
                                             pileName = item.pileName,
                                             pileColor = item.pileColor,
@@ -301,6 +301,8 @@ internal fun AllTransactionsScreen(
                                             enabled = !state.transactionMultiSelectionModeActive,
                                             timestamp = item.timestamp,
                                             movement = item.movement,
+                                            excluded = item.excluded,
+                                            source = item.source,
                                             modifier = Modifier
                                                 .animateItem()
                                         )
@@ -553,7 +555,7 @@ private fun AllTransactionsTopAppBar(
                                 }
 
                                 is TransactionEntryUiModel.PileContribution -> {
-                                    ContributionTransactionItem(
+                                    PileContributionItem(
                                         onClick = { onPileClick(item.pileId) },
                                         pileName = item.pileName,
                                         pileColor = item.pileColor,
@@ -568,6 +570,8 @@ private fun AllTransactionsTopAppBar(
                                         colors = ListItemDefaults.colors(
                                             containerColor = SearchBarDefaults.colors().containerColor
                                         ),
+                                        excluded = item.excluded,
+                                        source = item.source,
                                         elevation = ListItemDefaults.elevation(
                                             elevation = SearchBarDefaults.TonalElevation
                                         ),
