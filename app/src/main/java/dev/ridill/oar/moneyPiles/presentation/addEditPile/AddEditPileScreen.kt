@@ -232,21 +232,18 @@ fun AddEditPileScreen(
                         )
                     }
 
-                    if (!isEditMode || targetAmountState.text.isNotEmpty()) {
-                        AmountInput(
-                            inputState = targetAmountState,
-                            currency = state.currency,
-                            label = stringResource(R.string.pile_target_amount_optional),
-                            colors = TextFieldDefaults.colors(),
-                            enabled = !isEditMode,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Decimal,
-                                imeAction = ImeAction.Next
-                            ),
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    AmountInput(
+                        inputState = targetAmountState,
+                        currency = state.currency,
+                        label = stringResource(R.string.pile_target_amount_optional),
+                        colors = TextFieldDefaults.colors(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal,
+                            imeAction = ImeAction.Next
+                        ),
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
 
                 HorizontalDivider()
