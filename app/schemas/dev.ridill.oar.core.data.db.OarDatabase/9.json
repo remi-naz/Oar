@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "a0b9e19bcf0152ae81708abf3a1f97f6",
+    "identityHash": "3c489f912be7dac8e990fb6f9ec6554d",
     "entities": [
       {
         "tableName": "budget_cycle_table",
@@ -416,7 +416,7 @@
       },
       {
         "tableName": "money_pile_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `color` INTEGER NOT NULL, `contribution_mode` TEXT NOT NULL, `reminder_cadence` TEXT NOT NULL, `reminder_behavior` TEXT NOT NULL, `reminder_amount` REAL, `locked` INTEGER NOT NULL, `currency_code` TEXT NOT NULL, `target_amount` REAL, `target_remaining_amount` REAL, `target_date` TEXT, `created_timestamp` TEXT NOT NULL, `completion_timestamp` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `color` INTEGER NOT NULL, `contribution_mode` TEXT NOT NULL, `reminder_cadence` TEXT NOT NULL, `reminder_behavior` TEXT NOT NULL, `reminder_amount` REAL, `locked` INTEGER NOT NULL, `currency_code` TEXT NOT NULL, `target_amount` REAL, `target_remaining_amount` REAL, `target_date` TEXT, `created_timestamp` TEXT NOT NULL, `completion_timestamp` TEXT, `next_reminder_timestamp` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -501,6 +501,11 @@
           {
             "fieldPath": "completionTimestamp",
             "columnName": "completion_timestamp",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nextReminderTimestamp",
+            "columnName": "next_reminder_timestamp",
             "affinity": "TEXT"
           }
         ],
@@ -653,7 +658,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a0b9e19bcf0152ae81708abf3a1f97f6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3c489f912be7dac8e990fb6f9ec6554d')"
     ]
   }
 }

@@ -14,10 +14,10 @@ import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileTransactionDao
 import dev.ridill.oar.moneyPiles.data.repository.AddEditPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.AllPilesRepositoryImpl
-import dev.ridill.oar.moneyPiles.data.repository.MoneyPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.PileDetailRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.PileFundMovementRepositoryImpl
 import dev.ridill.oar.moneyPiles.domain.model.PileSweepOutRepositoryImpl
+import dev.ridill.oar.moneyPiles.domain.pileReminder.PileReminder
 import dev.ridill.oar.moneyPiles.domain.repository.AddEditPileRepository
 import dev.ridill.oar.moneyPiles.domain.repository.AllPilesRepository
 import dev.ridill.oar.moneyPiles.domain.repository.MoneyPileRepository
@@ -35,22 +35,6 @@ import kotlinx.coroutines.CoroutineScope
 @Module
 @InstallIn(ViewModelComponent::class)
 object MoneyPileViewModelModule {
-
-    @Provides
-    fun provideMoneyPileDao(db: OarDatabase): MoneyPileDao = db.moneyPileDao()
-
-    @Provides
-    fun provideMoneyPileTransactionDao(db: OarDatabase): MoneyPileTransactionDao =
-        db.moneyPileTransactionsDao()
-
-    @Provides
-    fun provideMoneyPileRepository(
-        dao: MoneyPileDao,
-        transactionDao: MoneyPileTransactionDao,
-    ): MoneyPileRepository = MoneyPileRepositoryImpl(
-        pileDao = dao,
-        transactionDao = transactionDao,
-    )
 
     @Provides
     fun provideAllPilesRepository(
@@ -72,11 +56,13 @@ object MoneyPileViewModelModule {
         pileDao: MoneyPileDao,
         pileTransactionDao: MoneyPileTransactionDao,
         pileRepo: MoneyPileRepository,
+        pileReminder: PileReminder,
     ): AddEditPileRepository = AddEditPileRepositoryImpl(
         db = db,
         pileDao = pileDao,
         pileTransactionDao = pileTransactionDao,
         pileRepo = pileRepo,
+        pileReminder = pileReminder,
     )
 
     @Provides

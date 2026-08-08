@@ -62,4 +62,7 @@ data class MoneyPileEntity(
 
     @ColumnInfo(name = "completion_timestamp")
     val completionTimestamp: LocalDateTime?,
+
+    @ColumnInfo(name = "next_reminder_timestamp")
+    val nextReminderTimestamp: LocalDateTime?,
 )

@@ -37,7 +37,8 @@ internal fun MoneyPileEntity.toMoneyPileDetails(): MoneyPileDetails = MoneyPileD
     createdTimestamp = createdTimestamp,
     currency = LocaleUtil.currencyForCode(currencyCode),
     targetDate = targetDate,
-    completionTimestamp = completionTimestamp
+    completionTimestamp = completionTimestamp,
+    nextReminderTimestamp = nextReminderTimestamp
 )
 
 internal fun MoneyPileTransactionsEntity.toPileTransactionEntry(): PileTransactionEntry =
@@ -64,6 +65,7 @@ internal fun MoneyPileDetails.toEntity(remainingAmount: Double?): MoneyPileEntit
     targetDate = targetDate,
     createdTimestamp = createdTimestamp,
     reminderAmount = reminderAmount,
-    completionTimestamp = null,
+    completionTimestamp = completionTimestamp,
     targetRemainingAmount = remainingAmount,
+    nextReminderTimestamp = nextReminderTimestamp,
 )
