@@ -36,7 +36,12 @@ class CycleCompletionReceiver : BroadcastReceiver() {
             .takeIf { it > -1L }
             ?: return
         logD("CycleReceiver") { "CycleCompletionReceiver: $id" }
-        completeCycleAndNotify(id, context)
+        val pendingResult = goAsync()
+        try {
+            completeCycleAndNotify(id, context)
+        } finally {
+            pendingResult.finish()
+        }
     }
 
     private fun completeCycleAndNotify(id: Long, context: Context) = applicationContext.launch {

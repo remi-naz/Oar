@@ -40,7 +40,13 @@ class ScheduledPaymentReminderReceiver : BroadcastReceiver() {
         val id = intent.getLongExtra(ScheduleReminder.EXTRA_SCHEDULE_ID, -1L)
             .takeIf { it > -1L }
             ?: return
-        notifyAndSetNextNextReminder(id)
+
+        val pendingResult = goAsync()
+        try {
+            notifyAndSetNextNextReminder(id)
+        } finally {
+            pendingResult.finish()
+        }
     }
 
     private fun notifyAndSetNextNextReminder(id: Long) = applicationContext.launch {

@@ -28,8 +28,13 @@ class TimeOrTimezoneChangeReceiver : BroadcastReceiver() {
                 Intent.ACTION_TIMEZONE_CHANGED
             ) != true
         ) return
+        val pendingResult = goAsync()
         applicationScope.launch {
-            appInitManager.startAlarmsAndReminderInitWorkers()
+            try {
+                appInitManager.startAlarmsAndReminderInitWorkers()
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 }
