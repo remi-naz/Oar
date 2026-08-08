@@ -173,7 +173,8 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
 
                 AddEditPileViewModel.AddEditPileEvent.PileDeleted -> {
                     resultBus.sendResult(AddEditMoneyPileResult.PILE_DELETED)
-                    navigator.goBack()
+                    navigator.goBack() // Pop AddEdit screen
+                    navigator.goBack() // Pop Detail screen
                 }
             }
         }
