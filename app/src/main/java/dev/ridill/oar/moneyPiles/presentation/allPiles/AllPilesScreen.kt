@@ -117,8 +117,8 @@ fun AllPilesScreen(
                             text = {
                                 Text(
                                     text = stringResource(
-                                        if (includeCompletedPiles) R.string.pile_menu_hide_locked
-                                        else R.string.pile_menu_show_locked
+                                        if (includeCompletedPiles) R.string.hide_completed
+                                        else R.string.show_completed
                                     )
                                 )
                             },
