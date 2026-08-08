@@ -1,6 +1,7 @@
 package dev.ridill.oar.moneyPiles.presentation.sweepout
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.WarningAmber
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -21,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -31,6 +36,9 @@ import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.ui.components.ButtonWithLoadingIndicator
 import dev.ridill.oar.core.ui.components.LabelledSwitch
+import dev.ridill.oar.core.ui.theme.BorderWidthStandard
+import dev.ridill.oar.core.ui.theme.ContentAlpha
+import dev.ridill.oar.core.ui.theme.IconSizeMedium
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
@@ -83,6 +91,13 @@ internal fun PileSweepOutConfirmationSheet(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        AnimatedVisibility(visible = state.showCompletionWarning) {
+            PileCompletionWarningBanner(
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+        }
 
         val isAmountError by remember(state.amountInputError) {
             derivedStateOf { state.amountInputError != null }
@@ -188,6 +203,42 @@ private fun ExpensePreviewCard(
     }
 }
 
+@Composable
+private fun PileCompletionWarningBanner(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = WarningColor.copy(alpha = ContentAlpha.PERCENT_16),
+        border = BorderStroke(
+            width = BorderWidthStandard,
+            color = WarningColor.copy(alpha = ContentAlpha.PERCENT_50),
+        ),
+        modifier = modifier
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(MaterialTheme.spacing.medium)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.WarningAmber,
+                contentDescription = null,
+                tint = WarningColor,
+                modifier = Modifier.size(IconSizeMedium)
+            )
+            Text(
+                text = stringResource(R.string.pile_sweep_out_will_complete_pile_warning),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+private val WarningColor = Color(0xFFF9A825)
+
 private val SweepIconContainerSize = 48.dp
 
 @PreviewLightDark
@@ -214,6 +265,8 @@ private fun PreviewPileSweepOutConfirmationSheet() {
                         targetDate = null,
                         completionTimestamp = null,
                     ),
+                    maxLimit = 5000.0,
+                    previewAmount = 5000.0,
                     createLinkedTransaction = true,
                 ),
                 actions = object : PileSweepOutActions {

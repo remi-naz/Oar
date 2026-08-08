@@ -6,11 +6,11 @@ import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileEntity
 import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileTransactionsEntity
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileAggregateView
 import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
-import dev.ridill.oar.moneyPiles.domain.model.MoneyPileWithSavedAmount
+import dev.ridill.oar.moneyPiles.domain.model.MoneyPileEntryUiModel
 import dev.ridill.oar.moneyPiles.domain.model.PileTransactionEntry
 
-internal fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount =
-    MoneyPileWithSavedAmount(
+internal fun MoneyPileAggregateView.toMoneyPile(): MoneyPileEntryUiModel.MoneyPileWithSavedAmount =
+    MoneyPileEntryUiModel.MoneyPileWithSavedAmount(
         id = id,
         name = name,
         icon = icon,
@@ -19,7 +19,8 @@ internal fun MoneyPileAggregateView.toMoneyPile(): MoneyPileWithSavedAmount =
         targetAmount = remainingAmount,
         savedAmount = aggregate,
         locked = locked,
-        createdTimestamp = createdTimestamp
+        createdTimestamp = createdTimestamp,
+        completionTimestamp = completionTimestamp,
     )
 
 internal fun MoneyPileEntity.toMoneyPileDetails(): MoneyPileDetails = MoneyPileDetails(
