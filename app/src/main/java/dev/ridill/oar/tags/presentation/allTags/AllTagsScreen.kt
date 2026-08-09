@@ -160,7 +160,7 @@ fun AllTagsScreen(
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                 actions.onTagLongPress(item.id)
                             },
-                            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
+                            onLongClickLabel = stringResource(R.string.cd_toggle_selection),
                             name = item.name,
                             color = item.color,
                             excluded = item.excluded,

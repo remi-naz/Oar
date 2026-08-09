@@ -135,14 +135,14 @@ internal fun PileDetailScreen(
                         IconButton(onClick = navigateToEditPile) {
                             Icon(
                                 imageVector = Icons.Rounded.Edit,
-                                contentDescription = stringResource(R.string.cd_tap_to_edit_pile)
+                                contentDescription = stringResource(R.string.cd_edit_pile)
                             )
                         }
                     } else if (pile != null) {
                         IconButton(onClick = actions::onDeletePileClick) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_delete),
-                                contentDescription = stringResource(R.string.cd_tap_to_delete_pile)
+                                contentDescription = stringResource(R.string.cd_delete_pile)
                             )
                         }
                     }
@@ -151,7 +151,7 @@ internal fun PileDetailScreen(
                     IconButton(onClick = { showOptionsMenu = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(R.string.cd_tap_for_more_options)
+                            contentDescription = stringResource(R.string.cd_more_options)
                         )
                     }
                     DropdownMenu(
@@ -576,7 +576,7 @@ private fun PileActionsBar(
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_sweep),
-                        contentDescription = stringResource(R.string.cd_tap_to_sweep_out_pile)
+                        contentDescription = stringResource(R.string.cd_sweep_out_pile)
                     )
                 }
 

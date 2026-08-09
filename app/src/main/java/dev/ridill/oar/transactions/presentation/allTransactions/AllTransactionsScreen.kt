@@ -266,7 +266,7 @@ internal fun AllTransactionsScreen(
                                                     .performHapticFeedback(HapticFeedbackType.LongPress)
                                                 actions.onTransactionLongPress(item.id)
                                             },
-                                            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
+                                            onLongClickLabel = stringResource(R.string.cd_toggle_selection),
                                             note = item.note,
                                             amount = TextFormat.currency(
                                                 item.amount,
@@ -483,7 +483,7 @@ private fun AllTransactionsTopAppBar(
                     IconButton(onClick = onMultiSelectionOptionsClick) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(R.string.cd_tap_for_more_options)
+                            contentDescription = stringResource(R.string.cd_more_options)
                         )
                     }
                 }
@@ -635,7 +635,7 @@ private fun MultiSelectionOptionsSheet(
             iconRes = option.iconRes,
             label = stringResource(option.labelRes),
             onClick = { onOptionClick(option) },
-            onClickLabel = stringResource(R.string.cd_option_name, stringResource(option.labelRes)),
+            onClickLabel = null,
             modifier = Modifier
                 .fillParentMaxWidth()
                 .animateItem()

@@ -147,7 +147,7 @@ internal fun FolderDetailsScreen(
                         IconButton(onClick = actions::onMultiSelectionOptionsClick) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = stringResource(R.string.cd_tap_for_more_options)
+                                contentDescription = stringResource(R.string.cd_more_options)
                             )
                         }
                     } else {
@@ -249,7 +249,7 @@ internal fun FolderDetailsScreen(
                                         modifier = Modifier
                                             .clickable(
                                                 onClick = { actions.onCycleSelect(item.cycle.id) },
-                                                onClickLabel = stringResource(R.string.cd_tap_to_see_cycle_aggregate)
+                                                onClickLabel = stringResource(R.string.cd_see_cycle_aggregate)
                                             )
                                             .animateItem()
                                     )
@@ -481,7 +481,7 @@ private fun TransactionInFolderItem(
                     .performHapticFeedback(HapticFeedbackType.LongPress)
                 onLongPress()
             },
-            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
+            onLongClickLabel = stringResource(R.string.cd_toggle_selection),
             note = note,
             amount = amount,
             timestamp = timestamp,
@@ -511,7 +511,7 @@ private fun FolderTransactionsOptionsSheet(
             iconRes = option.iconRes,
             label = stringResource(option.labelRes),
             onClick = { onOptionClick(option) },
-            onClickLabel = stringResource(R.string.cd_option_name, stringResource(option.labelRes)),
+            onClickLabel = null,
             modifier = Modifier
                 .fillParentMaxWidth()
                 .animateItem()

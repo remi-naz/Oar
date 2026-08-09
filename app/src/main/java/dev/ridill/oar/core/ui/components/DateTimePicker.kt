@@ -69,7 +69,7 @@ fun OarDatePickerDialog(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_clock),
-                contentDescription = stringResource(R.string.cd_tap_to_pick_time)
+                contentDescription = stringResource(R.string.cd_pick_time)
             )
         }
     },
@@ -125,7 +125,7 @@ fun OarTimePickerDialog(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_calendar),
-                contentDescription = stringResource(R.string.cd_tap_to_pick_date)
+                contentDescription = stringResource(R.string.cd_pick_date)
             )
         }
     },

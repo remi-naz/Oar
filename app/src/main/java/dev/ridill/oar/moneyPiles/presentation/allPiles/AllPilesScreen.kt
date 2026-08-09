@@ -106,7 +106,7 @@ fun AllPilesScreen(
                     IconButton(onClick = { showOptionsMenu = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(R.string.cd_tap_for_more_options)
+                            contentDescription = stringResource(R.string.cd_more_options)
                         )
                     }
                     DropdownMenu(

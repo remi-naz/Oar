@@ -293,7 +293,7 @@ private fun ScheduleItem(
         ScheduleListItem(
             onClick = if (selectionModeActive) onSelectionToggle else onClick,
             onLongClick = onLongPress,
-            onLongClickLabel = stringResource(R.string.cd_long_press_to_toggle_selection),
+            onLongClickLabel = stringResource(R.string.cd_toggle_selection),
             note = note,
             amount = amount,
             movement = type,
