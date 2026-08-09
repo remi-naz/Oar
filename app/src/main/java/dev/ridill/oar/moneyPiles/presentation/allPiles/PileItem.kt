@@ -109,7 +109,7 @@ internal fun PileGridItem(
             .clip(shape)
             .clickable(
                 onClick = onClick,
-                onClickLabel = stringResource(R.string.cd_tap_to_view_pile_details)
+                onClickLabel = stringResource(R.string.cd_view_pile_details)
             )
             .drawWithCache {
                 onDrawBehind {

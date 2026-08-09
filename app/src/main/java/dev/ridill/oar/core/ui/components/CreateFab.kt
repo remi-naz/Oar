@@ -194,7 +194,7 @@ enum class CreateOption(
         default = false
     ),
     CREATE_FOLDER(
-        labelRes = R.string.cd_new_folder,
+        labelRes = R.string.new_folder,
         iconRes = R.drawable.ic_outlined_folder,
         default = false
     );

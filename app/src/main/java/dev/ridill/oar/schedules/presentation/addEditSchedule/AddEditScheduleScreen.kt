@@ -394,7 +394,7 @@ private fun ScheduleTimestamp(
         FilledTonalIconButton(onClick = onClick) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_date_time),
-                contentDescription = stringResource(R.string.cd_tap_to_pick_timestamp)
+                contentDescription = stringResource(R.string.cd_pick_timestamp)
             )
         }
     }
