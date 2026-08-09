@@ -3,8 +3,8 @@ package dev.ridill.oar.aggregations.data.local
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
-import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.transactions.data.local.relation.AmountAndCurrencyRelation
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -65,4 +65,18 @@ interface AggregationsDao {
     """
     )
     suspend fun getAggregateAmountForCycle(cycleId: Long): Double
+
+    @Query(
+        """
+         SELECT IFNULL(SUM(
+            CASE
+                WHEN movement = 'OUT' THEN -amount
+                WHEN movement = 'IN' THEN amount
+            END
+        ), 0) as amount
+        FROM money_pile_transactions_table
+        WHERE pile_id = :pileId AND locked = 0
+    """
+    )
+    fun getAggregateAmountForMoneyPileFlow(pileId: Long): Flow<Double>
 }

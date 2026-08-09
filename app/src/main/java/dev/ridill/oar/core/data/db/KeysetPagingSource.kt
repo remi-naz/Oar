@@ -2,6 +2,7 @@ package dev.ridill.oar.core.data.db
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import dev.ridill.oar.core.domain.util.logE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -51,25 +52,26 @@ abstract class KeysetPagingSource<Key : Any, Value : Any>(
      */
     final override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> = try {
         val loadSize = resolveLoadSize(params.loadSize)
-        if (loadSize <= 0) {
-            LoadResult.Page(data = emptyList(), prevKey = null, nextKey = null)
-        } else {
-            val direction = if (params is LoadParams.Prepend) {
-                PageLoadDirection.BACKWARD
-            } else {
-                PageLoadDirection.FORWARD
-            }
-            val rows = fetch(params.key, direction, loadSize)
-                .let { if (params is LoadParams.Prepend) it.reversed() else it }
-            onLoaded(rows.size)
+        if (loadSize <= 0) return LoadResult.Page(
+            data = emptyList(),
+            prevKey = null,
+            nextKey = null
+        )
 
-            LoadResult.Page(
-                data = rows,
-                prevKey = rows.firstOrNull()?.let(::keyOf),
-                nextKey = rows.lastOrNull()?.let(::keyOf)?.takeIf { rows.size == loadSize }
-            )
-        }
+        val direction = if (params is LoadParams.Prepend) PageLoadDirection.BACKWARD
+        else PageLoadDirection.FORWARD
+
+        val rows = fetch(params.key, direction, loadSize)
+            .let { if (params is LoadParams.Prepend) it.reversed() else it }
+        onLoaded(rows.size)
+
+        LoadResult.Page(
+            data = rows,
+            prevKey = rows.firstOrNull()?.let(::keyOf),
+            nextKey = rows.lastOrNull()?.let(::keyOf)?.takeIf { rows.size == loadSize }
+        )
     } catch (e: Exception) {
+        logE(e, KeysetPagingSource::class.simpleName) { "load()" }
         LoadResult.Error(e)
     }
 

@@ -2,18 +2,18 @@ package dev.ridill.oar.transactions.domain.repository
 
 import androidx.paging.PagingData
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.Empty
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.model.Transaction
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
-import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import java.util.Currency
 
 interface TransactionRepository {
-    fun getAllTransactionsPaged(
+    fun getTransactionEntriesPaged(
         query: String? = String.Empty,
         cycleIds: Set<Long>? = null,
         type: FundMovement? = null,
@@ -21,9 +21,9 @@ interface TransactionRepository {
         tagIds: Set<Long>? = null,
         folderId: Long? = null,
         currency: Currency? = null
-    ): Flow<PagingData<TransactionEntry>>
+    ): Flow<PagingData<TransactionEntryUiModel>>
 
-    fun getDateSeparatedTransactions(
+    fun getDateSeparatedTransactionEntriesPaged(
         query: String? = String.Empty,
         cycleIds: Set<Long>? = null,
         type: FundMovement? = null,
@@ -31,7 +31,7 @@ interface TransactionRepository {
         tagIds: Set<Long>? = null,
         folderId: Long? = null,
         currency: Currency? = null
-    ): Flow<PagingData<TransactionListItemUIModel>>
+    ): Flow<PagingData<DateSeparatedTransactionEntryUiModel>>
 
     suspend fun saveTransaction(
         cycleId: Long,

@@ -38,6 +38,7 @@ import dev.ridill.oar.core.ui.navigation.FolderSelectedResult
 import dev.ridill.oar.core.ui.navigation.FolderSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
+import dev.ridill.oar.core.ui.navigation.MoneyPileDetailsRoute
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.core.ui.navigation.TagSelectedResult
@@ -134,7 +135,8 @@ fun EntryProviderScope<NavKey>.transactionEntries(
                 )
             },
             navigateToCreateSchedule = { navigator.navigate(AddEditScheduleRoute()) },
-            navigateToCreateFolder = { navigator.navigate(AddEditFolderSheetRoute()) }
+            navigateToCreateFolder = { navigator.navigate(AddEditFolderSheetRoute()) },
+            navigateToPileDetails = { navigator.navigate(MoneyPileDetailsRoute(it)) },
         )
     }
 

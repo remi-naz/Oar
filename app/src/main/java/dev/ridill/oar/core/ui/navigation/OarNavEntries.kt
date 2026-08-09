@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import dev.ridill.oar.dashboard.presentation.nav.dashboardEntries
 import dev.ridill.oar.folders.presentation.nav.folderEntries
+import dev.ridill.oar.moneyPiles.presentation.nav.moneyPileEntries
 import dev.ridill.oar.onboarding.presentation.nav.onboardingEntries
 import dev.ridill.oar.schedules.presentation.nav.scheduleEntries
 import dev.ridill.oar.settings.presentation.nav.settingsEntries
@@ -21,5 +22,6 @@ fun buildOarEntryProvider(
     folderEntries(navigator = navigator)
     tagEntries(navigator = navigator)
     scheduleEntries(navigator = navigator, motionScheme = motionScheme)
+    moneyPileEntries(navigator = navigator, motionScheme = motionScheme)
     settingsEntries(navigator = navigator)
 }

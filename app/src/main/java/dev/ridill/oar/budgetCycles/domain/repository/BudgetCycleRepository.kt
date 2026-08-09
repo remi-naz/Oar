@@ -14,10 +14,14 @@ import dev.ridill.oar.core.domain.util.Empty
 import kotlinx.coroutines.flow.Flow
 import java.time.YearMonth
 import java.util.Currency
+import kotlin.jvm.Throws
 
 interface BudgetCycleRepository {
     fun getActiveCycleFlow(): Flow<BudgetCycleEntry?>
     suspend fun getActiveCycle(): BudgetCycleEntry?
+
+    @Throws(NoActiveCycleThrowable::class)
+    suspend fun requireActiveCycle(): BudgetCycleEntry
     suspend fun getCycleConfig(): BudgetCycleConfig
 
     suspend fun updateCycleConfig(
@@ -64,3 +68,16 @@ interface BudgetCycleRepository {
     fun getActiveCycleDetails(): Flow<CycleHistoryEntry?>
     fun getCompletedCycleDetails(): Flow<PagingData<CycleHistoryEntry>>
 }
+
+class NoActiveCycleThrowable : IllegalStateException()
+
+class CycleEntryCreationFailedThrowable(entity: BudgetCycleEntry) :
+    IllegalStateException("Failed to create cycle entity $entity")
+
+class CycleNotFoundThrowable(val id: Long) :
+    IllegalStateException("Cycle not found for ID = $id")
+
+class CycleNotActiveThrowable(val id: Long) :
+    IllegalStateException("Cycle with ID = $id is not ACTIVE")
+
+class IllegalCycleThrowable : IllegalStateException("Illegal cycle")

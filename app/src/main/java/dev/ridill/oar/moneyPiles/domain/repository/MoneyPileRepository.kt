@@ -1,0 +1,29 @@
+package dev.ridill.oar.moneyPiles.domain.repository
+
+import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.core.domain.model.RootError
+import dev.ridill.oar.core.domain.util.DateUtil
+import dev.ridill.oar.moneyPiles.domain.model.ContributionSource
+import dev.ridill.oar.moneyPiles.domain.model.MoneyPileDetails
+import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
+
+interface MoneyPileRepository {
+    suspend fun getPileDetails(id: Long): MoneyPileDetails?
+    fun getPileDetailsFlow(id: Long): Flow<MoneyPileDetails?>
+    suspend fun addEntryToPile(
+        pileId: Long,
+        amount: Double,
+        movement: FundMovement,
+        source: ContributionSource,
+        timestamp: LocalDateTime = DateUtil.now(),
+        transactionId: Long? = null,
+    ): Long
+}
+
+enum class MoneyPileError : RootError {
+    NotFound,
+    Unknown
+}
+
+class PileNotFoundThrowable : Throwable()

@@ -2,7 +2,7 @@ package dev.ridill.oar.folders.domain.repository
 
 import androidx.paging.PagingData
 import dev.ridill.oar.folders.domain.model.FolderDetails
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
 import kotlinx.coroutines.flow.Flow
 
 interface FolderDetailsRepository {
@@ -11,7 +11,7 @@ interface FolderDetailsRepository {
     suspend fun deleteFolderWithTransactions(id: Long)
     fun getTransactionsInFolderPaged(
         folderId: Long
-    ): Flow<PagingData<TransactionListItemUIModel>>
+    ): Flow<PagingData<DateSeparatedTransactionEntryUiModel>>
 
     suspend fun addTransactionsToFolderByIds(folderId: Long, transactionIds: Set<Long>)
     suspend fun deleteTransactionsByIds(ids: Set<Long>)

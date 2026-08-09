@@ -2,6 +2,8 @@ package dev.ridill.oar.transactions.data.local.views
 
 import androidx.room.DatabaseView
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.moneyPiles.domain.model.ContributionSource
+import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -22,12 +24,19 @@ import java.time.LocalDateTime
         folder.id AS folderId,
         folder.name AS folderName,
         folder.created_timestamp AS folderCreatedTimestamp,
-        tx.schedule_id as scheduleId,
+        tx.schedule_id AS scheduleId,
+        pile.id AS pileId,
+        pile.name AS pileName,
+        pile.icon AS pileIcon,
+        pile.color AS pileColorCode,
+        ptx.contribution_source AS contributionSource,
         (CASE WHEN 1 IN (tx.is_excluded, tag.is_excluded, folder.is_excluded) THEN 1 ELSE 0 END) AS excluded
         FROM transaction_table tx
         JOIN budget_cycle_table cyc ON tx.cycle_id = cyc.id
         LEFT OUTER JOIN tag_table tag ON tx.tag_id = tag.id
         LEFT OUTER JOIN folder_table folder ON tx.folder_id = folder.id
+        LEFT OUTER JOIN money_pile_transactions_table ptx ON tx.id = ptx.transaction_id
+        LEFT OUTER JOIN money_pile_table pile ON ptx.pile_id = pile.id
         """,
     viewName = "transaction_details_view"
 )
@@ -49,5 +58,10 @@ data class TransactionDetailsView(
     val folderName: String?,
     val folderCreatedTimestamp: LocalDateTime?,
     val scheduleId: Long?,
-    val excluded: Boolean
+    val pileId: Long?,
+    val pileName: String?,
+    val pileIcon: PileIcon?,
+    val pileColorCode: Int?,
+    val contributionSource: ContributionSource?,
+    val excluded: Boolean,
 )

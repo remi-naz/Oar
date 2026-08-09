@@ -6,6 +6,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import dev.ridill.oar.core.domain.util.toUUID
+import dev.ridill.oar.moneyPiles.domain.pileReminder.RestorePileRemindersWorker
 import dev.ridill.oar.schedules.domain.scheduleReminder.RestoreScheduleRemindersWorker
 import dev.ridill.oar.settings.domain.backup.workers.RestoreBackupJobsWorker
 
@@ -31,6 +32,9 @@ class AppInitWorkManager(
 
     private val restoreScheduleRemindersWorkerName: String
         get() = "${context.packageName}.RESTORE_SCHEDULE_REMINDERS_WORKER"
+
+    private val restorePileRemindersWorkerName: String
+        get() = "${context.packageName}.RESTORE_PILE_REMINDERS_WORKER"
 
     private val restoreBackupJobsWorkerName: String
         get() = "${context.packageName}.RESTORE_BACKUP_JOBS_WORKER"
@@ -67,6 +71,11 @@ class AppInitWorkManager(
                 .setId(restoreScheduleRemindersWorkerName.toUUID())
                 .build()
 
+        val restorePileRemindersWorker = OneTimeWorkRequestBuilder<RestorePileRemindersWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setId(restorePileRemindersWorkerName.toUUID())
+            .build()
+
         workManager.beginUniqueWork(
             configRestoreWorkerName,
             ExistingWorkPolicy.REPLACE,
@@ -74,6 +83,7 @@ class AppInitWorkManager(
         )
             .then(restoreBackupJobsWorker)
             .then(restoreScheduleRemindersWorker)
+            .then(restorePileRemindersWorker)
             .enqueue()
     }
 
@@ -89,12 +99,18 @@ class AppInitWorkManager(
                 .setId(restoreScheduleRemindersWorkerName.toUUID())
                 .build()
 
+        val restorePileRemindersWorker = OneTimeWorkRequestBuilder<RestorePileRemindersWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setId(restorePileRemindersWorkerName.toUUID())
+            .build()
+
         workManager.beginUniqueWork(
             configRestoreWorkerName,
             ExistingWorkPolicy.REPLACE,
             budgetCycleInitWorker
         )
             .then(restoreScheduleRemindersWorker)
+            .then(restorePileRemindersWorker)
             .enqueue()
     }
 }

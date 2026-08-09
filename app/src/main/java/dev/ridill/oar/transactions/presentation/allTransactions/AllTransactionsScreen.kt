@@ -74,7 +74,6 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.ridill.oar.R
 import dev.ridill.oar.aggregations.presentation.AmountAggregatesList
-import dev.ridill.oar.budgetCycles.domain.model.CycleIndicator
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.ConfirmationDialog
@@ -95,32 +94,33 @@ import dev.ridill.oar.core.ui.components.slideInVerticallyWithFadeIn
 import dev.ridill.oar.core.ui.components.slideOutHorizontallyWithFadeOut
 import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
-import dev.ridill.oar.core.ui.theme.elevation
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.core.ui.util.isEmpty
+import dev.ridill.oar.moneyPiles.presentation.components.PileContributionItem
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
 import dev.ridill.oar.tags.presentation.tagSelection.TagSelectionField
 import dev.ridill.oar.transactions.domain.model.AllTransactionsMultiSelectionOption
-import dev.ridill.oar.transactions.domain.model.TransactionEntry
-import dev.ridill.oar.transactions.domain.model.TransactionListItemUIModel
+import dev.ridill.oar.transactions.domain.model.DateSeparatedTransactionEntryUiModel
+import dev.ridill.oar.transactions.domain.model.TransactionEntryUiModel
 import dev.ridill.oar.transactions.domain.model.TransactionTypeFilter
 import dev.ridill.oar.transactions.presentation.components.TransactionListItem
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
-fun AllTransactionsScreen(
+internal fun AllTransactionsScreen(
     snackbarController: SnackbarController,
-    transactionsLazyPagingItems: LazyPagingItems<TransactionListItemUIModel>,
+    transactionsLazyPagingItems: LazyPagingItems<DateSeparatedTransactionEntryUiModel>,
     searchQueryState: TextFieldState,
-    searchResultsLazyPagingItems: LazyPagingItems<TransactionEntry>,
+    searchResultsLazyPagingItems: LazyPagingItems<TransactionEntryUiModel>,
     state: AllTransactionsState,
     actions: AllTransactionsActions,
     navigateToAddEditTransaction: (Long?) -> Unit,
     navigateToCreateSchedule: () -> Unit,
     navigateToCreateFolder: () -> Unit,
+    navigateToPileDetails: (Long) -> Unit,
     navigateUp: () -> Unit
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -163,7 +163,8 @@ fun AllTransactionsScreen(
                 onDismissMultiSelectionMode = actions::onDismissMultiSelectionMode,
                 onMultiSelectionOptionsClick = actions::onMultiSelectionOptionsClick,
                 onSearchItemClick = { navigateToAddEditTransaction(it) },
-                navigateUp = navigateUp
+                onPileClick = navigateToPileDetails,
+                navigateUp = navigateUp,
             )
         },
         floatingActionButton = {
@@ -235,10 +236,10 @@ fun AllTransactionsScreen(
                     repeat(transactionsLazyPagingItems.itemCount) { index ->
                         transactionsLazyPagingItems[index]?.let { item ->
                             when (item) {
-                                is TransactionListItemUIModel.CycleSeparator -> {
+                                is DateSeparatedTransactionEntryUiModel.CycleSeparator -> {
                                     stickyHeader(
                                         key = "CycleId-${item.cycle.id}",
-                                        contentType = CycleIndicator::class
+                                        contentType = DateSeparatedTransactionEntryUiModel.CycleSeparator::class
                                     ) {
                                         ListSeparator(
                                             label = item.cycle.description,
@@ -248,10 +249,10 @@ fun AllTransactionsScreen(
                                     }
                                 }
 
-                                is TransactionListItemUIModel.TransactionItem -> {
+                                is DateSeparatedTransactionEntryUiModel.DateSeparatedTransactionItem -> {
                                     item(
                                         key = item.id,
-                                        contentType = TransactionEntry::class
+                                        contentType = DateSeparatedTransactionEntryUiModel.DateSeparatedTransactionItem::class
                                     ) {
                                         val selected = item.id in state.selectedTransactionIds
                                         TransactionListItem(
@@ -279,6 +280,30 @@ fun AllTransactionsScreen(
                                             selected = selected,
                                             modifier = Modifier
                                                 .fillParentMaxWidth()
+                                                .animateItem()
+                                        )
+                                    }
+                                }
+
+                                is DateSeparatedTransactionEntryUiModel.PileContribution -> {
+                                    item(
+                                        key = item.id,
+                                        contentType = DateSeparatedTransactionEntryUiModel.PileContribution::class
+                                    ) {
+                                        PileContributionItem(
+                                            onClick = { navigateToPileDetails(item.pileId) },
+                                            pileName = item.pileName,
+                                            pileColor = item.pileColor,
+                                            amount = TextFormat.currency(
+                                                item.amount,
+                                                item.currency
+                                            ),
+                                            enabled = !state.transactionMultiSelectionModeActive,
+                                            timestamp = item.timestamp,
+                                            movement = item.movement,
+                                            excluded = item.excluded,
+                                            source = item.source,
+                                            modifier = Modifier
                                                 .animateItem()
                                         )
                                     }
@@ -364,13 +389,14 @@ private fun AllTransactionsTopAppBar(
     searchBarState: SearchBarState,
     searchQueryState: TextFieldState,
     onClearSearchQuery: () -> Unit,
-    searchResults: LazyPagingItems<TransactionEntry>,
+    searchResults: LazyPagingItems<TransactionEntryUiModel>,
     onFilterOptionsClick: () -> Unit,
     multiSelectionModeActive: Boolean,
     selectionCount: Int,
     onDismissMultiSelectionMode: () -> Unit,
     onMultiSelectionOptionsClick: () -> Unit,
     onSearchItemClick: (Long) -> Unit,
+    onPileClick: (Long) -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -494,28 +520,66 @@ private fun AllTransactionsTopAppBar(
                     items(
                         count = searchResults.itemCount,
                         key = searchResults.itemKey { it.id },
-                        contentType = searchResults.itemContentType { "SearchResultTransactionItem" }
+                        contentType = searchResults.itemContentType {
+                            when (it) {
+                                is TransactionEntryUiModel.TransactionItem -> TransactionEntryUiModel.TransactionItem::class
+                                is TransactionEntryUiModel.PileContribution -> TransactionEntryUiModel.PileContribution::class
+                            }
+                        }
                     ) { index ->
                         searchResults[index]?.let { item ->
-                            TransactionListItem(
-                                note = item.note,
-                                amount = item.amountFormatted,
-                                timestamp = item.timestamp,
-                                leadingContentLine1 = item.timestamp.format(DateUtil.Formatters.ddth),
-                                leadingContentLine2 = item.timestamp.format(DateUtil.Formatters.MMM),
-                                movement = item.type,
-                                tag = item.tag,
-                                folder = item.folder,
-                                colors = ListItemDefaults.colors(
-                                    containerColor = SearchBarDefaults.colors().containerColor
-                                ),
-                                elevation = ListItemDefaults.elevation(
-                                    elevation = MaterialTheme.elevation.level1
-                                ),
-                                onClick = { onSearchItemClick(item.id) },
-                                modifier = Modifier
-                                    .animateItem()
-                            )
+                            when (item) {
+                                is TransactionEntryUiModel.TransactionItem -> {
+                                    TransactionListItem(
+                                        note = item.note,
+                                        amount = TextFormat.currency(
+                                            item.amount,
+                                            item.currency
+                                        ),
+                                        timestamp = item.timestamp,
+                                        leadingContentLine1 = item.timestamp.format(DateUtil.Formatters.ddth),
+                                        leadingContentLine2 = item.timestamp.format(DateUtil.Formatters.MMM),
+                                        movement = item.type,
+                                        tag = item.tag,
+                                        folder = item.folder,
+                                        colors = ListItemDefaults.colors(
+                                            containerColor = SearchBarDefaults.colors().containerColor
+                                        ),
+                                        elevation = ListItemDefaults.elevation(
+                                            elevation = SearchBarDefaults.TonalElevation
+                                        ),
+                                        onClick = { onSearchItemClick(item.id) },
+                                        modifier = Modifier
+                                            .animateItem()
+                                    )
+                                }
+
+                                is TransactionEntryUiModel.PileContribution -> {
+                                    PileContributionItem(
+                                        onClick = { onPileClick(item.pileId) },
+                                        pileName = item.pileName,
+                                        pileColor = item.pileColor,
+                                        amount = TextFormat.currency(
+                                            item.amount,
+                                            item.currency
+                                        ),
+                                        timestamp = item.timestamp,
+                                        leadingContentLine1 = item.timestamp.format(DateUtil.Formatters.ddth),
+                                        leadingContentLine2 = item.timestamp.format(DateUtil.Formatters.MMM),
+                                        movement = item.movement,
+                                        colors = ListItemDefaults.colors(
+                                            containerColor = SearchBarDefaults.colors().containerColor
+                                        ),
+                                        excluded = item.excluded,
+                                        source = item.source,
+                                        elevation = ListItemDefaults.elevation(
+                                            elevation = SearchBarDefaults.TonalElevation
+                                        ),
+                                        modifier = Modifier
+                                            .animateItem()
+                                    )
+                                }
+                            }
                         }
                     }
                 }
