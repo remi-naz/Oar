@@ -619,6 +619,7 @@
     <string name="of_value">of %s</string>
     <string name="pile_locked">Pile locked</string>
     <string name="delete_pile_confirmation_title">Delete Pile?</string>
+    <string name="delete_pile_confirmation_note">Note: Contributions already added to your transaction balance will be converted into normal, editable transactions</string>
     <string name="pile_deleted">Pile Deleted</string>
     <string name="pile_saved">Pile Saved</string>
     <string name="error_invalid_pile_name">Please enter a valid name</string>
@@ -678,4 +679,5 @@
     <string name="hide_completed">Hide Completed</string>
     <string name="contribution_source_to_pile">%1$s towards %2$s</string>
     <string name="contribution_source_from_pile">%1$s from %2$s</string>
+    <string name="cd_tap_to_delete_pile">Tap to delete pile</string>
 </resources>

@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.presentation.currencyUpdate.CurrencySelectionButton
 import dev.ridill.oar.core.ui.components.BackArrowButton
-import dev.ridill.oar.core.ui.components.ConfirmationDialog
 import dev.ridill.oar.core.ui.components.OarPlainTooltip
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.OarTextField
@@ -75,6 +74,7 @@ import dev.ridill.oar.moneyPiles.domain.model.PileContributionMode
 import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderBehavior
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderCadence
+import dev.ridill.oar.moneyPiles.presentation.components.PileDeleteConfirmationDialog
 import dev.ridill.oar.moneyPiles.presentation.components.PileIconDefaults
 import dev.ridill.oar.moneyPiles.presentation.components.PileIconIndicator
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
@@ -380,8 +380,7 @@ internal fun AddEditPileScreen(
     }
 
     if (state.showDeleteConfirmation) {
-        ConfirmationDialog(
-            titleRes = R.string.delete_pile_confirmation_title,
+        PileDeleteConfirmationDialog(
             onConfirm = actions::onDeleteConfirm,
             onDismiss = actions::onDeleteConfirmationDismiss,
         )

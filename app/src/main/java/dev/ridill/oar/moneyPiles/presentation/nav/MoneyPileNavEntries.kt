@@ -105,10 +105,16 @@ fun EntryProviderScope<NavKey>.moneyPileEntries(
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         val snackbarController = rememberSnackbarController()
-        CollectFlowEffect(viewModel.events, snackbarController) { event ->
+        val resultBus = LocalResultBus.current
+        CollectFlowEffect(viewModel.events, resultBus, snackbarController) { event ->
             when (event) {
                 is PileDetailViewModel.PileDetailEvent.ShowUiMessage -> {
                     snackbarController.showSnackbar(event.text)
+                }
+
+                PileDetailViewModel.PileDetailEvent.PileDeleted -> {
+                    resultBus.sendResult(AddEditMoneyPileResult.PILE_DELETED)
+                    navigator.goBack()
                 }
             }
         }

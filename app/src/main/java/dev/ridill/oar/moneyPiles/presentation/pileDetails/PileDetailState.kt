@@ -17,6 +17,7 @@ data class PileDetailState(
     val lockedEntriesExist: Boolean = false,
     val isComplete: Boolean = false,
     val completionTimestamp: LocalDateTime? = null,
+    val showDeleteConfirmation: Boolean = false,
 )
 
 sealed interface PileProgressState {

@@ -122,6 +122,9 @@ class PileDetailViewModel @AssistedInject constructor(
     private val lockedEntriesExist = repo
         .doLockedEntriesExist(route.pileId)
 
+    private val showDeleteConfirmation = savedStateHandle
+        .getStateFlow(SHOW_DELETE_CONFIRMATION, false)
+
     val state = combineTuple(
         details,
         savedAmount,
@@ -133,6 +136,7 @@ class PileDetailViewModel @AssistedInject constructor(
         lockedEntriesExist,
         isComplete,
         completionTimestamp,
+        showDeleteConfirmation,
     ).mapLatest { (
                       details,
                       savedAmount,
@@ -144,6 +148,7 @@ class PileDetailViewModel @AssistedInject constructor(
                       doLockedEntriesExist,
                       lockedEntriesExist,
                       completionTimestamp,
+                      showDeleteConfirmation,
                   ) ->
         PileDetailState(
             pile = details,
@@ -156,6 +161,7 @@ class PileDetailViewModel @AssistedInject constructor(
             lockedEntriesExist = doLockedEntriesExist,
             isComplete = lockedEntriesExist,
             completionTimestamp = completionTimestamp,
+            showDeleteConfirmation = showDeleteConfirmation,
         )
     }.asStateFlow(viewModelScope, PileDetailState())
 
@@ -205,9 +211,27 @@ class PileDetailViewModel @AssistedInject constructor(
         savedStateHandle[SHOW_LOCKED] = includeLocked
     }
 
+    override fun onDeletePileClick() {
+        savedStateHandle[SHOW_DELETE_CONFIRMATION] = true
+    }
+
+    override fun onDeletePileConfirmationDismiss() {
+        savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
+    }
+
+    override fun onDeletePileConfirm() {
+        viewModelScope.launch {
+            savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
+            repo.deletePile(route.pileId)
+            eventBus.send(PileDetailEvent.PileDeleted)
+        }
+    }
+
     sealed interface PileDetailEvent {
         data class ShowUiMessage(val text: UiText) : PileDetailEvent
+        data object PileDeleted : PileDetailEvent
     }
 }
 
 private const val SHOW_LOCKED = "SHOW_LOCKED"
+private const val SHOW_DELETE_CONFIRMATION = "SHOW_DELETE_CONFIRMATION"

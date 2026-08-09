@@ -90,14 +90,18 @@ object MoneyPileViewModelModule {
         db: OarDatabase,
         @ApplicationScope applicationScope: CoroutineScope,
         dao: MoneyPileTransactionDao,
+        pileDao: MoneyPileDao,
         pileRepo: MoneyPileRepository,
-        aggregationsRepo: AggregationsRepository
+        aggregationsRepo: AggregationsRepository,
+        pileReminder: PileReminder,
     ): PileDetailRepository = PileDetailRepositoryImpl(
         db = db,
         applicationScope = applicationScope,
         dao = dao,
+        pileDao = pileDao,
         pileRepo = pileRepo,
         aggregationsRepo = aggregationsRepo,
+        pileReminder = pileReminder,
     )
 
     @Provides

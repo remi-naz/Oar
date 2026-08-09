@@ -4,4 +4,7 @@ interface PileDetailActions {
     fun onTransactionActionRevealed()
     fun onTransactionDelete(id: Long)
     fun onIncludeLockedTransactionsToggle(includeLocked: Boolean)
+    fun onDeletePileClick()
+    fun onDeletePileConfirmationDismiss()
+    fun onDeletePileConfirm()
 }

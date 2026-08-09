@@ -101,6 +101,7 @@ import dev.ridill.oar.moneyPiles.domain.model.PileIcon
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderBehavior
 import dev.ridill.oar.moneyPiles.domain.model.PileReminderCadence
 import dev.ridill.oar.moneyPiles.domain.model.PileTransactionEntry
+import dev.ridill.oar.moneyPiles.presentation.components.PileDeleteConfirmationDialog
 import dev.ridill.oar.moneyPiles.presentation.components.PileIconIndicator
 import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDate
@@ -135,6 +136,13 @@ internal fun PileDetailScreen(
                             Icon(
                                 imageVector = Icons.Rounded.Edit,
                                 contentDescription = stringResource(R.string.cd_tap_to_edit_pile)
+                            )
+                        }
+                    } else if (pile != null) {
+                        IconButton(onClick = actions::onDeletePileClick) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_delete),
+                                contentDescription = stringResource(R.string.cd_tap_to_delete_pile)
                             )
                         }
                     }
@@ -346,6 +354,13 @@ internal fun PileDetailScreen(
                 messageRes = R.string.pile_transactions_empty_message
             )
         }
+    }
+
+    if (state.showDeleteConfirmation) {
+        PileDeleteConfirmationDialog(
+            onConfirm = actions::onDeletePileConfirm,
+            onDismiss = actions::onDeletePileConfirmationDismiss,
+        )
     }
 }
 
@@ -783,6 +798,9 @@ private fun PreviewPileDetailScreen() {
                 override fun onTransactionActionRevealed() {}
                 override fun onTransactionDelete(id: Long) {}
                 override fun onIncludeLockedTransactionsToggle(includeLocked: Boolean) {}
+                override fun onDeletePileClick() {}
+                override fun onDeletePileConfirmationDismiss() {}
+                override fun onDeletePileConfirm() {}
             },
             transactionPagingItems = transactionPagingItems,
             navigateUp = {},
