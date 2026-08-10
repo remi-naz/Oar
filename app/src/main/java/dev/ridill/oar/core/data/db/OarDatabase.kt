@@ -4,6 +4,7 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import dev.ridill.oar.aggregations.data.local.AggregationsDao
@@ -12,8 +13,10 @@ import dev.ridill.oar.budgetCycles.data.local.entity.BudgetCycleEntity
 import dev.ridill.oar.budgetCycles.data.local.view.BudgetCycleDetailsView
 import dev.ridill.oar.folders.data.local.FolderDao
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
+import dev.ridill.oar.folders.data.local.entity.FolderFtsEntity
 import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
 import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileEntity
+import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileFtsEntity
 import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileTransactionsEntity
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileAggregateView
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileTransactionDao
@@ -25,8 +28,10 @@ import dev.ridill.oar.settings.data.local.entity.ConfigEntity
 import dev.ridill.oar.settings.data.local.entity.CurrencyListEntity
 import dev.ridill.oar.tags.data.local.TagsDao
 import dev.ridill.oar.tags.data.local.entity.TagEntity
+import dev.ridill.oar.tags.data.local.entity.TagFtsEntity
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
+import dev.ridill.oar.transactions.data.local.entity.TransactionFtsEntity
 import dev.ridill.oar.transactions.data.local.views.TransactionDetailsView
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -42,13 +47,17 @@ import java.time.ZoneId
         CurrencyListEntity::class,
         MoneyPileEntity::class,
         MoneyPileTransactionsEntity::class,
+        TransactionFtsEntity::class,
+        TagFtsEntity::class,
+        FolderFtsEntity::class,
+        MoneyPileFtsEntity::class,
     ],
     views = [
         BudgetCycleDetailsView::class,
         TransactionDetailsView::class,
         MoneyPileAggregateView::class,
     ],
-    version = 9,
+    version = 10,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -56,6 +65,7 @@ import java.time.ZoneId
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
+        AutoMigration(from = 9, to = 10, spec = FtsIndexRebuildSpec::class),
     ]
 )
 @TypeConverters(DateTimeConverter::class)
@@ -78,6 +88,19 @@ abstract class OarDatabase : RoomDatabase() {
     abstract fun configDao(): ConfigDao
     abstract fun moneyPileDao(): MoneyPileDao
     abstract fun moneyPileTransactionsDao(): MoneyPileTransactionDao
+}
+
+/**
+ * Room's generated 9->10 auto-migration creates the FTS4 tables and content-sync triggers, but
+ * leaves them empty - the `rebuild` command backfills them from the already-migrated content
+ * tables so existing rows are searchable immediately, not just after their next edit.
+ */
+class FtsIndexRebuildSpec : AutoMigrationSpec {
+    override fun onPostMigrate(db: SupportSQLiteDatabase) {
+        listOf("transaction_fts", "tag_fts", "folder_fts", "money_pile_fts").forEach { table ->
+            db.execSQL("INSERT INTO `$table`(`$table`) VALUES('rebuild')")
+        }
+    }
 }
 
 val MIGRATION_5_6 = object : Migration(5, 6) {

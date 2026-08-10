@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
  */
 class TransactionPagingSource(
     private val dao: TransactionDao,
+    private val queryBuilder: TransactionPagedQueryBuilder,
     db: OarDatabase,
     applicationScope: CoroutineScope,
     private val query: String?,
@@ -41,7 +42,7 @@ class TransactionPagingSource(
         direction: PageLoadDirection,
         loadSize: Int
     ): List<TransactionDetailsView> {
-        val rawQuery = TransactionPagedQueryBuilder.build(
+        val rawQuery = queryBuilder.build(
             query = query,
             cycleIds = cycleIds,
             movement = type,

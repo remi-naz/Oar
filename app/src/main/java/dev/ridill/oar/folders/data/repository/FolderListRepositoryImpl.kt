@@ -8,6 +8,7 @@ import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.folders.data.local.FolderDao
+import dev.ridill.oar.folders.data.local.FolderPagedQueryBuilder
 import dev.ridill.oar.folders.data.local.FolderPagingSource
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
 import dev.ridill.oar.folders.data.toFolder
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.mapLatest
 
 class FolderListRepositoryImpl(
     private val folderDao: FolderDao,
+    private val queryBuilder: FolderPagedQueryBuilder,
     private val db: OarDatabase,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : FolderListRepository {
@@ -27,6 +29,7 @@ class FolderListRepositoryImpl(
         pagingSourceFactory = {
             FolderPagingSource(
                 dao = folderDao,
+                queryBuilder = queryBuilder,
                 db = db,
                 applicationScope = applicationScope,
                 query = searchQuery

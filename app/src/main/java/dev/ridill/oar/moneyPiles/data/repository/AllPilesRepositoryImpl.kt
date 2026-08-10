@@ -9,6 +9,7 @@ import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
+import dev.ridill.oar.moneyPiles.data.local.MoneyPilePagedQueryBuilder
 import dev.ridill.oar.moneyPiles.data.local.MoneyPilesPagingSource
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileAggregateView
 import dev.ridill.oar.moneyPiles.data.toMoneyPile
@@ -22,6 +23,7 @@ internal class AllPilesRepositoryImpl(
     private val db: OarDatabase,
     @ApplicationScope private val applicationScope: CoroutineScope,
     private val dao: MoneyPileDao,
+    private val queryBuilder: MoneyPilePagedQueryBuilder,
 ) : AllPilesRepository {
 
     override fun getAllPilesPagedGroupedByCompleted(
@@ -35,6 +37,7 @@ internal class AllPilesRepositoryImpl(
                 applicationScope = applicationScope,
                 query = query,
                 dao = dao,
+                queryBuilder = queryBuilder,
                 includeCompleted = includeCompleted,
             )
         }
