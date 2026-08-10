@@ -4,10 +4,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.animPreferences.AnimPreferencesManager
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.folders.data.local.FolderDao
+import dev.ridill.oar.folders.data.local.FolderPagedQueryBuilder
 import dev.ridill.oar.folders.data.repository.AddEditFolderRepositoryImpl
 import dev.ridill.oar.folders.data.repository.FolderDetailsRepositoryImpl
 import dev.ridill.oar.folders.data.repository.FolderListRepositoryImpl
@@ -28,12 +30,19 @@ object FolderModule {
     fun provideFolderDao(db: OarDatabase): FolderDao = db.folderDao()
 
     @Provides
+    fun provideFolderPagedQueryBuilder(
+        formatter: FtsQueryFormatter
+    ): FolderPagedQueryBuilder = FolderPagedQueryBuilder(formatter)
+
+    @Provides
     fun provideFolderListsRepository(
         folderDao: FolderDao,
+        queryBuilder: FolderPagedQueryBuilder,
         db: OarDatabase,
         @ApplicationScope applicationScope: CoroutineScope
     ): FolderListRepository = FolderListRepositoryImpl(
         folderDao = folderDao,
+        queryBuilder = queryBuilder,
         db = db,
         applicationScope = applicationScope
     )

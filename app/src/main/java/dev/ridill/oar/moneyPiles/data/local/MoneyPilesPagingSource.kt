@@ -11,6 +11,7 @@ internal class MoneyPilesPagingSource(
     applicationScope: CoroutineScope,
     private val query: String,
     private val dao: MoneyPileDao,
+    private val queryBuilder: MoneyPilePagedQueryBuilder,
     private val includeCompleted: Boolean = true,
 ) : KeysetPagingSource<MoneyPilePageKey, MoneyPileAggregateView>(
     db = db,
@@ -22,7 +23,7 @@ internal class MoneyPilesPagingSource(
         direction: PageLoadDirection,
         loadSize: Int
     ): List<MoneyPileAggregateView> {
-        val query = MoneyPilePagedQueryBuilder.build(
+        val query = queryBuilder.build(
             query = query,
             cursor = cursor,
             direction = direction,

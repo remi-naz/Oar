@@ -1,20 +1,24 @@
 package dev.ridill.oar.transactions.data.local
 
 import androidx.room.RoomRawQuery
+import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.KeysetColumn
 import dev.ridill.oar.core.data.db.KeysetPagedQuery
 import dev.ridill.oar.core.data.db.PageLoadDirection
 import dev.ridill.oar.core.data.db.SortDirection
 import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.core.domain.util.Empty
 
 /**
  * Builds the paged transactions query with only the WHERE predicates for filters that are
  * actually active, so SQLite can use indices for whichever ones are present instead of always
  * full-scanning (the previous `(:param IS NULL OR column = :param)` form was never sargable).
  */
-object TransactionPagedQueryBuilder {
+class TransactionPagedQueryBuilder(
+    private val formatter: FtsQueryFormatter
+) {
 
-    private val COLUMNS = listOf(
+    private val columns = listOf(
         KeysetColumn("DATE(cycleStartDate)", SortDirection.DESC),
         KeysetColumn("DATE(cycleEndDate)", SortDirection.DESC),
         KeysetColumn("DATETIME(transactionTimestamp)", SortDirection.DESC),
@@ -33,16 +37,30 @@ object TransactionPagedQueryBuilder {
         direction: PageLoadDirection,
         limit: Int
     ): RoomRawQuery {
-        val builder = KeysetPagedQuery("transaction_details_view", COLUMNS)
+        val builder = KeysetPagedQuery("transaction_details_view", columns)
+        val matchQuery = formatter.prefixMatchOrNull(query)
 
-        if (!query.isNullOrBlank()) {
+        if (matchQuery != null) {
             builder.where(
-                "(transactionAmount LIKE ? || '%' OR transactionNote LIKE '%' || ? || '%' " +
-                        "OR tagName LIKE '%' || ? || '%' OR folderName LIKE '%' || ? || '%')"
+                """transactionId IN (
+                    SELECT rowid FROM transaction_fts WHERE transaction_fts MATCH ?
+                    UNION
+                    SELECT id FROM transaction_table
+                     WHERE tag_id IN (SELECT rowid FROM tag_fts WHERE tag_fts MATCH ?)
+                    UNION
+                    SELECT id FROM transaction_table
+                     WHERE folder_id IN (SELECT rowid FROM folder_fts WHERE folder_fts MATCH ?)
+                    UNION
+                    SELECT transaction_id FROM money_pile_transactions_table
+                     WHERE pile_id IN (SELECT rowid FROM money_pile_fts WHERE money_pile_fts MATCH ?)
+                    UNION
+                    SELECT id FROM transaction_table WHERE amount LIKE ? || '%'
+                )"""
             ) { s, i ->
-                s.bindText(i, query); s.bindText(i + 1, query)
-                s.bindText(i + 2, query); s.bindText(i + 3, query)
-                i + 4
+                s.bindText(i, matchQuery); s.bindText(i + 1, matchQuery)
+                s.bindText(i + 2, matchQuery); s.bindText(i + 3, matchQuery)
+                s.bindText(i + 4, query ?: String.Empty)
+                i + 5
             }
         }
         builder.whereLongIn("cycleId", cycleIds)

@@ -1,6 +1,7 @@
 package dev.ridill.oar.tags.data.local
 
 import androidx.room.RoomRawQuery
+import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.KeysetColumn
 import dev.ridill.oar.core.data.db.KeysetPagedQuery
 import dev.ridill.oar.core.data.db.PageLoadDirection
@@ -12,9 +13,11 @@ import dev.ridill.oar.core.data.db.SortDirection
  * treats it as "match everything", while selection search (requireNonBlankQuery) only shows
  * results once the user has actually typed something.
  */
-object TagPagedQueryBuilder {
+class TagPagedQueryBuilder(
+    private val formatter: FtsQueryFormatter
+) {
 
-    private val COLUMNS = listOf(
+    private val columns = listOf(
         KeysetColumn("DATETIME(created_timestamp)", SortDirection.DESC),
         KeysetColumn("name", SortDirection.ASC),
         KeysetColumn("id", SortDirection.ASC)
@@ -28,14 +31,21 @@ object TagPagedQueryBuilder {
         direction: PageLoadDirection,
         limit: Int
     ): RoomRawQuery {
-        val builder = KeysetPagedQuery("tag_table", COLUMNS)
+        val builder = KeysetPagedQuery("tag_table", columns)
+        val matchQuery = formatter.prefixMatchOrNull(query)
 
         if (requireNonBlankQuery) {
-            builder.where("LENGTH(?) > 0 AND name LIKE '%' || ? || '%'") { s, i ->
-                s.bindText(i, query); s.bindText(i + 1, query); i + 2
+            if (matchQuery != null) {
+                builder.where("id IN (SELECT rowid FROM tag_fts WHERE tag_fts MATCH ?)") { s, i ->
+                    s.bindText(i, matchQuery); i + 1
+                }
+            } else {
+                builder.where("0")
             }
-        } else if (query.isNotBlank()) {
-            builder.where("name LIKE '%' || ? || '%'") { s, i -> s.bindText(i, query); i + 1 }
+        } else if (matchQuery != null) {
+            builder.where("id IN (SELECT rowid FROM tag_fts WHERE tag_fts MATCH ?)") { s, i ->
+                s.bindText(i, matchQuery); i + 1
+            }
         }
         builder.whereLongIn("id", idIgnoreSet, negate = true)
 

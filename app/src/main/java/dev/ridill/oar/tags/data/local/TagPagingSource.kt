@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
  */
 class TagPagingSource(
     private val dao: TagsDao,
+    private val queryBuilder: TagPagedQueryBuilder,
     db: OarDatabase,
     applicationScope: CoroutineScope,
     private val query: String,
@@ -41,7 +42,7 @@ class TagPagingSource(
         direction: PageLoadDirection,
         loadSize: Int
     ): List<TagEntity> {
-        val rawQuery = TagPagedQueryBuilder.build(
+        val rawQuery = queryBuilder.build(
             query = query,
             requireNonBlankQuery = requireNonBlankQuery,
             idIgnoreSet = idIgnoreSet,

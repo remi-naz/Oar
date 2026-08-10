@@ -7,6 +7,7 @@ import androidx.paging.map
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.di.ApplicationScope
+import dev.ridill.oar.tags.data.local.TagPagedQueryBuilder
 import dev.ridill.oar.tags.data.local.TagPagingSource
 import dev.ridill.oar.tags.data.local.TagsDao
 import dev.ridill.oar.tags.data.local.entity.TagEntity
@@ -26,6 +27,7 @@ import java.time.LocalDateTime
 
 class TagsRepositoryImpl(
     private val dao: TagsDao,
+    private val queryBuilder: TagPagedQueryBuilder,
     private val db: OarDatabase,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : TagsRepository {
@@ -37,6 +39,7 @@ class TagsRepositoryImpl(
         pagingSourceFactory = {
             TagPagingSource(
                 dao = dao,
+                queryBuilder = queryBuilder,
                 db = db,
                 applicationScope = applicationScope,
                 query = searchQuery,
@@ -72,6 +75,7 @@ class TagsRepositoryImpl(
         pagingSourceFactory = {
             TagPagingSource(
                 dao = dao,
+                queryBuilder = queryBuilder,
                 db = db,
                 applicationScope = applicationScope,
                 query = searchQuery,

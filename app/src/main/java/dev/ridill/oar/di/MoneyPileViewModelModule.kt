@@ -8,9 +8,11 @@ import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ridill.oar.aggregations.domain.repository.AggregationsRepository
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
+import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
+import dev.ridill.oar.moneyPiles.data.local.MoneyPilePagedQueryBuilder
 import dev.ridill.oar.moneyPiles.data.local.view.MoneyPileTransactionDao
 import dev.ridill.oar.moneyPiles.data.repository.AddEditPileRepositoryImpl
 import dev.ridill.oar.moneyPiles.data.repository.AllPilesRepositoryImpl
@@ -37,14 +39,21 @@ import kotlinx.coroutines.CoroutineScope
 object MoneyPileViewModelModule {
 
     @Provides
+    fun provideMoneyPilePagedQueryBuilder(
+        formatter: FtsQueryFormatter
+    ): MoneyPilePagedQueryBuilder = MoneyPilePagedQueryBuilder(formatter)
+
+    @Provides
     fun provideAllPilesRepository(
         db: OarDatabase,
         @ApplicationScope applicationScope: CoroutineScope,
         dao: MoneyPileDao,
+        queryBuilder: MoneyPilePagedQueryBuilder,
     ): AllPilesRepository = AllPilesRepositoryImpl(
         db = db,
         applicationScope = applicationScope,
         dao = dao,
+        queryBuilder = queryBuilder,
     )
 
     @Provides

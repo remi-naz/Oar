@@ -6,11 +6,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.crashlytics.CrashlyticsManager
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.transactions.data.local.TransactionDao
+import dev.ridill.oar.transactions.data.local.TransactionPagedQueryBuilder
 import dev.ridill.oar.transactions.data.repository.TransactionRepositoryImpl
 import dev.ridill.oar.transactions.domain.autoDetection.RegexTransactionDataExtractor
 import dev.ridill.oar.transactions.domain.autoDetection.TransactionAutoDetectService
@@ -27,12 +29,19 @@ object TransactionSingletonModule {
     fun provideTransactionDao(db: OarDatabase): TransactionDao = db.transactionDao()
 
     @Provides
+    fun provideTransactionPagedQueryBuilder(
+        formatter: FtsQueryFormatter
+    ): TransactionPagedQueryBuilder = TransactionPagedQueryBuilder(formatter)
+
+    @Provides
     fun provideTransactionRepository(
         transactionDao: TransactionDao,
+        queryBuilder: TransactionPagedQueryBuilder,
         db: OarDatabase,
         @ApplicationScope applicationScope: CoroutineScope,
     ): TransactionRepository = TransactionRepositoryImpl(
         dao = transactionDao,
+        queryBuilder = queryBuilder,
         db = db,
         applicationScope = applicationScope
     )

@@ -11,6 +11,7 @@ import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.transactions.data.local.TransactionDao
+import dev.ridill.oar.transactions.data.local.TransactionPagedQueryBuilder
 import dev.ridill.oar.transactions.data.local.TransactionPagingSource
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import dev.ridill.oar.transactions.data.local.views.TransactionDetailsView
@@ -31,6 +32,7 @@ import java.util.Currency
 
 internal class TransactionRepositoryImpl(
     private val dao: TransactionDao,
+    private val queryBuilder: TransactionPagedQueryBuilder,
     private val db: OarDatabase,
     @ApplicationScope private val applicationScope: CoroutineScope
 ) : TransactionRepository {
@@ -47,6 +49,7 @@ internal class TransactionRepositoryImpl(
         pagingSourceFactory = {
             TransactionPagingSource(
                 dao = dao,
+                queryBuilder = queryBuilder,
                 db = db,
                 applicationScope = applicationScope,
                 query = query,
@@ -74,6 +77,7 @@ internal class TransactionRepositoryImpl(
         pagingSourceFactory = {
             TransactionPagingSource(
                 dao = dao,
+                queryBuilder = queryBuilder,
                 db = db,
                 applicationScope = applicationScope,
                 query = query,

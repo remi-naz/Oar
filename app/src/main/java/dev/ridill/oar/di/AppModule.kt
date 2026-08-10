@@ -15,6 +15,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ridill.oar.account.domain.service.AccessTokenKeystoreService
 import dev.ridill.oar.application.OarViewModel
+import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.MIGRATION_5_6
 import dev.ridill.oar.core.data.db.MIGRATION_6_7
 import dev.ridill.oar.core.data.db.OarDatabase
@@ -165,6 +166,10 @@ object AppModule {
 
     @Provides
     fun provideCrashlyticsManager(): CrashlyticsManager = FirebaseCrashlyticsManager()
+
+    @Singleton
+    @Provides
+    fun provideFtsQueryFormatter(): FtsQueryFormatter = FtsQueryFormatter()
 }
 
 @Qualifier

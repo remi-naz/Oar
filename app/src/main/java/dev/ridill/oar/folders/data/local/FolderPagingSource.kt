@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
  */
 class FolderPagingSource(
     private val dao: FolderDao,
+    private val queryBuilder: FolderPagedQueryBuilder,
     db: OarDatabase,
     applicationScope: CoroutineScope,
     private val query: String
@@ -27,7 +28,7 @@ class FolderPagingSource(
         direction: PageLoadDirection,
         loadSize: Int
     ): List<FolderEntity> {
-        val rawQuery = FolderPagedQueryBuilder.build(
+        val rawQuery = queryBuilder.build(
             query = query,
             cursor = cursor,
             direction = direction,
