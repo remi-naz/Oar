@@ -71,13 +71,23 @@ jobs:
           echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
           echo "aab=$dest" >> "$GITHUB_OUTPUT"
 
+      - name: Zip merged native libs
+        id: native_libs
+        run: |
+          native_libs_dir="app/build/intermediates/merged_native_libs/productionRelease/mergeProductionReleaseNativeLibs/out"
+          zip_path="$(pwd)/${{ steps.artifacts.outputs.name }}-native-libs.zip"
+          (cd "$native_libs_dir" && zip -r "$zip_path" arm64-v8a armeabi-v7a x86_64)
+          echo "zip=$zip_path" >> "$GITHUB_OUTPUT"
+
       # Kept as a private Actions artifact (not a public release download) so the
       # bundle used for the Play Store upload is traceable to this tag/run.
       - name: Upload AAB as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.artifacts.outputs.name }}
-          path: ${{ steps.artifacts.outputs.aab }}
+          path: |
+            ${{ steps.artifacts.outputs.aab }}
+            ${{ steps.native_libs.outputs.zip }}
           retention-days: 14
 
       # No files attached: Play Store is the only distribution channel for now.
