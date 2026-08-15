@@ -146,7 +146,7 @@ fun AllTagsScreen(
                 items(
                     count = tagsLazyPagingItems.itemCount,
                     key = tagsLazyPagingItems.itemKey { it.id },
-                    contentType = tagsLazyPagingItems.itemContentType { "TagListItem" }
+                    contentType = tagsLazyPagingItems.itemContentType { Tag::class }
                 ) { index ->
                     tagsLazyPagingItems[index]?.let { item ->
                         val selected = item.id in state.selectedIds

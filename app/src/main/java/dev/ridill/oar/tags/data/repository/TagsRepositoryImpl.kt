@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class TagsRepositoryImpl(
+internal class TagsRepositoryImpl(
     private val dao: TagsDao,
     private val queryBuilder: TagPagedQueryBuilder,
     private val db: OarDatabase,
@@ -33,7 +33,8 @@ class TagsRepositoryImpl(
 ) : TagsRepository {
     override fun getAllTagsPagingData(
         searchQuery: String,
-        limit: Int
+        limit: Int,
+        requireNonBlankQuery: Boolean
     ): Flow<PagingData<Tag>> = Pager(
         config = PagingConfig(UtilConstants.DEFAULT_PAGE_SIZE),
         pagingSourceFactory = {
@@ -43,7 +44,7 @@ class TagsRepositoryImpl(
                 db = db,
                 applicationScope = applicationScope,
                 query = searchQuery,
-                requireNonBlankQuery = false,
+                requireNonBlankQuery = requireNonBlankQuery,
                 idIgnoreSet = null,
                 limit = limit
             )
