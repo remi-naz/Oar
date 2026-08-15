@@ -40,7 +40,7 @@ class CycleSelectionViewModel @AssistedInject constructor(
     )
 
     val cyclesPagingData = query.textAsFlow()
-        .debounce(UtilConstants.DEBOUNCE_TIMEOUT)
+        .debounce(UtilConstants.DebounceTimeoutDuration)
         .flatMapLatest { query ->
             repo.getCyclesSelectorsPagingData(query)
         }

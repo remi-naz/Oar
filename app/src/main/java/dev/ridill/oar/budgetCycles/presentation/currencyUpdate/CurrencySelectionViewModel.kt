@@ -20,7 +20,7 @@ class CurrencySelectionViewModel @Inject constructor(
     val searchQueryState = TextFieldState()
 
     val currencyPagingData = searchQueryState.textAsFlow()
-        .debounce(UtilConstants.DEBOUNCE_TIMEOUT)
+        .debounce(UtilConstants.DebounceTimeoutDuration)
         .flatMapLatest { query ->
             repo.getCurrencyListPaged(query)
         }.cachedIn(viewModelScope)
