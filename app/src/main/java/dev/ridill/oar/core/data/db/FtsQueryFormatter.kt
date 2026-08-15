@@ -13,6 +13,7 @@ class FtsQueryFormatter {
                 ?.let { "$it*" }
         }
         ?.filter { it.isNotEmpty() }
+        ?.takeIf { it.isNotEmpty() }
         ?.joinToString(String.WhiteSpace)
 
     companion object {

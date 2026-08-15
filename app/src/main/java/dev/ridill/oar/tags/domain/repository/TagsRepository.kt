@@ -13,7 +13,8 @@ import java.time.LocalDateTime
 interface TagsRepository {
     fun getAllTagsPagingData(
         searchQuery: String = String.Empty,
-        limit: Int = OarDatabase.INVALID_LIMIT
+        limit: Int = OarDatabase.INVALID_LIMIT,
+        requireNonBlankQuery: Boolean = false,
     ): Flow<PagingData<Tag>>
 
     fun getTagInfoPagingData(

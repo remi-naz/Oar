@@ -40,7 +40,7 @@ class FolderSelectionViewModel @AssistedInject constructor(
         .getStateFlow<Long?>(SELECTED_FOLDER_ID, null)
 
     val folderListPaged = searchQueryState.textAsFlow()
-        .debounce(UtilConstants.DEBOUNCE_TIMEOUT)
+        .debounce(UtilConstants.DebounceTimeoutDuration)
         .flatMapLatest {
             repo.getFoldersListPaged(it)
         }.cachedIn(viewModelScope)

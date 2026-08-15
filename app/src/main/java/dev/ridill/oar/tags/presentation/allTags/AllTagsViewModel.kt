@@ -31,7 +31,7 @@ class AllTagsViewModel @Inject constructor(
         init = { TextFieldState() }
     )
     val allTagsPagingData = searchQueryState.textAsFlow()
-        .debounce(UtilConstants.DEBOUNCE_TIMEOUT)
+        .debounce(UtilConstants.DebounceTimeoutDuration)
         .flatMapLatest {
             repo.getAllTagsPagingData(it)
         }.cachedIn(viewModelScope)
