@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.KeyboardActionHandler
@@ -18,35 +19,31 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SearchBarState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TextFieldLabelPosition
 import androidx.compose.material3.TextFieldLabelScope
-import androidx.compose.material3.rememberSearchBarWithGapState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Density
 import dev.ridill.oar.R
-import kotlinx.coroutines.launch
 
 @Composable
 fun SearchField(
     state: TextFieldState,
     modifier: Modifier = Modifier,
-    searchBarState: SearchBarState = rememberSearchBarWithGapState(),
     placeholder: String? = null,
     onSearch: () -> Unit = {},
 ) {
@@ -54,35 +51,32 @@ fun SearchField(
         derivedStateOf { state.text.isEmpty() }
     }
 
-    val coroutineScope = rememberCoroutineScope()
-    SearchBar(
-        state = searchBarState,
+    OarTextField(
+        state = state,
         modifier = modifier,
-        inputField = {
-            SearchBarDefaults.InputField(
-                textFieldState = state,
-                searchBarState = searchBarState,
-                onSearch = {
-                    coroutineScope.launch {
-                        searchBarState.animateToCollapsed()
-                        onSearch()
-                    }
-                },
-                placeholder = placeholder?.let {
-                    { Text(it) }
-                },
-                trailingIcon = {
-                    if (!isSearchQueryEmpty) {
-                        IconButton(onClick = state::clearText) {
-                            Icon(
-                                imageVector = Icons.Rounded.Clear,
-                                contentDescription = stringResource(R.string.cd_clear)
-                            )
-                        }
-                    }
-                },
-            )
-        }
+        shape = CircleShape,
+        placeholder = { placeholder?.let { Text(it) } },
+        colors = TextFieldDefaults.colors(
+            disabledIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent
+        ),
+        trailingIcon = {
+            if (!isSearchQueryEmpty) {
+                IconButton(onClick = state::clearText) {
+                    Icon(
+                        imageVector = Icons.Rounded.Clear,
+                        contentDescription = stringResource(R.string.cd_clear)
+                    )
+                }
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Search,
+            keyboardType = KeyboardType.Text
+        ),
+        onKeyboardAction = { onSearch() }
     )
 }
 
