@@ -14,15 +14,24 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   bump-version:
     runs-on: ubuntu-latest
     steps:
+      - name: Mint token as version-bump-bot
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,13 +47,34 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit and tag
+      - name: Commit on bump branch
+        id: branch
         run: |
+          branch="chore/bump-v${{ steps.bump.outputs.new_version }}"
+          git checkout -b "$branch"
           git add app/build.gradle.kts
           git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }} [skip ci]"
-          git tag "v${{ steps.bump.outputs.new_version }}"
+          git push origin "$branch"
+          echo "name=$branch" >> "$GITHUB_OUTPUT"
 
-      - name: Push commit and tag
+      # main requires PRs + signed commits. A squash-merge performed via the API
+      # is created and GPG-signed by GitHub itself, so this satisfies the signed
+      # commit rule without needing a bot signing key or a branch-protection bypass.
+      - name: Open and merge PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git push origin HEAD:main
+          pr_url=$(gh pr create \
+            --base main \
+            --head "${{ steps.branch.outputs.name }}" \
+            --title "chore: bump version to ${{ steps.bump.outputs.new_version }} [skip ci]" \
+            --body "Automated version bump (${{ inputs.bump-type }}) to ${{ steps.bump.outputs.new_version }} (code ${{ steps.bump.outputs.new_code }}).")
+          gh pr merge "$pr_url" --squash --delete-branch
+
+      - name: Tag merged commit
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+          git tag "v${{ steps.bump.outputs.new_version }}"
           git push origin "v${{ steps.bump.outputs.new_version }}"
