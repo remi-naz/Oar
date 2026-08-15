@@ -1,4 +1,16 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
+
+val keystoreProperties = Properties().apply {
+    val propertiesFile = rootProject.file("keystore.properties")
+    if (propertiesFile.exists()) {
+        load(FileInputStream(propertiesFile))
+    }
+}
+
+fun signingProp(propertyKey: String, envVar: String): String? =
+    keystoreProperties.getProperty(propertyKey) ?: System.getenv(envVar)
 
 plugins {
     alias(libs.plugins.com.android.application)
@@ -34,6 +46,18 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = signingProp("storeFile", "SIGNING_STORE_FILE")
+            if (storeFilePath != null) {
+                storeFile = file(storeFilePath)
+                storePassword = signingProp("storePassword", "SIGNING_STORE_PASSWORD")
+                keyAlias = signingProp("keyAlias", "SIGNING_KEY_ALIAS")
+                keyPassword = signingProp("keyPassword", "SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -45,6 +69,7 @@ android {
             ndk {
                 debugSymbolLevel = "FULL"
             }
+            signingConfig = signingConfigs.getByName("release")
         }
 
         getByName("debug") {
@@ -64,8 +89,8 @@ android {
 
         create("production") {
             dimension = "env"
-            versionCode = 20
-            versionName = "1.4.0"
+            versionCode = 21
+            versionName = "1.4.1"
         }
     }
 
