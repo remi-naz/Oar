@@ -57,18 +57,26 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: ./gradlew bundleProductionRelease
 
-      - name: Locate build artifact
+      - name: Locate and rename build artifact
         id: artifacts
         run: |
-          aab=$(find app/build/outputs/bundle/productionRelease -name "*.aab" | head -n 1)
-          echo "aab=$aab" >> "$GITHUB_OUTPUT"
+          project_name=$(grep -oE 'rootProject\.name\s*=\s*"[^"]+"' settings.gradle.kts | sed -E 's/.*"([^"]+)"/\1/')
+          version_code=$(awk '/create\("production"\)/{f=1} f && /versionCode/{match($0, /[0-9]+/); print substr($0, RSTART, RLENGTH); exit}' app/build.gradle.kts)
+          artifact_name="${project_name}-productionRelease-code${version_code}-v${{ steps.version.outputs.version }}"
+
+          src=$(find app/build/outputs/bundle/productionRelease -name "*.aab" | head -n 1)
+          dest="$(dirname "$src")/${artifact_name}.aab"
+          mv "$src" "$dest"
+
+          echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
+          echo "aab=$dest" >> "$GITHUB_OUTPUT"
 
       # Kept as a private Actions artifact (not a public release download) so the
       # bundle used for the Play Store upload is traceable to this tag/run.
       - name: Upload AAB as workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-${{ steps.version.outputs.version }}
+          name: ${{ steps.artifacts.outputs.name }}
           path: ${{ steps.artifacts.outputs.aab }}
           retention-days: 14
 
