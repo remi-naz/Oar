@@ -53,7 +53,7 @@ jobs:
           branch="chore/bump-v${{ steps.bump.outputs.new_version }}"
           git checkout -b "$branch"
           git add app/build.gradle.kts
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }} [skip ci]"
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
           git push origin "$branch"
           echo "name=$branch" >> "$GITHUB_OUTPUT"
 
@@ -68,7 +68,7 @@ jobs:
           pr_url=$(gh pr create \
             --base main \
             --head "${{ steps.branch.outputs.name }}" \
-            --title "chore: bump version to ${{ steps.bump.outputs.new_version }} [skip ci]" \
+            --title "chore: bump version to ${{ steps.bump.outputs.new_version }}" \
             --body "Automated version bump (${{ inputs.bump-type }}) to ${{ steps.bump.outputs.new_version }} (code ${{ steps.bump.outputs.new_code }}).")
           gh pr merge "$pr_url" --squash --delete-branch
 
