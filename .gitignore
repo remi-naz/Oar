@@ -29,6 +29,18 @@ render.experimental.xml
 *.keystore
 keystore.properties
 
+# fastlane
+fastlane/play-service-account.json
+fastlane/metadata
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Bundler
+/.bundle/
+/vendor/bundle/
+
 # Google Services (e.g. APIs or Firebase)
 app/google-services.json
 

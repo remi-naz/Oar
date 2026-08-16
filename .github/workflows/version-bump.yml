@@ -11,6 +11,16 @@ on:
           - patch
           - minor
           - major
+      track:
+        description: "Play Store track for the resulting release, or 'skip' to build only"
+        required: false
+        type: choice
+        default: skip
+        options:
+          - skip
+          - internal
+          - beta
+          - production
 
 permissions:
   contents: write
@@ -69,12 +79,12 @@ jobs:
             --base main \
             --head "${{ steps.branch.outputs.name }}" \
             --title "chore: bump version to ${{ steps.bump.outputs.new_version }}" \
-            --body "Automated version bump (${{ inputs.bump-type }}) to ${{ steps.bump.outputs.new_version }} (code ${{ steps.bump.outputs.new_code }}).")
+            --body "Automated version bump (${{ inputs.bump-type }}) to ${{ steps.bump.outputs.new_version }} (code ${{ steps.bump.outputs.new_code }}). ${{ (inputs.track == 'skip' || inputs.track == '') && 'Build only, will not deploy to Play Store.' || format('Will deploy to the {0} track.', inputs.track) }}")
           gh pr merge "$pr_url" --squash --delete-branch
 
       - name: Tag merged commit
         run: |
           git fetch origin main
           git checkout -B main origin/main
-          git tag "v${{ steps.bump.outputs.new_version }}"
+          git tag -a "v${{ steps.bump.outputs.new_version }}" -m "release-track:${{ inputs.track || 'skip' }}"
           git push origin "v${{ steps.bump.outputs.new_version }}"
