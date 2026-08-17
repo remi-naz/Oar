@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,10 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
-import dev.ridill.oar.budgetCycles.presentation.currencyUpdate.CurrencySelectionSheet
-import dev.ridill.oar.budgetCycles.presentation.currencyUpdate.CurrencySelectionViewModel
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.orZero
 import dev.ridill.oar.core.ui.components.ComponentViewModelScope
@@ -50,150 +46,6 @@ import dev.ridill.oar.transactions.presentation.amountTransformation.AmountTrans
 import dev.ridill.oar.transactions.presentation.amountTransformation.AmountTransformationViewModel
 import java.util.Currency
 
-@Composable
-fun AmountInput(
-    inputState: TextFieldState,
-    currency: Currency,
-    onCurrencySelect: (Currency) -> Unit,
-    modifier: Modifier = Modifier,
-    isError: Boolean = false,
-    enabled: Boolean = true,
-    label: String? = null,
-    placeholder: String? = stringResource(R.string.amount_zero),
-    colors: TextFieldColors = DefaultColors,
-    prefix: @Composable (() -> Unit)? = { Text(currency.symbol) },
-    supportingText: @Composable (() -> Unit)? = null,
-    isInputAnExpression: Boolean = false,
-    onExpressionEvalClick: () -> Unit = {},
-    focusManager: FocusManager = LocalFocusManager.current,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    onKeyboardAction: KeyboardActionHandler? = { focusManager.moveFocus(FocusDirection.Next) },
-    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
-) {
-    if (LocalInspectionMode.current) return
-    val showTransformButton by remember {
-        derivedStateOf {
-            inputState.text.toString()
-                .toDoubleOrNull().orZero() > Double.Zero
-        }
-    }
-    var showCurrencySelectionSheet by rememberSaveable { mutableStateOf(false) }
-    var showTransformationSheet by rememberSaveable { mutableStateOf(false) }
-
-    ComponentViewModelScope("amount_input") {
-        val currencySelectionViewModel: CurrencySelectionViewModel = hiltViewModel()
-        val amountTransformationViewModel: AmountTransformationViewModel = hiltViewModel()
-
-        OarTextField(
-            state = inputState,
-            modifier = modifier
-                .defaultMinSize(minWidth = InputMinWidth),
-            enabled = enabled,
-            leadingIcon = {
-                FilledTonalIconButton(
-                    onClick = { showCurrencySelectionSheet = true },
-                ) {
-                    Text(currency.symbol)
-                }
-            },
-            textStyle = MaterialTheme.typography.headlineMedium.copy(
-                textAlign = TextAlign.Center
-            ),
-            label = label?.let {
-                { Text(it) }
-            },
-            isError = isError,
-            supportingText = supportingText,
-            placeholder = placeholder?.let {
-                {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = InputMinWidth),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            },
-            prefix = prefix,
-            keyboardOptions = keyboardOptions.copy(
-                keyboardType = KeyboardType.Phone,
-            ),
-            colors = colors,
-            onKeyboardAction = onKeyboardAction,
-            lineLimits = lineLimits,
-            outputTransformation = rememberAmountOutputTransformation(),
-            trailingIcon = {
-                when {
-                    isInputAnExpression -> {
-                        IconButton(onClick = onExpressionEvalClick) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_equals),
-                                contentDescription = stringResource(R.string.cd_evaluate_expression),
-                                modifier = Modifier
-                                    .size(IconSizeMedium)
-                            )
-                        }
-                    }
-
-                    showTransformButton -> {
-                        IconButton(onClick = { showTransformationSheet = true }) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_gears),
-                                contentDescription = stringResource(R.string.cd_transform_amount)
-                            )
-                        }
-                    }
-                }
-            }
-        )
-
-        if (showCurrencySelectionSheet) {
-            val currenciesLazyPagingItems = currencySelectionViewModel.currencyPagingData
-                .collectAsLazyPagingItems()
-
-            OarModalBottomSheet(
-                onDismissRequest = { showCurrencySelectionSheet = false }
-            ) {
-                CurrencySelectionSheet(
-                    searchQueryState = currencySelectionViewModel.searchQueryState,
-                    selectedCode = currency.currencyCode,
-                    currenciesPagingData = currenciesLazyPagingItems,
-                    onConfirm = { selectedCurrency ->
-                        onCurrencySelect(selectedCurrency)
-                        showCurrencySelectionSheet = false
-                    }
-                )
-            }
-        }
-
-        if (showTransformationSheet) {
-            val selectedTransformation by amountTransformationViewModel.selectedTransformation.collectAsStateWithLifecycle()
-
-            OarModalBottomSheet(
-                onDismissRequest = { showTransformationSheet = false }
-            ) {
-                AmountTransformationSheet(
-                    selectedTransformation = selectedTransformation,
-                    onTransformationSelect = amountTransformationViewModel::onTransformationSelect,
-                    factorInput = amountTransformationViewModel.factorInputState,
-                    onTransformClick = {
-                        inputState.setTextAndPlaceCursorAtEnd(
-                            amountTransformationViewModel
-                                .transformedAmount(inputState.text.toString())
-                        )
-                        showTransformationSheet = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-/**
- * Variant of [AmountInput] without [CurrencySelectionSheet] functionality
- * and static hardcoded [currency] param
- */
 @Composable
 fun AmountInput(
     inputState: TextFieldState,

@@ -45,7 +45,7 @@ fun CurrencySelectionButton(
 ) {
     if (LocalInspectionMode.current) {
         CurrencySelectionButton(
-            currency = LocaleUtil.defaultCurrency,
+            currency = currency,
             onClick = {},
             modifier = modifier
         )
@@ -137,7 +137,7 @@ private val ContentPadding: PaddingValues = PaddingValues(4.dp)
 private fun PreviewCurrencySelectionButton() {
     OarTheme {
         CurrencySelectionButton(
-            currency = LocaleUtil.defaultCurrency,
+            currency = LocaleUtil.currencyForCode("QAR"),
             onCurrencySelect = {}
         )
     }
