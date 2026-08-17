@@ -70,6 +70,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import dev.ridill.oar.R
+import dev.ridill.oar.budgetCycles.presentation.currencyUpdate.CurrencySelectionButton
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.model.creditOrDebitLabel
@@ -157,7 +158,13 @@ fun AddEditScheduleScreen(
                     )
                 },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
-                scrollBehavior = topAppBarScrollBehavior
+                scrollBehavior = topAppBarScrollBehavior,
+                actions = {
+                    CurrencySelectionButton(
+                        currency = state.currency,
+                        onCurrencySelect = actions::onCurrencySelect
+                    )
+                }
             )
         },
         modifier = Modifier
@@ -194,7 +201,6 @@ fun AddEditScheduleScreen(
 
                 AmountInput(
                     currency = state.currency,
-                    onCurrencySelect = actions::onCurrencySelect,
                     inputState = amountInputState,
                     isInputAnExpression = state.isAmountInputAnExpression,
                     onExpressionEvalClick = actions::onEvaluateExpressionClick,
