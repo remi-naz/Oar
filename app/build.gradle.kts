@@ -89,8 +89,8 @@ android {
 
         create("production") {
             dimension = "env"
-            versionCode = 23
-            versionName = "1.4.3"
+            versionCode = 24
+            versionName = "1.4.4"
         }
     }
 
