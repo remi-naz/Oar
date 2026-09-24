@@ -9,60 +9,37 @@ interface SchedulesRepository {
 
     /**
      * Computes the timestamp of the next occurrence of a schedule, one [repetition]
-     * period after [anchor].
+     * period after the schedule's own due date.
      *
-     * This is *not* a plain "add one period" calculation. It happens in two steps:
+     * When [expectedTimestamp] (the schedule's previously recorded due date) is known,
+     * it — not [anchor] (the moment the payment is actually being recorded) — is used as
+     * the base for the shift. This keeps the schedule's cadence anchored to its original
+     * calendar position instead of letting an early/late payment shift every future
+     * occurrence.
      *
-     * 1. **Naive shift** — [anchor] is moved forward by one [repetition] period
-     *    (+1 week / +1 month / +2 months / +1 year) to get a `nextIntervalDateTime`.
-     *    If [expectedTimestamp] is `null`, this naive value is returned as-is.
+     * Falls back to shifting [anchor] itself when [expectedTimestamp] is `null`
+     * (e.g. a brand-new schedule with no due date yet).
      *
-     * 2. **Drift correction** — if [expectedTimestamp] is supplied, `nextIntervalDateTime`
-     *    is further nudged by a `difference`, computed as the shifted date's own calendar
-     *    position modulo the length of the period it falls in:
-     *     - [ScheduleRepetition.WEEKLY]: day-of-week, modulo 7
-     *     - [ScheduleRepetition.MONTHLY]: day-of-month, modulo the length of [anchor]'s month
-     *     - [ScheduleRepetition.BI_MONTHLY]: day-of-month, modulo twice the length of
-     *       [anchor]'s month
-     *     - [ScheduleRepetition.YEARLY]: day-of-year, modulo the length of the shifted
-     *       date's year
-     *
-     *    That `difference` is then applied on top of the naive shift:
-     *     - if [anchor] is *after* [expectedTimestamp] (the last payment was logged later
-     *       than originally expected), `difference` days are subtracted, pulling the next
-     *       date back.
-     *     - otherwise (the last payment landed on or before the expected date),
-     *       `difference` days are added, pushing the next date forward.
-     *
-     *    This keeps the schedule's cadence anchored to its original calendar position
-     *    instead of letting a single early/late payment permanently shift every future
-     *    occurrence by a fixed period.
+     * [originalDueDate] — the due date/time as originally set by the user — is used to restore
+     * the intended day-of-month/day-of-year on the result, so a schedule due on the 31st
+     * doesn't permanently drift to an earlier day after passing through a shorter month.
      *
      * Returns `null` for [ScheduleRepetition.NO_REPEAT].
+     *
+     * See [dev.ridill.oar.schedules.domain.util.ScheduleDateCalculator] for the
+     * implementation.
      */
     fun calculateNextPaymentTimestampFromDate(
         anchor: LocalDateTime,
         repetition: ScheduleRepetition,
         expectedTimestamp: LocalDateTime? = null,
+        originalDueDate: LocalDateTime? = null,
     ): LocalDateTime?
 
     /**
      * Computes the timestamp of the previous occurrence of a schedule, one [repetition]
-     * period before [anchor].
-     *
-     * Mirrors [calculateNextPaymentTimestampFromDate], but shifting backwards:
-     *
-     * 1. **Naive shift** — [anchor] is moved back by one [repetition] period
-     *    (-1 week / -1 month / -2 months / -1 year) to get a `prevIntervalDateTime`.
-     *    If [expectedTimestamp] is `null`, this naive value is returned as-is.
-     *
-     * 2. **Drift correction** — if [expectedTimestamp] is supplied, `prevIntervalDateTime`
-     *    is further nudged by a `difference`, computed the same way as in
-     *    [calculateNextPaymentTimestampFromDate] (day-of-week/month/year of the shifted
-     *    date, modulo that period's length):
-     *     - if [anchor] is *after* [expectedTimestamp], `difference` days are subtracted
-     *       from the shifted date.
-     *     - otherwise, `difference` days are added.
+     * period before the schedule's own due date. Mirrors
+     * [calculateNextPaymentTimestampFromDate], shifting backwards instead.
      *
      * Returns `null` for [ScheduleRepetition.NO_REPEAT].
      */
@@ -70,6 +47,7 @@ interface SchedulesRepository {
         anchor: LocalDateTime,
         repetition: ScheduleRepetition,
         expectedTimestamp: LocalDateTime? = null,
+        originalDueDate: LocalDateTime? = null,
     ): LocalDateTime?
 
     suspend fun saveSchedule(

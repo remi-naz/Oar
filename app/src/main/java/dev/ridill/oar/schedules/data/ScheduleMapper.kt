@@ -15,6 +15,7 @@ fun ScheduleEntity.toSchedule(): Schedule = Schedule(
     tagId = tagId,
     folderId = folderId,
     lastPaymentTimestamp = lastPaymentTimestamp,
+    originalDueDate = originalDueDate,
     currency = LocaleUtil.currencyForCode(currencyCode)
 )
 
@@ -28,6 +29,7 @@ fun Schedule.toEntity(): ScheduleEntity = ScheduleEntity(
     folderId = folderId,
     nextPaymentTimestamp = nextPaymentTimestamp,
     lastPaymentTimestamp = lastPaymentTimestamp,
+    originalDueDate = originalDueDate,
     currencyCode = currency.currencyCode
 )
 
