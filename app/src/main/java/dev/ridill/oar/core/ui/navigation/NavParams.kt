@@ -38,5 +38,6 @@ fun ScheduleInputs.toSchedule(): Schedule = Schedule(
     folderId = folderId,
     repetition = ScheduleRepetition.NO_REPEAT,
     nextPaymentTimestamp = null,
-    lastPaymentTimestamp = null
+    lastPaymentTimestamp = null,
+    originalDueDate = null
 )

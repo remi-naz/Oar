@@ -39,5 +39,8 @@ data class ScheduleEntity(
     val lastPaymentTimestamp: LocalDateTime?,
 
     @ColumnInfo(name = "next_payment_timestamp")
-    val nextPaymentTimestamp: LocalDateTime?
+    val nextPaymentTimestamp: LocalDateTime?,
+
+    @ColumnInfo(name = "original_due_date", defaultValue = "NULL")
+    val originalDueDate: LocalDateTime?
 )

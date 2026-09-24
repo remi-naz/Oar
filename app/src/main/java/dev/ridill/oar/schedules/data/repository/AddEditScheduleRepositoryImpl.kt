@@ -33,7 +33,8 @@ class AddEditScheduleRepositoryImpl(
                 .calculateNextPaymentTimestampFromDate(
                     anchor = _currentDateTime.value,
                     repetition = schedule.repetition,
-                    expectedTimestamp = schedule.lastPaymentTimestamp
+                    expectedTimestamp = schedule.lastPaymentTimestamp,
+                    originalDueDate = schedule.originalDueDate
                 )
 
             schedule.copy(nextPaymentTimestamp = nextPaymentTimestamp)
@@ -59,7 +60,10 @@ class AddEditScheduleRepositoryImpl(
         }
 
     override suspend fun saveSchedule(schedule: Schedule) = schedulesRepo.saveSchedule(
-        schedule = schedule,
+        // The due date the user set here becomes the new canonical anchor. It's what
+        // ScheduleDateCalculator uses to recover the intended day-of-month once the
+        // schedule's cadence carries it through a shorter calendar period.
+        schedule = schedule.copy(originalDueDate = schedule.nextPaymentTimestamp),
         setReminder = true
     )
 

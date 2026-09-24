@@ -17,6 +17,7 @@ import dev.ridill.oar.schedules.domain.notification.ScheduleReminderNotification
 import dev.ridill.oar.schedules.domain.repository.SchedulesRepository
 import dev.ridill.oar.schedules.domain.scheduleReminder.AlarmManagerScheduleReminder
 import dev.ridill.oar.schedules.domain.scheduleReminder.ScheduleReminder
+import dev.ridill.oar.schedules.domain.util.ScheduleDateCalculator
 import dev.ridill.oar.transactions.data.local.TransactionDao
 
 @Module
@@ -27,18 +28,23 @@ object SchedulesSingletonModule {
         database.schedulesDao()
 
     @Provides
+    fun provideScheduleDateCalculator(): ScheduleDateCalculator = ScheduleDateCalculator()
+
+    @Provides
     fun provideSchedulesRepository(
         db: OarDatabase,
         schedulesDao: SchedulesDao,
         transactionDao: TransactionDao,
         scheduler: ScheduleReminder,
-        cycleRepo: BudgetCycleRepository
+        cycleRepo: BudgetCycleRepository,
+        dateCalculator: ScheduleDateCalculator
     ): SchedulesRepository = SchedulesRepositoryImpl(
         db = db,
         schedulesDao = schedulesDao,
         transactionDao = transactionDao,
         scheduler = scheduler,
-        cycleRepo = cycleRepo
+        cycleRepo = cycleRepo,
+        dateCalculator = dateCalculator
     )
 
     @Provides

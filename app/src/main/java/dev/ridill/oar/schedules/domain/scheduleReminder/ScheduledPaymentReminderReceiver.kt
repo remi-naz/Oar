@@ -61,6 +61,8 @@ class ScheduledPaymentReminderReceiver : BroadcastReceiver() {
         val newReminderDate = repo.calculateNextPaymentTimestampFromDate(
             anchor = DateUtil.now(),
             repetition = schedule.repetition,
+            expectedTimestamp = schedule.nextPaymentTimestamp,
+            originalDueDate = schedule.originalDueDate
         )
         scheduleReminder.setReminder(schedule.copy(nextPaymentTimestamp = newReminderDate))
     }

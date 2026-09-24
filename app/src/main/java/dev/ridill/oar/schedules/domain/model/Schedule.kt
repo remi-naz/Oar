@@ -20,7 +20,14 @@ data class Schedule(
     val folderId: Long?,
     val repetition: ScheduleRepetition,
     val nextPaymentTimestamp: LocalDateTime?,
-    val lastPaymentTimestamp: LocalDateTime?
+    val lastPaymentTimestamp: LocalDateTime?,
+    /**
+     * The due date/time as originally set by the user (e.g. the 31st of the month), kept
+     * unchanged as [nextPaymentTimestamp] advances automatically on each payment. Used to
+     * recover the intended day-of-month/day-of-year after it gets clamped by a shorter
+     * calendar period (e.g. February), instead of permanently losing it.
+     */
+    val originalDueDate: LocalDateTime?
 ) : Parcelable {
     companion object {
         val DEFAULT = Schedule(
@@ -33,7 +40,8 @@ data class Schedule(
             folderId = null,
             repetition = ScheduleRepetition.NO_REPEAT,
             nextPaymentTimestamp = null,
-            lastPaymentTimestamp = null
+            lastPaymentTimestamp = null,
+            originalDueDate = null
         )
     }
 }
