@@ -1,5 +1,6 @@
 package dev.ridill.oar.core.ui.util
 
+import android.icu.text.CompactDecimalFormat
 import androidx.compose.runtime.Composable
 import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.domain.util.LocaleUtil
@@ -45,6 +46,22 @@ object TextFormat {
         minFractionDigits: Int = DEFAULT_MIN_FRACTION_DIGITS,
         isGroupingUsed: Boolean = true
     ): String = NumberFormat.getNumberInstance(locale)
+        .apply {
+            maximumFractionDigits = maxFractionDigits
+            minimumFractionDigits = minFractionDigits
+            this.isGroupingUsed = isGroupingUsed
+        }
+        .format(value)
+
+    @Composable
+    fun compactNumber(
+        value: Number,
+        locale: Locale = LocaleUtil.defaultLocale,
+        compactStyle: CompactDecimalFormat.CompactStyle = CompactDecimalFormat.CompactStyle.SHORT,
+        maxFractionDigits: Int = DEFAULT_MAX_FRACTION_DIGITS,
+        minFractionDigits: Int = DEFAULT_MIN_FRACTION_DIGITS,
+        isGroupingUsed: Boolean = true
+    ): String = CompactDecimalFormat.getInstance(locale, compactStyle)
         .apply {
             maximumFractionDigits = maxFractionDigits
             minimumFractionDigits = minFractionDigits

@@ -26,7 +26,6 @@ import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.local.CurrencyListDao
 import dev.ridill.oar.settings.data.local.entity.ConfigEntity
 import dev.ridill.oar.settings.data.local.entity.CurrencyListEntity
-import dev.ridill.oar.statistics.data.local.StatisticsDao
 import dev.ridill.oar.tags.data.local.TagsDao
 import dev.ridill.oar.tags.data.local.entity.TagEntity
 import dev.ridill.oar.tags.data.local.entity.TagFtsEntity
@@ -90,7 +89,6 @@ abstract class OarDatabase : RoomDatabase() {
     abstract fun configDao(): ConfigDao
     abstract fun moneyPileDao(): MoneyPileDao
     abstract fun moneyPileTransactionsDao(): MoneyPileTransactionDao
-    abstract fun statisticsDao(): StatisticsDao
 }
 
 /**
