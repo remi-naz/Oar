@@ -25,9 +25,6 @@ data class AddEditTransactionRoute(
 @Serializable
 data object AllTransactionsRoute : NavKey
 
-@Serializable
-data object StatisticsRoute : NavKey
-
 // --- Folders ---
 @Serializable
 data object AllFoldersRoute : NavKey
