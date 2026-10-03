@@ -23,4 +23,5 @@ interface AllTransactionsActions {
     fun onAggregationConfirm()
     fun onFilterOptionsClick()
     fun onFilterOptionsDismiss()
+    fun onCycleHeaderClick(id: Long)
 }

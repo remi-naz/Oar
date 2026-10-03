@@ -124,4 +124,10 @@ internal class AllTransactionsRepositoryImpl(
     ) = withContext(Dispatchers.IO) {
         transactionsDao.updateCycleIdForTransactions(ids, cycleId)
     }
+
+    override suspend fun getTransactionIdsInCycle(
+        cycleId: Long
+    ): List<Long> = withContext(Dispatchers.IO) {
+        transactionsDao.getTransactionIdsInCycle(cycleId = cycleId)
+    }
 }
