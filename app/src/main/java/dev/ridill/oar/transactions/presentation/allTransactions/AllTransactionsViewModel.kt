@@ -437,6 +437,14 @@ class AllTransactionsViewModel @Inject constructor(
         savedStateHandle[SHOW_FILTER_OPTIONS] = false
     }
 
+    override fun onCycleHeaderClick(id: Long) {
+        viewModelScope.launch {
+            val cycleTransactionIds = transactionRepo.getTransactionIdsInCycle(cycleId = id)
+            savedStateHandle[SELECTED_TRANSACTION_IDS] =
+                selectedTransactionIds.value + cycleTransactionIds
+        }
+    }
+
     fun onCycleSelect(id: Long) = viewModelScope.launch {
         val selectedIds = selectedTransactionIds.value
         transactionRepo.updateCycleForTransactions(selectedIds, id)

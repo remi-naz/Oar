@@ -78,6 +78,6 @@ internal class FolderDetailsRepositoryImpl(
         cycleId: Long,
         folderId: Long
     ): List<Long> = withContext(Dispatchers.IO) {
-        transactionDao.getTransactionIdsInFolder(cycleId = cycleId, folderId = folderId)
+        transactionDao.getTransactionIdsInCycle(cycleId = cycleId, folderId = folderId)
     }
 }

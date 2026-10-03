@@ -8,6 +8,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -244,6 +245,10 @@ internal fun AllTransactionsScreen(
                                         ListSeparator(
                                             label = item.cycle.description,
                                             modifier = Modifier
+                                                .clickable(
+                                                    onClick = { actions.onCycleHeaderClick(item.cycle.id) },
+                                                    onClickLabel = stringResource(R.string.cd_see_cycle_aggregate)
+                                                )
                                                 .animateItem()
                                         )
                                     }
