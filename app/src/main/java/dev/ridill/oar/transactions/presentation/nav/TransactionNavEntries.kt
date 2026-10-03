@@ -41,6 +41,7 @@ import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.MoneyPileDetailsRoute
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
+import dev.ridill.oar.core.ui.navigation.StatisticsRoute
 import dev.ridill.oar.core.ui.navigation.TagSelectedResult
 import dev.ridill.oar.core.ui.navigation.TagSelectionSheetRoute
 import dev.ridill.oar.transactions.presentation.addEditTransaction.AddEditTransactionScreen
