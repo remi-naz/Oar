@@ -26,9 +26,13 @@ import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.local.CurrencyListDao
 import dev.ridill.oar.settings.data.local.entity.ConfigEntity
 import dev.ridill.oar.settings.data.local.entity.CurrencyListEntity
+import dev.ridill.oar.tags.data.local.TagTrigramDao
 import dev.ridill.oar.tags.data.local.TagsDao
 import dev.ridill.oar.tags.data.local.entity.TagEntity
 import dev.ridill.oar.tags.data.local.entity.TagFtsEntity
+import dev.ridill.oar.tags.data.local.entity.TagTrigramEntity
+import dev.ridill.oar.tags.domain.util.TextNormalizer
+import dev.ridill.oar.tags.domain.util.TrigramGenerator
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.entity.TransactionEntity
 import dev.ridill.oar.transactions.data.local.entity.TransactionFtsEntity
@@ -51,13 +55,14 @@ import java.time.ZoneId
         TagFtsEntity::class,
         FolderFtsEntity::class,
         MoneyPileFtsEntity::class,
+        TagTrigramEntity::class,
     ],
     views = [
         BudgetCycleDetailsView::class,
         TransactionDetailsView::class,
         MoneyPileAggregateView::class,
     ],
-    version = 11,
+    version = 12,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -67,6 +72,7 @@ import java.time.ZoneId
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10, spec = FtsIndexRebuildSpec::class),
         AutoMigration(from = 10, to = 11),
+        AutoMigration(from = 11, to = 12, spec = TagTrigramBackfillSpec::class),
     ]
 )
 @TypeConverters(DateTimeConverter::class)
@@ -89,6 +95,7 @@ abstract class OarDatabase : RoomDatabase() {
     abstract fun configDao(): ConfigDao
     abstract fun moneyPileDao(): MoneyPileDao
     abstract fun moneyPileTransactionsDao(): MoneyPileTransactionDao
+    abstract fun tagTrigramDao(): TagTrigramDao
 }
 
 /**
@@ -101,6 +108,52 @@ class FtsIndexRebuildSpec : AutoMigrationSpec {
         listOf("transaction_fts", "tag_fts", "folder_fts", "money_pile_fts").forEach { table ->
             db.execSQL("INSERT INTO `$table`(`$table`) VALUES('rebuild')")
         }
+    }
+}
+
+/**
+ * Room's generated 11->12 auto-migration creates the `tag_trigram` table/indices/FK, but it's
+ * empty until each tag is next written - this backfills it from every tag that already exists,
+ * batched inside one transaction so large tag lists don't hold everything in memory at once.
+ */
+class TagTrigramBackfillSpec : AutoMigrationSpec {
+    // Not part of the Hilt graph - Room instantiates AutoMigrationSpecs itself via a no-arg
+    // constructor, so these are built directly rather than injected.
+    private val trigramGenerator = TrigramGenerator(TextNormalizer())
+
+    override fun onPostMigrate(db: SupportSQLiteDatabase) {
+        db.beginTransaction()
+        try {
+            db.query("SELECT id, name FROM tag_table").use { cursor ->
+                var batch = mutableListOf<Pair<Long, String>>()
+                while (cursor.moveToNext()) {
+                    batch.add(cursor.getLong(0) to cursor.getString(1))
+                    if (batch.size >= BACKFILL_BATCH_SIZE) {
+                        insertTrigramBatch(db, batch)
+                        batch = mutableListOf()
+                    }
+                }
+                if (batch.isNotEmpty()) insertTrigramBatch(db, batch)
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    private fun insertTrigramBatch(db: SupportSQLiteDatabase, batch: List<Pair<Long, String>>) {
+        batch.forEach { (tagId, name) ->
+            trigramGenerator.forName(name).forEach { trigram ->
+                db.execSQL(
+                    "INSERT OR IGNORE INTO tag_trigram (trigram, tagId) VALUES (?, ?)",
+                    arrayOf<Any>(trigram, tagId)
+                )
+            }
+        }
+    }
+
+    private companion object {
+        const val BACKFILL_BATCH_SIZE = 500
     }
 }
 

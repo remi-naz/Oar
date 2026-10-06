@@ -48,6 +48,9 @@ interface TagsDao : BaseDao<TagEntity> {
     @Query("SELECT * FROM tag_table WHERE id = :id")
     suspend fun getTagById(id: Long): TagEntity?
 
+    @Query("SELECT * FROM tag_table")
+    suspend fun getAllTagsSync(): List<TagEntity>
+
     @Query("SELECT * FROM tag_table WHERE id IN (:ids)")
     fun getTagsByIdFlow(ids: Set<Long>): Flow<List<TagEntity>>
 

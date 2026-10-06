@@ -41,4 +41,13 @@ interface TagsRepository {
     suspend fun deleteTagWithTransactions(tagId: Long)
     suspend fun getTagById(id: Long): Tag?
     fun getTagsListFlowByIds(ids: Set<Long>): Flow<List<Tag>>
+
+    /**
+     * Typo-tolerant tag search: exact/prefix matches first, then fuzzy matches scored via
+     * trigram candidates ranked in Kotlin (never scored against transaction_table).
+     */
+    suspend fun searchTags(query: String): List<Tag>
+
+    /** Clears and regenerates the entire trigram index from current tag names. */
+    suspend fun rebuildTrigramIndex()
 }
