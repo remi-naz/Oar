@@ -30,6 +30,7 @@ fun EntryProviderScope<NavKey>.tagEntries(navigator: OarNavigator) {
         val viewModel: AllTagsViewModel = hiltViewModel()
         val searchQueryState = viewModel.searchQueryState
         val tagsLazyPagingItems = viewModel.allTagsPagingData.collectAsLazyPagingItems()
+        val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         val snackbarController = rememberSnackbarController()
@@ -38,6 +39,7 @@ fun EntryProviderScope<NavKey>.tagEntries(navigator: OarNavigator) {
             snackbarController = snackbarController,
             tagsLazyPagingItems = tagsLazyPagingItems,
             tagSearchQueryState = searchQueryState,
+            searchResults = searchResults,
             state = state,
             actions = viewModel,
             navigateUp = navigator::goBack,

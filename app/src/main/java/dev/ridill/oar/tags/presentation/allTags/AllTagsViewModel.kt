@@ -1,6 +1,8 @@
 package dev.ridill.oar.tags.presentation.allTags
 
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.material3.SearchBarValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,10 +13,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.textAsFlow
+import dev.ridill.oar.tags.domain.model.Tag
 import dev.ridill.oar.tags.domain.repository.TagsRepository
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,11 +35,16 @@ class AllTagsViewModel @Inject constructor(
         saver = TextFieldState.Saver,
         init = { TextFieldState() }
     )
-    val allTagsPagingData = searchQueryState.textAsFlow()
+    val allTagsPagingData = repo.getAllTagsPagingData()
+        .cachedIn(viewModelScope)
+
+    val searchResults = searchQueryState.textAsFlow()
         .debounce(UtilConstants.DebounceTimeoutDuration)
-        .flatMapLatest {
-            repo.getAllTagsPagingData(it)
-        }.cachedIn(viewModelScope)
+        .flatMapLatest { query ->
+            if (query.isBlank()) flowOf(emptyList())
+            else repo.searchTags(query).map { it.all }
+        }
+        .asStateFlow(viewModelScope, emptyList<Tag>())
 
     private val selectedIds = savedStateHandle.getStateFlow<Set<Long>>(SELECTED_IDS, emptySet())
     private val multiSelectionModeActive = selectedIds
@@ -89,6 +99,14 @@ class AllTagsViewModel @Inject constructor(
             repo.deleteMultipleTagsByIds(selectedIds)
             savedStateHandle[SELECTED_IDS] = emptySet<Long>()
         }
+    }
+
+    override fun onSearchBarValueChange(value: SearchBarValue) {
+        searchQueryState.clearText()
+    }
+
+    override fun onClearSearchQuery() {
+        searchQueryState.clearText()
     }
 }
 
