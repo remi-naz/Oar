@@ -59,9 +59,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.PagingData
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.ComponentViewModelScope
@@ -70,11 +67,9 @@ import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.theme.BorderWidthStandard
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
-import dev.ridill.oar.core.ui.util.isNotEmpty
 import dev.ridill.oar.tags.domain.model.Tag
 import dev.ridill.oar.tags.domain.model.TagSelectionEntry
 import dev.ridill.oar.tags.presentation.components.TagChip
-import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDateTime
 
 @Composable
@@ -90,7 +85,7 @@ fun TagSelectionField(
     ComponentViewModelScope(key = "MultiTagSelectionField") {
         val viewModel: TagSelectionViewModel = hiltViewModel()
         val queryState = viewModel.searchQueryState
-        val tagsLazyPagingItems = viewModel.tagsPagingData.collectAsLazyPagingItems()
+        val suggestedTags by viewModel.suggestedTags.collectAsStateWithLifecycle()
         val state by viewModel.state.collectAsStateWithLifecycle()
         SideEffect {
             viewModel.updateSelectedIds(selectedIds)
@@ -108,7 +103,7 @@ fun TagSelectionField(
             queryState = queryState,
             selectedIds = state.selectedIds,
             selectedTags = state.selectedTags,
-            suggestedTags = tagsLazyPagingItems,
+            suggestedTags = suggestedTags,
             onTagRemove = { viewModel.onTagRemove(it, false) },
             onTagSelect = { viewModel.onTagSelect(it, false) },
             onNewTagIndicatorClick = { viewModel.onNewTagClick(it, false) },
@@ -136,7 +131,7 @@ fun TagSelectionField(
     ComponentViewModelScope(key = "SingleTagSelectionField") {
         val viewModel: TagSelectionViewModel = hiltViewModel()
         val queryState = viewModel.searchQueryState
-        val tagsLazyPagingItems = viewModel.tagsPagingData.collectAsLazyPagingItems()
+        val suggestedTags by viewModel.suggestedTags.collectAsStateWithLifecycle()
         val state by viewModel.state.collectAsStateWithLifecycle()
         SideEffect {
             viewModel.updateSelectedIds(selectedId?.let { setOf(it) }.orEmpty())
@@ -154,7 +149,7 @@ fun TagSelectionField(
             queryState = queryState,
             selectedIds = state.selectedIds,
             selectedTags = state.selectedTags,
-            suggestedTags = tagsLazyPagingItems,
+            suggestedTags = suggestedTags,
             onTagRemove = { viewModel.onTagRemove(it, true) },
             onTagSelect = { viewModel.onTagSelect(it, true) },
             onNewTagIndicatorClick = { viewModel.onNewTagClick(it, true) },
@@ -172,7 +167,7 @@ private fun TagSelectionField(
     queryState: TextFieldState,
     selectedIds: Set<Long>,
     selectedTags: List<Tag>,
-    suggestedTags: LazyPagingItems<TagSelectionEntry>,
+    suggestedTags: List<TagSelectionEntry>,
     onTagRemove: (Long) -> Unit,
     onTagSelect: (Long) -> Unit,
     onNewTagIndicatorClick: (String) -> Unit,
@@ -283,7 +278,7 @@ private fun TagSelectionField(
             }
         }
 
-        val showSuggestions by remember {
+        val showSuggestions by remember(suggestedTags) {
             derivedStateOf { suggestedTags.isNotEmpty() }
         }
         AnimatedVisibility(
@@ -303,35 +298,33 @@ private fun TagSelectionField(
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)
                 ) {
-                    repeat(suggestedTags.itemCount) { index ->
-                        suggestedTags[index]?.let { tag ->
-                            when (tag) {
-                                is TagSelectionEntry.NewTagIndicator -> {
-                                    AssistChip(
-                                        onClick = { onNewTagIndicatorClick(tag.label) },
-                                        label = {
-                                            Text(
-                                                stringResource(
-                                                    R.string.create_colon_label,
-                                                    tag.label
-                                                )
+                    suggestedTags.forEach { tag ->
+                        when (tag) {
+                            is TagSelectionEntry.NewTagIndicator -> {
+                                AssistChip(
+                                    onClick = { onNewTagIndicatorClick(tag.label) },
+                                    label = {
+                                        Text(
+                                            stringResource(
+                                                R.string.create_colon_label,
+                                                tag.label
                                             )
-                                        },
-                                        trailingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Add,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    )
-                                }
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                            }
 
-                                is TagSelectionEntry.Tag -> {
-                                    SuggestionChip(
-                                        onClick = { onTagSelect(tag.id) },
-                                        label = { Text(tag.name) },
-                                    )
-                                }
+                            is TagSelectionEntry.Tag -> {
+                                SuggestionChip(
+                                    onClick = { onTagSelect(tag.id) },
+                                    label = { Text(tag.name) },
+                                )
                             }
                         }
                     }
@@ -438,19 +431,15 @@ private fun PreviewTagSelectionField() {
                         excluded = false
                     )
                 ),
-                suggestedTags = flowOf(
-                    PagingData.from(
-                        listOf(
-                            TagSelectionEntry.Tag(
-                                id = 2L,
-                                name = LoremIpsum(1).values.joinToString(),
-                                colorCode = Color.Red.toArgb(),
-                                createdTimestamp = LocalDateTime.now(),
-                                excluded = false
-                            ) as TagSelectionEntry
-                        )
+                suggestedTags = listOf(
+                    TagSelectionEntry.Tag(
+                        id = 2L,
+                        name = LoremIpsum(1).values.joinToString(),
+                        colorCode = Color.Red.toArgb(),
+                        createdTimestamp = LocalDateTime.now(),
+                        excluded = false
                     )
-                ).collectAsLazyPagingItems(),
+                ),
                 onTagSelect = {},
                 onTagRemove = {},
                 onNewTagIndicatorClick = {},

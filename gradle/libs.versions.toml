@@ -57,6 +57,7 @@ bcrypt = "0.4"
 argon2kt = "1.6.0"
 
 com-google-truth = "1.4.5"
+robolectric = "4.16"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -105,6 +106,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidx-room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidx-room" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "androidx-room" }
 androidx-sqlite = { group = "androidx.sqlite", name = "sqlite-ktx", version.ref = "androidx-sqlite" }
 
 # Paging 3
@@ -154,6 +156,7 @@ com-lambdapioneer-argon2kt = { group = "com.lambdapioneer.argon2kt", name = "arg
 
 # Test
 com-google-truth = { group = "com.google.truth", name = "truth", version.ref = "com-google-truth" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }

@@ -7,10 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.saveable
-import androidx.paging.TerminalSeparatorType
-import androidx.paging.cachedIn
-import androidx.paging.insertSeparators
-import androidx.paging.map
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.core.data.db.OarDatabase
@@ -46,28 +42,22 @@ class TagSelectionViewModel @Inject constructor(
     private val selectedIds = savedStateHandle
         .getStateFlow<Set<Long>>(SELECTED_IDS, emptySet())
 
-    val tagsPagingData = combineTuple(
+    val suggestedTags = combineTuple(
         searchQueryState.textAsFlow(),
         selectedIds,
     ).debounce(UtilConstants.DebounceTimeoutDuration)
         .flatMapLatest { (query, ignoreSet) ->
-            repo.searchTagsForSelection(
-                searchQuery = query,
-                ignoreIds = ignoreSet
-            ).map { pagingData ->
-                pagingData
-                    .map { TagSelectionEntry.Tag(it) }
-                    .insertSeparators<TagSelectionEntry.Tag, TagSelectionEntry>(
-                        terminalSeparatorType = TerminalSeparatorType.FULLY_COMPLETE
-                    ) { before, after ->
-                        if (query.isNotBlank()
-                            && before == null
-                            && after == null
-                        ) TagSelectionEntry.NewTagIndicator(query.trim())
-                        else null
-                    }
+            repo.searchTags(
+                query = query,
+                ignoreIds = ignoreSet,
+                maxCandidates = MAX_CANDIDATES
+            ).map { result ->
+                val entries: List<TagSelectionEntry> = result.all.map { TagSelectionEntry.Tag(it) }
+                if (query.isNotBlank() && !result.hasExactMatch) entries + TagSelectionEntry
+                    .NewTagIndicator(query.trim())
+                else entries
             }
-        }.cachedIn(viewModelScope)
+        }.asStateFlow(viewModelScope, emptyList())
 
     private val selectedTags = selectedIds
         .flatMapLatest { repo.getTagsListFlowByIds(it) }
@@ -81,7 +71,7 @@ class TagSelectionViewModel @Inject constructor(
                   ) ->
         TagSelectionState(
             selectedIds = selectedIds,
-            selectedTags = selectedTags
+            selectedTags = selectedTags,
         )
     }.asStateFlow(viewModelScope, TagSelectionState())
 
@@ -128,3 +118,8 @@ class TagSelectionViewModel @Inject constructor(
 }
 
 private const val SELECTED_IDS = "SELECTED_IDS"
+
+/**
+ * Chosen at random. No particular reason for this specific value.
+ */
+private const val MAX_CANDIDATES = 15

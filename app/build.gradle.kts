@@ -98,6 +98,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+    sourceSets {
+        // Room's exported schema jsons, needed by MigrationTestHelper under Robolectric - debug
+        // only, since Robolectric's local unit tests read the debug variant's merged assets.
+        getByName("debug") {
+            assets.srcDirs("$projectDir/schemas")
+        }
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -241,6 +251,9 @@ dependencies {
     // Test
     testImplementation(libs.com.google.truth)
     androidTestImplementation(libs.com.google.truth)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.androidx.junit)
 }
 
 ksp {
