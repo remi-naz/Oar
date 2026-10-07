@@ -13,7 +13,8 @@ class FuzzyTagScorer(
     fun score(
         queryTokens: List<String>,
         tagTokens: List<String>,
-        config: FuzzyConfig = FuzzyConfig.DEFAULT
+        config: FuzzyConfig = FuzzyConfig.DEFAULT,
+        requireFirstCharMatch: Boolean = config.requireFirstCharMatch
     ): Double? {
         if (queryTokens.isEmpty() || tagTokens.isEmpty()) return null
 
@@ -21,7 +22,14 @@ class FuzzyTagScorer(
         val isExact = BooleanArray(queryTokens.size)
         for (i in queryTokens.indices) {
             val isLast = i == queryTokens.lastIndex
-            val match = bestMatch(queryTokens[i], tagTokens, isLast, config, allowRelaxation = false)
+            val match = bestMatch(
+                queryToken = queryTokens[i],
+                tagTokens = tagTokens,
+                isLast = isLast,
+                config = config,
+                requireFirstCharMatch = requireFirstCharMatch,
+                allowRelaxation = false
+            )
             matches[i] = match
             isExact[i] = match == EXACT_SCORE
         }
@@ -33,7 +41,14 @@ class FuzzyTagScorer(
             val anotherTokenMatchedExactly = isExact.indices.any { it != i && isExact[it] }
             if (!anotherTokenMatchedExactly) continue
             val isLast = i == queryTokens.lastIndex
-            matches[i] = bestMatch(token, tagTokens, isLast, config, allowRelaxation = true)
+            matches[i] = bestMatch(
+                queryToken = token,
+                tagTokens = tagTokens,
+                isLast = isLast,
+                config = config,
+                requireFirstCharMatch = requireFirstCharMatch,
+                allowRelaxation = true
+            )
         }
 
         if (matches.any { it == null }) return null
@@ -45,9 +60,19 @@ class FuzzyTagScorer(
         tagTokens: List<String>,
         isLast: Boolean,
         config: FuzzyConfig,
+        requireFirstCharMatch: Boolean,
         allowRelaxation: Boolean
     ): Double? = tagTokens
-        .mapNotNull { tagToken -> matchScore(queryToken, tagToken, isLast, config, allowRelaxation) }
+        .mapNotNull { tagToken ->
+            matchScore(
+                queryToken = queryToken,
+                tagToken = tagToken,
+                isLast = isLast,
+                config = config,
+                requireFirstCharMatch = requireFirstCharMatch,
+                allowRelaxation = allowRelaxation
+            )
+        }
         .maxOrNull()
 
     private fun matchScore(
@@ -55,6 +80,7 @@ class FuzzyTagScorer(
         tagToken: String,
         isLast: Boolean,
         config: FuzzyConfig,
+        requireFirstCharMatch: Boolean,
         allowRelaxation: Boolean
     ): Double? {
         if (queryToken == tagToken) return EXACT_SCORE
@@ -63,10 +89,11 @@ class FuzzyTagScorer(
         }
         if (isAdjacentTransposition(queryToken, tagToken)) return TRANSPOSITION_SCORE
 
-        val budget = if (allowRelaxation) config.shortWordRelaxationEdits else config.typoBudgetFor(queryToken.length)
+        val budget = if (allowRelaxation) config.shortWordRelaxationEdits else config
+            .typoBudgetFor(queryToken.length)
         if (budget <= 0) return null
         if (kotlin.math.abs(queryToken.length - tagToken.length) > budget) return null
-        if (config.requireFirstCharMatch && !allowRelaxation && queryToken.first() != tagToken.first()) return null
+        if (requireFirstCharMatch && !allowRelaxation && queryToken.first() != tagToken.first()) return null
 
         val distance = editDistance.withinDistance(queryToken, tagToken, budget) ?: return null
         return if (distance == 0) EXACT_SCORE else (1.0 - distance * 0.2).coerceAtLeast(0.5)

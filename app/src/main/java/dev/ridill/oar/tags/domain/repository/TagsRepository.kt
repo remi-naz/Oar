@@ -53,7 +53,8 @@ interface TagsRepository {
     fun searchTags(
         query: String,
         ignoreIds: Set<Long> = emptySet(),
-        maxCandidates: Int = FuzzyConfig.DEFAULT.candidateLimit
+        maxCandidates: Int = FuzzyConfig.DEFAULT.candidateLimit,
+        requireFirstCharMatch: Boolean = FuzzyConfig.DEFAULT.requireFirstCharMatch
     ): Flow<TagSearchResult>
 
     /** Clears and regenerates the entire trigram index from current tag names. */

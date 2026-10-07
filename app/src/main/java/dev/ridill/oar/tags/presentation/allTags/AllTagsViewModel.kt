@@ -42,7 +42,7 @@ class AllTagsViewModel @Inject constructor(
         .debounce(UtilConstants.DebounceTimeoutDuration)
         .flatMapLatest { query ->
             if (query.isBlank()) flowOf(emptyList())
-            else repo.searchTags(query).map { it.all }
+            else repo.searchTags(query = query).map { it.all }
         }
         .asStateFlow(viewModelScope, emptyList<Tag>())
 

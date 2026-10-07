@@ -157,16 +157,18 @@ internal class TagsRepositoryImpl(
     override fun searchTags(
         query: String,
         ignoreIds: Set<Long>,
-        maxCandidates: Int
+        maxCandidates: Int,
+        requireFirstCharMatch: Boolean
     ): Flow<TagSearchResult> = db.invalidationTracker
         .createFlow(TAG_TABLE, TAG_TRIGRAM_TABLE, emitInitialState = true)
-        .mapLatest { fetchSearchResult(query, ignoreIds, maxCandidates) }
+        .mapLatest { fetchSearchResult(query, ignoreIds, maxCandidates, requireFirstCharMatch) }
         .flowOn(Dispatchers.IO)
 
     private suspend fun fetchSearchResult(
         query: String,
         ignoreIds: Set<Long>,
-        maxCandidates: Int
+        maxCandidates: Int,
+        requireFirstCharMatch: Boolean
     ): TagSearchResult {
         val normalized = textNormalizer.normalize(query)
         if (normalized.isBlank()) return TagSearchResult.EMPTY
@@ -183,7 +185,11 @@ internal class TagsRepositoryImpl(
             fetchCandidates(trigrams, maxCandidates)
                 .filter { it.id !in exactIds && it.id !in ignoreIds }
                 .mapNotNull { entity ->
-                    fuzzyTagScorer.score(queryTokens, textNormalizer.tokenize(entity.name))
+                    fuzzyTagScorer.score(
+                        queryTokens = queryTokens,
+                        tagTokens = textNormalizer.tokenize(entity.name),
+                        requireFirstCharMatch = requireFirstCharMatch
+                    )
                         ?.takeIf { it >= FuzzyConfig.DEFAULT.minScore }
                         ?.let { score -> entity to score }
                 }

@@ -2,7 +2,7 @@ package dev.ridill.oar.tags.domain.util
 
 /** Tunable thresholds for fuzzy tag matching. See [typoBudgetFor] and [FuzzyTagScorer]. */
 data class FuzzyConfig(
-    val requireFirstCharMatch: Boolean = true,
+    val requireFirstCharMatch: Boolean = false,
     val minScore: Double = 0.6,
     /** A token at or below this length may only use [shortWordRelaxationEdits] if another query token matches exactly. */
     val shortWordRelaxationLength: Int = 3,
