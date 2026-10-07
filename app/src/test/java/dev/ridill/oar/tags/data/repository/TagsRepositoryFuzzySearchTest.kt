@@ -7,12 +7,14 @@ import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.tags.data.local.TagPagedQueryBuilder
 import dev.ridill.oar.tags.domain.model.Tag
+import dev.ridill.oar.tags.domain.model.TagSearchResult
 import dev.ridill.oar.tags.domain.util.EditDistance
 import dev.ridill.oar.tags.domain.util.FuzzyTagScorer
 import dev.ridill.oar.tags.domain.util.TextNormalizer
 import dev.ridill.oar.tags.domain.util.TrigramGenerator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -64,6 +66,14 @@ class TagsRepositoryFuzzySearchTest {
         )
     }
 
+    private fun search(
+        query: String,
+        ignoreIds: Set<Long> = emptySet(),
+        maxCandidates: Int = 100
+    ): TagSearchResult = runBlocking {
+        repository.searchTags(query, ignoreIds, maxCandidates).first()
+    }
+
     private fun trigramCountForTag(tagId: Long): Int {
         db.query("SELECT COUNT(*) FROM tag_trigram WHERE tagId = ?", arrayOf(tagId)).use { cursor ->
             cursor.moveToFirst()
@@ -72,97 +82,150 @@ class TagsRepositoryFuzzySearchTest {
     }
 
     @Test
-    fun searchTags_withTypo_findsTag() = runBlocking {
+    fun searchTags_withTypo_findsTag() {
         saveTag("Food Out")
         saveTag("Transport")
 
-        val results = repository.searchTags("Food Put")
+        val result = search("Food Put")
 
-        assertThat(results.map(Tag::name)).contains("Food Out")
+        assertThat(result.all.map(Tag::name)).contains("Food Out")
     }
 
     @Test
-    fun searchTags_wordOrderIndependent() = runBlocking {
+    fun searchTags_wordOrderIndependent() {
         saveTag("Food Out")
 
-        val results = repository.searchTags("Out Food")
+        val result = search("Out Food")
 
-        assertThat(results.map(Tag::name)).contains("Food Out")
+        assertThat(result.all.map(Tag::name)).contains("Food Out")
     }
 
     @Test
-    fun searchTags_exactMatchRanksAboveFuzzyMatch() = runBlocking {
+    fun searchTags_exactMatchRanksAboveFuzzyMatch() {
         saveTag("Food Out")
         saveTag("Fod Out")
 
-        val results = repository.searchTags("Food Out")
+        val result = search("Food Out")
 
-        assertThat(results.map(Tag::name).first()).isEqualTo("Food Out")
+        assertThat(result.all.map(Tag::name).first()).isEqualTo("Food Out")
     }
 
     @Test
-    fun searchTags_unrelatedTagNotReturned() = runBlocking {
+    fun searchTags_unrelatedTagNotReturned() {
         saveTag("Food Out")
         saveTag("Transport")
 
-        val results = repository.searchTags("Food Out")
+        val result = search("Food Out")
 
-        assertThat(results.map(Tag::name)).doesNotContain("Transport")
+        assertThat(result.all.map(Tag::name)).doesNotContain("Transport")
     }
 
     @Test
-    fun searchTags_emptyQuery_returnsEmpty() = runBlocking {
+    fun searchTags_emptyQuery_returnsEmpty() {
         saveTag("Food Out")
 
-        assertThat(repository.searchTags("")).isEmpty()
+        val result = search("")
+
+        assertThat(result.all).isEmpty()
     }
 
     @Test
-    fun searchTags_shortQuery_prefixOnlyNoFuzzy() = runBlocking {
+    fun searchTags_shortQuery_prefixOnlyNoFuzzy() {
         saveTag("Out")
         saveTag("Transport")
 
         // 2-char query: prefix match only, must not fuzzy-match "Transport" via loose scoring.
-        val results = repository.searchTags("ou")
+        val result = search("ou")
 
-        assertThat(results.map(Tag::name)).containsExactly("Out")
-        Unit
+        assertThat(result.all.map(Tag::name)).containsExactly("Out")
     }
 
     @Test
-    fun searchTags_accentedTagMatchesUnaccentedQuery() = runBlocking {
+    fun searchTags_accentedTagMatchesUnaccentedQuery() {
         saveTag("Café")
 
-        val results = repository.searchTags("cafe")
+        val result = search("cafe")
 
-        assertThat(results.map(Tag::name)).contains("Café")
+        assertThat(result.all.map(Tag::name)).contains("Café")
     }
 
     @Test
-    fun saveTag_insert_createsTrigramRows() = runBlocking {
+    fun searchTags_exactMatch_hasExactMatchIsTrue() {
+        saveTag("Food Out")
+
+        val result = search("Food Out")
+
+        assertThat(result.hasExactMatch).isTrue()
+        assertThat(result.exactMatches.map(Tag::name)).contains("Food Out")
+    }
+
+    @Test
+    fun searchTags_onlyFuzzyMatch_hasExactMatchIsFalse() {
+        saveTag("Food Out")
+
+        val result = search("Food Put")
+
+        assertThat(result.hasExactMatch).isFalse()
+        assertThat(result.exactMatches).isEmpty()
+        assertThat(result.fuzzyMatches.map(Tag::name)).contains("Food Out")
+    }
+
+    @Test
+    fun searchTags_noMatch_hasExactMatchIsFalseAndAllIsEmpty() {
+        saveTag("Transport")
+
+        val result = search("Food Out")
+
+        assertThat(result.hasExactMatch).isFalse()
+        assertThat(result.all).isEmpty()
+    }
+
+    @Test
+    fun searchTags_ignoreIds_excludesSelectedTagFromBothBuckets() {
+        val exactId = saveTag("Food Out")
+        val fuzzyId = saveTag("Fod Out")
+
+        val result = search("Food Out", ignoreIds = setOf(exactId, fuzzyId))
+
+        assertThat(result.all.map(Tag::id)).doesNotContain(exactId)
+        assertThat(result.all.map(Tag::id)).doesNotContain(fuzzyId)
+    }
+
+    @Test
+    fun searchTags_maxCandidates_capsFuzzyMatchCount() {
+        // All typo'd variants of "Food Out" so every one is a fuzzy candidate, none exact.
+        val names = listOf("Fod Out", "Food Ouf", "Fod Ouf", "Food Oot", "Foodd Out")
+        names.forEach { saveTag(it) }
+
+        val result = search("Food Out", maxCandidates = 2)
+
+        assertThat(result.fuzzyMatches.size).isAtMost(2)
+    }
+
+    @Test
+    fun saveTag_insert_createsTrigramRows() {
         val id = saveTag("Food Out")
 
         assertThat(trigramCountForTag(id)).isGreaterThan(0)
     }
 
     @Test
-    fun saveTag_rename_updatesTrigramRows() = runBlocking {
+    fun saveTag_rename_updatesTrigramRows() {
         val id = saveTag("Food Out")
         val before = trigramCountForTag(id)
 
-        repository.saveTag(id, "Groceries", 0, false, LocalDateTime.now())
-        val results = repository.searchTags("Groceries")
+        runBlocking { repository.saveTag(id, "Groceries", 0, false, LocalDateTime.now()) }
 
-        assertThat(results.map(Tag::name)).contains("Groceries")
-        assertThat(repository.searchTags("Food Out").map(Tag::id)).doesNotContain(id)
+        assertThat(search("Groceries").all.map(Tag::name)).contains("Groceries")
+        assertThat(search("Food Out").all.map(Tag::id)).doesNotContain(id)
         assertThat(before).isGreaterThan(0)
     }
 
     @Test
-    fun deleteTag_removesTrigramRowsViaCascade() = runBlocking {
+    fun deleteTag_removesTrigramRowsViaCascade() {
         val id = saveTag("Food Out")
 
-        repository.deleteTagById(id)
+        runBlocking { repository.deleteTagById(id) }
 
         val remaining = db.query("SELECT COUNT(*) FROM tag_trigram WHERE tagId = ?", arrayOf(id))
         remaining.use {
@@ -172,7 +235,7 @@ class TagsRepositoryFuzzySearchTest {
     }
 
     @Test
-    fun rebuildTrigramIndex_reproducesSameRows() = runBlocking {
+    fun rebuildTrigramIndex_reproducesSameRows() {
         saveTag("Food Out")
         saveTag("Transport")
 
@@ -185,7 +248,7 @@ class TagsRepositoryFuzzySearchTest {
         }
 
         val before = snapshot()
-        repository.rebuildTrigramIndex()
+        runBlocking { repository.rebuildTrigramIndex() }
         val after = snapshot()
 
         assertThat(after).isEqualTo(before)

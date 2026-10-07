@@ -6,6 +6,8 @@ import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.tags.domain.model.Tag
 import dev.ridill.oar.tags.domain.model.TagInfo
+import dev.ridill.oar.tags.domain.model.TagSearchResult
+import dev.ridill.oar.tags.domain.util.FuzzyConfig
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -44,9 +46,15 @@ interface TagsRepository {
 
     /**
      * Typo-tolerant tag search: exact/prefix matches first, then fuzzy matches scored via
-     * trigram candidates ranked in Kotlin (never scored against transaction_table).
+     * trigram candidates ranked in Kotlin (never scored against transaction_table). Reactive -
+     * re-emits whenever a tag is added/renamed/deleted. Bounded, not paginated: [maxCandidates]
+     * caps how many trigram candidates are scored, not how many results the UI can page through.
      */
-    suspend fun searchTags(query: String): List<Tag>
+    fun searchTags(
+        query: String,
+        ignoreIds: Set<Long> = emptySet(),
+        maxCandidates: Int = FuzzyConfig.DEFAULT.candidateLimit
+    ): Flow<TagSearchResult>
 
     /** Clears and regenerates the entire trigram index from current tag names. */
     suspend fun rebuildTrigramIndex()

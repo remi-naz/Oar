@@ -3,15 +3,18 @@ package dev.ridill.oar.tags.domain.util
 import java.text.Normalizer
 
 class TextNormalizer {
-    private val COMBINING_MARKS = Regex("\\p{Mn}+")
-    private val TOKEN_SPLIT = Regex("\\W+")
+    private val combiningMarksRegex = Regex("\\p{Mn}+")
+    private val tokenSplitRegex = Regex("\\W+")
 
     fun normalize(text: String): String = Normalizer.normalize(text, Normalizer.Form.NFD)
-        .replace(COMBINING_MARKS, "")
+        .replace(combiningMarksRegex, "")
         .lowercase()
         .trim()
 
-    fun tokenize(text: String): List<String> = normalize(text)
-        .split(TOKEN_SPLIT)
+    fun tokenize(text: String): List<String> = tokenizeNormalized(normalize(text))
+
+    /** Splits text that's already been through [normalize] - skips re-normalizing it. */
+    fun tokenizeNormalized(normalizedText: String): List<String> = normalizedText
+        .split(tokenSplitRegex)
         .filter { it.isNotBlank() }
 }

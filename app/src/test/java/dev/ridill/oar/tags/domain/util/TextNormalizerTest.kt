@@ -32,4 +32,11 @@ class TextNormalizerTest {
     fun tokenize_ofBlank_returnsEmptyList() {
         assertThat(textNormalizer.tokenize("   ")).isEmpty()
     }
+
+    @Test
+    fun tokenizeNormalized_splitsAlreadyNormalizedText_sameAsTokenize() {
+        val normalized = textNormalizer.normalize("Food Put!")
+        assertThat(textNormalizer.tokenizeNormalized(normalized))
+            .isEqualTo(textNormalizer.tokenize("Food Put!"))
+    }
 }
