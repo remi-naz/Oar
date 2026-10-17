@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
@@ -34,11 +35,11 @@ import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.oar.core.ui.components.rememberPermissionState
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.navigation.AllTagsRoute
 import dev.ridill.oar.core.ui.navigation.BackupEncryptionRoute
 import dev.ridill.oar.core.ui.navigation.BackupSettingsRoute
 import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
 import dev.ridill.oar.core.ui.navigation.BudgetCyclesRoute
-import dev.ridill.oar.core.ui.navigation.AllTagsRoute
 import dev.ridill.oar.core.ui.navigation.BudgetUpdatedResult
 import dev.ridill.oar.core.ui.navigation.CurrencySelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.CycleSelectedResult
@@ -52,7 +53,6 @@ import dev.ridill.oar.core.ui.navigation.SettingsRoute
 import dev.ridill.oar.core.ui.navigation.UpdateBudgetSheetRoute
 import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.TextFormat
-import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.core.ui.util.launchAppNotificationSettings
 import dev.ridill.oar.core.ui.util.launchAppSettings
 import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionScreen
@@ -82,13 +82,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
         val snackbarController = rememberSnackbarController()
         val credentialService = rememberCredentialService(context = context)
         val activity = LocalActivity.current
-
-        ResultEffect<BudgetUpdatedResult> { _ ->
-            snackbarController.showSnackbar(
-                UiText.StringResource(R.string.budget_updated)
-                    .asString(context)
-            )
-        }
 
         CollectFlowEffect(
             viewModel.events,
@@ -271,6 +264,8 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
         val context = LocalContext.current
         val snackbarController = rememberSnackbarController()
 
+        val biometricHwUnavailableMessage = stringResource(R.string.error_biometric_hw_unavailable)
+
         val biometricManager = remember(context) { BiometricManager.from(context) }
         val biometricEnrollLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
@@ -305,7 +300,7 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
                             }
 
                             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                                snackbarController.showSnackbar(context.getString(R.string.error_biometric_hw_unavailable))
+                                snackbarController.showSnackbar(biometricHwUnavailableMessage)
                             }
 
                             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
@@ -352,13 +347,20 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
         val cycleHistory = viewModel.history.collectAsLazyPagingItems()
         val currencyPreference = LocalCurrencyPreference.current
 
+        val snackbarController = rememberSnackbarController()
+
         OnLifecycleStartEffect { viewModel.refreshCurrentDate() }
 
         ResultEffect<Currency> { currency ->
             viewModel.onCurrencySelected(currency)
         }
+        val budgetUpdatedMessage = stringResource(R.string.budget_updated)
+        ResultEffect<BudgetUpdatedResult> { _ ->
+            snackbarController.showSnackbar(budgetUpdatedMessage)
+        }
 
         BudgetCyclesScreenContent(
+            snackbarController = snackbarController,
             state = state,
             history = cycleHistory,
             actions = viewModel,

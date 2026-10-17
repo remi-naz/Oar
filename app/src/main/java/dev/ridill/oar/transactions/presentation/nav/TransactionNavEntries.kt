@@ -11,6 +11,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,6 +27,7 @@ import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.components.slideInVerticallyWithFadeIn
 import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.navigation.AddEditFolderSheetRoute
+import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
@@ -34,6 +36,7 @@ import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.AllTransactionsRoute
 import dev.ridill.oar.core.ui.navigation.CycleSelectedResult
 import dev.ridill.oar.core.ui.navigation.CycleSelectionSheetRoute
+import dev.ridill.oar.core.ui.navigation.FolderSavedResult
 import dev.ridill.oar.core.ui.navigation.FolderSelectedResult
 import dev.ridill.oar.core.ui.navigation.FolderSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
@@ -79,7 +82,19 @@ fun EntryProviderScope<NavKey>.transactionEntries(
         ResultEffect<TagSelectedResult> { result ->
             viewModel.onTagAssignmentSelectionResult(result.id)
         }
+        val pileDeletedMessage = stringResource(R.string.pile_deleted)
+        ResultEffect<AddEditMoneyPileResult> { result ->
+            if (result == AddEditMoneyPileResult.PILE_DELETED) {
+                snackbarController.showSnackbar(pileDeletedMessage)
+            }
+        }
+        val folderCreatedMessage = stringResource(R.string.transaction_folder_created)
+        ResultEffect<FolderSavedResult> { _ ->
+            snackbarController.showSnackbar(folderCreatedMessage)
+        }
 
+        val scheduleSavedMessage = stringResource(R.string.schedule_saved)
+        val viewActionLabel = stringResource(R.string.action_view)
         CollectFlowEffect(viewModel.events, context, snackbarController) { event ->
             when (event) {
                 is AllTransactionsViewModel.AllTransactionsEvent.ShowUiMessage -> {
@@ -99,8 +114,8 @@ fun EntryProviderScope<NavKey>.transactionEntries(
 
                 AllTransactionsViewModel.AllTransactionsEvent.ScheduleSaved -> {
                     snackbarController.showSnackbar(
-                        message = context.getString(R.string.schedule_saved),
-                        actionLabel = context.getString(R.string.action_view),
+                        message = scheduleSavedMessage,
+                        actionLabel = viewActionLabel,
                         onSnackbarResult = { result ->
                             if (result == SnackbarResult.ActionPerformed) {
                                 navigator.navigate(AllSchedulesRoute)

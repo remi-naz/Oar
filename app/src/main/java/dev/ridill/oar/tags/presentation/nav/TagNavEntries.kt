@@ -1,11 +1,13 @@
 package dev.ridill.oar.tags.presentation.nav
 
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.navigation.AddEditTagSheetRoute
@@ -14,6 +16,7 @@ import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.OarNavigator
+import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.core.ui.navigation.TagSavedResult
 import dev.ridill.oar.core.ui.navigation.TagSelectedResult
 import dev.ridill.oar.core.ui.navigation.TagSelectionSheetRoute
@@ -34,6 +37,10 @@ fun EntryProviderScope<NavKey>.tagEntries(navigator: OarNavigator) {
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         val snackbarController = rememberSnackbarController()
+        val tagSavedMessage = stringResource(R.string.tag_saved)
+        ResultEffect<TagSavedResult> { _ ->
+            snackbarController.showSnackbar(tagSavedMessage)
+        }
 
         AllTagsScreen(
             snackbarController = snackbarController,

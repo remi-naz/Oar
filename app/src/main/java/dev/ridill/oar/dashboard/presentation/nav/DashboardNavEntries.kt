@@ -3,6 +3,7 @@ package dev.ridill.oar.dashboard.presentation.nav
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
@@ -11,6 +12,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
@@ -42,13 +44,21 @@ fun EntryProviderScope<NavKey>.dashboardEntries(navigator: OarNavigator) {
         ResultEffect<AddEditScheduleResult> { result ->
             viewModel.onAddEditScheduleNavResult(result)
         }
+        val pileDeletedMessage = stringResource(R.string.pile_deleted)
+        ResultEffect<AddEditMoneyPileResult> { result ->
+            if (result == AddEditMoneyPileResult.PILE_DELETED) {
+                snackbarController.showSnackbar(pileDeletedMessage)
+            }
+        }
 
+        val scheduleSavedMessage = stringResource(R.string.schedule_saved)
+        val viewActionLabel = stringResource(R.string.action_view)
         CollectFlowEffect(flow = viewModel.events, snackbarController, context) { event ->
             when (event) {
                 DashboardViewModel.DashboardEvent.ScheduleSaved -> {
                     snackbarController.showSnackbar(
-                        message = context.getString(R.string.schedule_saved),
-                        actionLabel = context.getString(R.string.action_view),
+                        message = scheduleSavedMessage,
+                        actionLabel = viewActionLabel,
                         onSnackbarResult = { result ->
                             if (result == SnackbarResult.ActionPerformed) {
                                 navigator.navigate(AllSchedulesRoute)
