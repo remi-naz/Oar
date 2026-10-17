@@ -1,8 +1,8 @@
 package dev.ridill.oar.tags.presentation.nav
 
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
@@ -37,10 +37,9 @@ fun EntryProviderScope<NavKey>.tagEntries(navigator: OarNavigator) {
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         val snackbarController = rememberSnackbarController()
-        val context = LocalContext.current
-
+        val tagSavedMessage = stringResource(R.string.tag_saved)
         ResultEffect<TagSavedResult> { _ ->
-            snackbarController.showSnackbar(context.getString(R.string.tag_saved))
+            snackbarController.showSnackbar(tagSavedMessage)
         }
 
         AllTagsScreen(

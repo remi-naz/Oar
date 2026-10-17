@@ -3,6 +3,8 @@ package dev.ridill.oar.folders.presentation.nav
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
@@ -44,13 +46,12 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
         val foldersPagingItems = viewModel.folderListPagingData.collectAsLazyPagingItems()
 
         val snackbarController = rememberSnackbarController()
-        val context = LocalContext.current
-
         ResultEffect<FolderSavedResult> { result ->
             navigator.navigate(FolderDetailsRoute(result.id))
         }
+        val folderDeletedMessage = stringResource(R.string.transaction_folder_deleted)
         ResultEffect<FolderDeletedResult> { _ ->
-            snackbarController.showSnackbar(context.getString(R.string.transaction_folder_deleted))
+            snackbarController.showSnackbar(folderDeletedMessage)
         }
 
         AllFoldersScreen(
@@ -80,10 +81,15 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
         ResultEffect<AddEditScheduleResult> { result ->
             viewModel.onAddEditScheduleNavResult(result)
         }
+        val folderUpdatedMessage = stringResource(R.string.transaction_folder_updated)
         ResultEffect<FolderSavedResult> { _ ->
-            snackbarController.showSnackbar(context.getString(R.string.transaction_folder_updated))
+            snackbarController.showSnackbar(folderUpdatedMessage)
         }
 
+        val transactionRemovedMessage = pluralStringResource(
+            R.plurals.transaction_removed_from_this_folder, 1
+        )
+        val undoActionLabel = stringResource(R.string.action_undo)
         CollectFlowEffect(viewModel.events, context, snackbarController) { event ->
             when (event) {
                 is FolderDetailsViewModel.FolderDetailsEvent.ShowUiMessage -> {
@@ -100,10 +106,8 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
 
                 is FolderDetailsViewModel.FolderDetailsEvent.TransactionRemovedFromFolder -> {
                     snackbarController.showSnackbar(
-                        message = context.resources.getQuantityString(
-                            R.plurals.transaction_removed_from_this_folder, 1
-                        ),
-                        actionLabel = context.getString(R.string.action_undo),
+                        message = transactionRemovedMessage,
+                        actionLabel = undoActionLabel,
                         onSnackbarResult = {
                             if (it == SnackbarResult.ActionPerformed) {
                                 viewModel.onRemoveTransactionUndo(event.txId)
