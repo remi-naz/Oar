@@ -53,11 +53,13 @@ import dev.ridill.oar.core.ui.components.LabelLargeText
 import dev.ridill.oar.core.ui.components.ListSeparator
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.OptionListItem
+import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.SwipeToAction
 import dev.ridill.oar.core.ui.components.TitleLargeText
 import dev.ridill.oar.core.ui.components.TitleMediumText
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
+import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.components.rememberSwipeToActionState
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.NegativeRed
@@ -71,9 +73,9 @@ import dev.ridill.oar.core.ui.util.plus
 import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDate
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BudgetCyclesScreenContent(
+    snackbarController: SnackbarController,
     state: BudgetCyclesState,
     history: LazyPagingItems<CycleHistoryEntry>,
     actions: BudgetCyclesActions,
@@ -91,6 +93,7 @@ fun BudgetCyclesScreenContent(
                 scrollBehavior = topAppBarScrollBehavior
             )
         },
+        snackbarController = snackbarController,
         modifier = modifier
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
@@ -355,6 +358,7 @@ private fun CycleOptionsSheet(
 private fun PreviewCycleHistoryScreenContent() {
     OarTheme {
         BudgetCyclesScreenContent(
+            snackbarController = rememberSnackbarController(),
             state = BudgetCyclesState(
                 activeCycle = CycleHistoryEntry(
                     id = 1L,

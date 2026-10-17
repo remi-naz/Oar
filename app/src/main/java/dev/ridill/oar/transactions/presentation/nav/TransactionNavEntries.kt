@@ -26,6 +26,7 @@ import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.components.slideInVerticallyWithFadeIn
 import dev.ridill.oar.core.ui.components.slideOutVerticallyWithFadeOut
 import dev.ridill.oar.core.ui.navigation.AddEditFolderSheetRoute
+import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
@@ -34,6 +35,7 @@ import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.AllTransactionsRoute
 import dev.ridill.oar.core.ui.navigation.CycleSelectedResult
 import dev.ridill.oar.core.ui.navigation.CycleSelectionSheetRoute
+import dev.ridill.oar.core.ui.navigation.FolderSavedResult
 import dev.ridill.oar.core.ui.navigation.FolderSelectedResult
 import dev.ridill.oar.core.ui.navigation.FolderSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.INVALID_ID_LONG
@@ -78,6 +80,14 @@ fun EntryProviderScope<NavKey>.transactionEntries(
         }
         ResultEffect<TagSelectedResult> { result ->
             viewModel.onTagAssignmentSelectionResult(result.id)
+        }
+        ResultEffect<AddEditMoneyPileResult> { result ->
+            if (result == AddEditMoneyPileResult.PILE_DELETED) {
+                snackbarController.showSnackbar(context.getString(R.string.pile_deleted))
+            }
+        }
+        ResultEffect<FolderSavedResult> { _ ->
+            snackbarController.showSnackbar(context.getString(R.string.transaction_folder_created))
         }
 
         CollectFlowEffect(viewModel.events, context, snackbarController) { event ->

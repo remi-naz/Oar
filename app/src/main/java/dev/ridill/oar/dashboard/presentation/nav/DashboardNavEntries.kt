@@ -11,6 +11,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
+import dev.ridill.oar.core.ui.navigation.AddEditMoneyPileResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditScheduleRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
@@ -41,6 +42,11 @@ fun EntryProviderScope<NavKey>.dashboardEntries(navigator: OarNavigator) {
         }
         ResultEffect<AddEditScheduleResult> { result ->
             viewModel.onAddEditScheduleNavResult(result)
+        }
+        ResultEffect<AddEditMoneyPileResult> { result ->
+            if (result == AddEditMoneyPileResult.PILE_DELETED) {
+                snackbarController.showSnackbar(context.getString(R.string.pile_deleted))
+            }
         }
 
         CollectFlowEffect(flow = viewModel.events, snackbarController, context) { event ->

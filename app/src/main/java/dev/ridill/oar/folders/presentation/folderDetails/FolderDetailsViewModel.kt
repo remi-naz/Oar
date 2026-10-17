@@ -15,6 +15,8 @@ import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.orFalse
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
+import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.FolderDetailsRoute
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.folders.domain.model.FolderTransactionsMultiSelectionOption
@@ -185,6 +187,26 @@ class FolderDetailsViewModel @AssistedInject constructor(
 
     fun onRemoveTransactionUndo(txId: Long) = viewModelScope.launch {
         repo.addTransactionToFolder(txId, route.folderId)
+    }
+
+    fun onAddEditTxNavResult(result: AddEditTxResult) = viewModelScope.launch {
+        val message = when (result) {
+            AddEditTxResult.TRANSACTION_DELETED -> UiText.PluralResource(
+                R.plurals.transaction_deleted,
+                1
+            )
+
+            AddEditTxResult.TRANSACTION_SAVED -> UiText.StringResource(R.string.transaction_saved)
+        }
+        eventBus.send(FolderDetailsEvent.ShowUiMessage(message))
+    }
+
+    fun onAddEditScheduleNavResult(result: AddEditScheduleResult) = viewModelScope.launch {
+        if (result == AddEditScheduleResult.SCHEDULE_SAVED) {
+            eventBus.send(
+                FolderDetailsEvent.ShowUiMessage(UiText.StringResource(R.string.schedule_saved))
+            )
+        }
     }
 
     override fun onTransactionLongPress(id: Long) {

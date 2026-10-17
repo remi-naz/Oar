@@ -12,7 +12,9 @@ import dev.ridill.oar.R
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.navigation.AddEditFolderSheetRoute
+import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
+import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.AllFoldersRoute
 import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
 import dev.ridill.oar.core.ui.navigation.FolderDeletedResult
@@ -71,6 +73,16 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
         val snackbarController = rememberSnackbarController()
 
         val resultBus = LocalResultBus.current
+
+        ResultEffect<AddEditTxResult> { result ->
+            viewModel.onAddEditTxNavResult(result)
+        }
+        ResultEffect<AddEditScheduleResult> { result ->
+            viewModel.onAddEditScheduleNavResult(result)
+        }
+        ResultEffect<FolderSavedResult> { _ ->
+            snackbarController.showSnackbar(context.getString(R.string.transaction_folder_updated))
+        }
 
         CollectFlowEffect(viewModel.events, context, snackbarController) { event ->
             when (event) {

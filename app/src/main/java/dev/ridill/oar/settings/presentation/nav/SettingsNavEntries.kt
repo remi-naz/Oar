@@ -83,13 +83,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
         val credentialService = rememberCredentialService(context = context)
         val activity = LocalActivity.current
 
-        ResultEffect<BudgetUpdatedResult> { _ ->
-            snackbarController.showSnackbar(
-                UiText.StringResource(R.string.budget_updated)
-                    .asString(context)
-            )
-        }
-
         CollectFlowEffect(
             viewModel.events,
             snackbarController,
@@ -352,13 +345,23 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
         val cycleHistory = viewModel.history.collectAsLazyPagingItems()
         val currencyPreference = LocalCurrencyPreference.current
 
+        val context = LocalContext.current
+        val snackbarController = rememberSnackbarController()
+
         OnLifecycleStartEffect { viewModel.refreshCurrentDate() }
 
         ResultEffect<Currency> { currency ->
             viewModel.onCurrencySelected(currency)
         }
+        ResultEffect<BudgetUpdatedResult> { _ ->
+            snackbarController.showSnackbar(
+                UiText.StringResource(R.string.budget_updated)
+                    .asString(context)
+            )
+        }
 
         BudgetCyclesScreenContent(
+            snackbarController = snackbarController,
             state = state,
             history = cycleHistory,
             actions = viewModel,
