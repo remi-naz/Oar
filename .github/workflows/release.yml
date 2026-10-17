@@ -119,17 +119,7 @@ jobs:
           if [ -f "$changelog_file" ]; then
             echo "Custom changelog already committed at $changelog_file, leaving it as-is."
           else
-            previous_tag=$(git describe --tags --abbrev=0 "${{ steps.resolve.outputs.tag }}^" 2>/dev/null || echo "")
-            if [ -n "$previous_tag" ]; then
-              git log "${previous_tag}..${{ steps.resolve.outputs.tag }}" \
-                --pretty=format:"- %s" \
-                --invert-grep --grep="^chore: bump version" \
-                > "$changelog_file"
-            else
-              echo "- Initial release" > "$changelog_file"
-            fi
-            # Play Store limits release notes to 500 characters per locale
-            head -c 500 "$changelog_file" > "${changelog_file}.tmp" && mv "${changelog_file}.tmp" "$changelog_file"
+            echo "Bug fixes and general improvements" > "$changelog_file"
           fi
           cat "$changelog_file"
 
