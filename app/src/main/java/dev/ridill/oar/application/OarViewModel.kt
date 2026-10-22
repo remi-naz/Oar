@@ -66,6 +66,13 @@ class OarViewModel @Inject constructor(
         collectTransactionAutoDetectEnabled()
         collectIsAppLocked()
         initRemoteConfig()
+        startCycleCatchUp()
+    }
+
+    // Safety net for a lost cycle alarm; no-op while the active cycle is still running
+    private fun startCycleCatchUp() {
+        appInitWorkManager.startCycleCatchUpWorker()
+        appInitWorkManager.scheduleDailyCycleCatchUp()
     }
 
     private fun collectTransactionAutoDetectEnabled() = viewModelScope.launch {

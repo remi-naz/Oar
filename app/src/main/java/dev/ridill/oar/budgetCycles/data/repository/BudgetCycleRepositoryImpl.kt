@@ -29,6 +29,7 @@ import dev.ridill.oar.budgetCycles.domain.repository.CycleNotActiveThrowable
 import dev.ridill.oar.budgetCycles.domain.repository.CycleNotFoundThrowable
 import dev.ridill.oar.budgetCycles.domain.repository.IllegalCycleThrowable
 import dev.ridill.oar.budgetCycles.domain.repository.NoActiveCycleThrowable
+import dev.ridill.oar.budgetCycles.domain.util.CycleDateCalculator
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.DateUtil
@@ -54,7 +55,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import java.time.YearMonth
 import java.time.format.TextStyle
-import java.time.temporal.TemporalAdjusters
 import java.util.Currency
 import kotlin.math.absoluteValue
 
@@ -65,7 +65,8 @@ class BudgetCycleRepositoryImpl(
     private val cycleDao: BudgetCycleDao,
     private val aggDao: AggregationsDao,
     private val configDao: ConfigDao,
-    private val manager: CycleManager
+    private val manager: CycleManager,
+    private val cycleDateCalculator: CycleDateCalculator
 ) : BudgetCycleRepository {
 
     override fun getActiveCycleFlow(): Flow<BudgetCycleEntry?> = cycleDao
@@ -236,13 +237,22 @@ class BudgetCycleRepositoryImpl(
                 val lastCycle = getLastCycle()
                 val dateNow = DateUtil.dateNow()
                 logD(TAG) { "lastCycle = $lastCycle" }
+                if (lastCycle?.active == true && lastCycle.endDate.isBefore(dateNow)) {
+                    logI(TAG) { "Last cycle is overdue, completing it" }
+                    return@withContext when (val result = completeOverdueCycleIfAny()) {
+                        is Result.Success -> Result.Success(Unit)
+                        is Result.Error -> Result.Error(result.error, result.message)
+                    }
+                }
+
+                // Last day of a cycle is still part of it
                 val isLastCycleActiveRightNow = lastCycle?.active == true
-                        && lastCycle.endDate.isAfter(dateNow)
+                        && !lastCycle.endDate.isBefore(dateNow)
                 logD(TAG) { "isLastCycleActiveRightNow = $isLastCycleActiveRightNow" }
 
                 return@withContext if (isLastCycleActiveRightNow) {
                     // Continue Ongoing cycle
-                    // Schedule it's completion alarm
+                    // Schedule its completion alarm
                     logI(TAG) { "Continuing ongoing cycle" }
                     scheduleCycleCompletion(lastCycle)
                 } else {
@@ -256,6 +266,20 @@ class BudgetCycleRepositoryImpl(
                     message = UiText.StringResource(R.string.error_failed_to_start_cycle, true)
                 )
             }
+        }
+
+    override suspend fun completeOverdueCycleIfAny(): Result<BudgetCycleSummary?, BudgetCycleError> =
+        withContext(Dispatchers.IO) {
+            val activeCycle = getActiveCycle() ?: return@withContext Result.Success(null)
+            if (!activeCycle.endDate.isBefore(DateUtil.dateNow())) {
+                // Still running; (re)schedule its alarm in case it was lost
+                return@withContext when (val result = scheduleCycleCompletion(activeCycle)) {
+                    is Result.Success -> Result.Success(null)
+                    is Result.Error -> Result.Error(result.error, result.message)
+                }
+            }
+            logI(TAG) { "Active cycle ${activeCycle.id} is overdue, completing" }
+            completeCycleNowAndStartNext(activeCycle.id)
         }
 
     override suspend fun createNewCycleAndScheduleCompletion(
@@ -305,47 +329,10 @@ class BudgetCycleRepositoryImpl(
         logI(TAG) { "createCycleEntryFromConfigForMonth() called with: month = $month" }
         val config = getCycleConfig()
         val dateNow = DateUtil.dateNow()
-        val dateFromYearMonth = DateUtil.dateNow()
-            .with(month)
-        val startDay = config.startDay
-        logD(TAG) { "createCycleEntryFromConfigForMonth: startDay = $startDay" }
-        val (startDate, endDate) = when (startDay) {
-            CycleStartDay.FirstDayOfMonth -> {
-                val startDate = if (startNow) dateNow
-                else dateNow.withDayOfMonth(1)
-
-                val endDate = dateFromYearMonth
-                    .with(TemporalAdjusters.lastDayOfMonth())
-
-                startDate to endDate
-            }
-
-            CycleStartDay.LastDayOfMonth -> {
-                val startDate = if (startNow) dateNow
-                else dateNow
-                    .withMonth(month.monthValue - 1)
-                    .with(TemporalAdjusters.lastDayOfMonth())
-
-                val endDate = dateFromYearMonth
-                    .with(TemporalAdjusters.lastDayOfMonth())
-                    .minusDays(1L)
-
-                startDate to endDate
-            }
-
-            is CycleStartDay.SpecificDayOfMonth -> {
-                val startDate = if (startNow) dateNow
-                else dateNow
-                    .withMonth(month.monthValue - 1)
-                    .withDayOfMonth(startDay.dayOfMonth)
-
-                val endDate = dateFromYearMonth
-                    .withDayOfMonth(startDay.dayOfMonth)
-                    .minusDays(1L)
-
-                startDate to endDate
-            }
-        }
+        logD(TAG) { "createCycleEntryFromConfigForMonth: startDay = ${config.startDay}" }
+        val period = cycleDateCalculator.periodForMonth(config.startDay, month)
+        val startDate = if (startNow) dateNow else period.start
+        val endDate = period.end
 
         logD(TAG) { "startDate = $startDate, endDate = $endDate" }
 
@@ -390,7 +377,12 @@ class BudgetCycleRepositoryImpl(
 
                 // Create Next Cycle Entry
                 val newCycleResult = createNewCycleAndScheduleCompletion(
-                    month = YearMonth.from(enforcedCycleEndDate.plusMonths(1L)),
+                    month = cycleDateCalculator.nextCycleMonth(
+                        startDay = getCycleConfig().startDay,
+                        // Scheduled end, so completing late doesn't skip a period
+                        completedCycleScheduledEnd = cycleById.endDate,
+                        today = DateUtil.dateNow()
+                    ),
                     startNow = true
                 )
 

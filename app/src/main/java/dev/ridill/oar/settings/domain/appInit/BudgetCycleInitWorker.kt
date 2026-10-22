@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dev.ridill.oar.R
+import dev.ridill.oar.budgetCycles.domain.cycleManager.postCycleCompleted
 import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleEntry
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.domain.notification.NotificationHelper
@@ -30,6 +31,14 @@ class BudgetCycleInitWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         startForeground()
         logI(TAG) { "$TAG started" }
+        // Close an overdue cycle first so the user still gets the completion summary
+        val overdueCycleId = repo.getActiveCycle()?.id
+        val overdueResult = repo.completeOverdueCycleIfAny()
+        if (overdueResult is dev.ridill.oar.core.domain.model.Result.Success) {
+            val summary = overdueResult.data
+            if (summary != null && overdueCycleId != null)
+                notificationHelper.postCycleCompleted(appContext, overdueCycleId, summary)
+        }
         val result = repo.scheduleLastCycleOrNew()
         return@withContext when (result) {
             is dev.ridill.oar.core.domain.model.Result.Error -> {

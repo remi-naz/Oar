@@ -1,14 +1,18 @@
 package dev.ridill.oar.settings.domain.appInit
 
 import android.content.Context
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleCatchUpWorker
 import dev.ridill.oar.core.domain.util.toUUID
 import dev.ridill.oar.moneyPiles.domain.pileReminder.RestorePileRemindersWorker
 import dev.ridill.oar.schedules.domain.scheduleReminder.RestoreScheduleRemindersWorker
 import dev.ridill.oar.settings.domain.backup.workers.RestoreBackupJobsWorker
+import java.util.concurrent.TimeUnit
 
 class AppInitWorkManager(
     private val context: Context
@@ -20,9 +24,6 @@ class AppInitWorkManager(
     }
 
     private val workManager = WorkManager.getInstance(context)
-
-    private val appInitWorkerName: String
-        get() = "${context.packageName}.APP_INIT_WORKERS"
 
     private val configRestoreWorkerName: String
         get() = "${context.packageName}.CONFIG_RESTORE_WORKERS"
@@ -39,6 +40,12 @@ class AppInitWorkManager(
     private val restoreBackupJobsWorkerName: String
         get() = "${context.packageName}.RESTORE_BACKUP_JOBS_WORKER"
 
+    private val cycleCatchUpWorkerName: String
+        get() = "${context.packageName}.CYCLE_CATCH_UP_WORKER"
+
+    private val periodicCycleCatchUpWorkerName: String
+        get() = "${context.packageName}.PERIODIC_CYCLE_CATCH_UP_WORKER"
+
     private val currencyListInitWorkerName: String
         get() = "${context.packageName}.CURRENCY_LIST_INIT_WORKER"
 
@@ -53,6 +60,30 @@ class AppInitWorkManager(
             ExistingWorkPolicy.REPLACE,
             currencyInitWorker
         ).enqueue()
+    }
+
+    fun startCycleCatchUpWorker() {
+        val request = OneTimeWorkRequestBuilder<CycleCatchUpWorker>()
+            .setId(cycleCatchUpWorkerName.toUUID())
+            .build()
+
+        workManager.enqueueUniqueWork(
+            cycleCatchUpWorkerName,
+            ExistingWorkPolicy.KEEP,
+            request
+        )
+    }
+
+    fun scheduleDailyCycleCatchUp() {
+        val request = PeriodicWorkRequestBuilder<CycleCatchUpWorker>(1, TimeUnit.DAYS)
+            .setId(periodicCycleCatchUpWorkerName.toUUID())
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            periodicCycleCatchUpWorkerName,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request
+        )
     }
 
     fun startConfigRestoreWorkers() {

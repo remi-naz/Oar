@@ -38,6 +38,15 @@ interface BudgetCycleRepository {
     fun scheduleCycleCompletion(cycle: BudgetCycleEntry): Result<Unit, BudgetCycleError>
     suspend fun scheduleLastCycleOrNew(): Result<Unit, BudgetCycleError>
 
+    /**
+     * Completes the active cycle if its end date has already passed (e.g. its alarm was lost),
+     * following the same rules as a late alarm or manual completion. Otherwise makes sure the
+     * active cycle's alarm is scheduled.
+     *
+     * @return the summary of the completed cycle, or null when nothing needed completing.
+     */
+    suspend fun completeOverdueCycleIfAny(): Result<BudgetCycleSummary?, BudgetCycleError>
+
     suspend fun createNewCycleAndScheduleCompletion(
         month: YearMonth,
         startNow: Boolean = false
