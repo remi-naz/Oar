@@ -13,9 +13,11 @@ import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleManager
 import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleAlarmManager
 import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleEntry
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
+import dev.ridill.oar.budgetCycles.domain.util.CycleDateCalculator
 import dev.ridill.oar.budgetCycles.presentation.notification.CycleNotificationHelper
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.notification.NotificationHelper
+import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.settings.data.local.ConfigDao
 
 @Module
@@ -28,8 +30,12 @@ object BudgetCycleSingletonModule {
 
     @Provides
     fun provideCycleManager(
-        @ApplicationContext context: Context
-    ): CycleManager = CycleAlarmManager(context)
+        @ApplicationContext context: Context,
+        receiverService: ReceiverService
+    ): CycleManager = CycleAlarmManager(context, receiverService)
+
+    @Provides
+    fun provideCycleDateCalculator(): CycleDateCalculator = CycleDateCalculator()
 
     @Provides
     fun provideCycleRepository(
@@ -37,13 +43,15 @@ object BudgetCycleSingletonModule {
         cycleDao: BudgetCycleDao,
         aggregationsDao: AggregationsDao,
         cycleManager: CycleManager,
-        configDao: ConfigDao
+        configDao: ConfigDao,
+        cycleDateCalculator: CycleDateCalculator
     ): BudgetCycleRepository = BudgetCycleRepositoryImpl(
         db = database,
         cycleDao = cycleDao,
         aggDao = aggregationsDao,
         manager = cycleManager,
-        configDao = configDao
+        configDao = configDao,
+        cycleDateCalculator = cycleDateCalculator
     )
 
     @Provides

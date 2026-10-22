@@ -7,7 +7,7 @@ import android.content.Intent
 import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleError
 import dev.ridill.oar.core.domain.model.Result
-import dev.ridill.oar.core.domain.util.BuildUtil
+import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.logD
@@ -16,12 +16,10 @@ import dev.ridill.oar.core.ui.util.UiText
 import java.time.LocalDateTime
 
 class CycleAlarmManager(
-    private val context: Context
+    private val context: Context,
+    private val receiverService: ReceiverService
 ) : CycleManager {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
-
-    override fun canScheduleExactAlarms(): Boolean = !BuildUtil.isApiLevelAtLeast31
-            || alarmManager.canScheduleExactAlarms()
 
     override fun cancelCycleCompletion(cycleId: Long) {
         val pendingIntent = buildPendingIntent(cycleId)
@@ -34,12 +32,14 @@ class CycleAlarmManager(
     ): Result<Unit, BudgetCycleError> = try {
         val endTimeMillis = DateUtil.toMillis(endDate)
         val pendingIntent = buildPendingIntent(cycleId)
-        alarmManager.setWindow(
-            AlarmManager.RTC,
+        // Inexact on purpose: rollover doesn't need minute precision, so no exact alarm permission
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
             endTimeMillis,
-            CycleManager.AlarmWindow.inWholeMilliseconds,
             pendingIntent
         )
+        // Re-register the alarm after reboot / time changes even if no schedules or piles exist
+        receiverService.toggleBootAndTimeReceivers(true)
 
         logD(CycleManager::class.simpleName) { "Scheduled cycle ID = $cycleId to complete at $endDate" }
         Result.Success(Unit)
@@ -53,7 +53,7 @@ class CycleAlarmManager(
 
     private fun buildPendingIntent(cycleId: Long): PendingIntent {
         val intent = Intent(context, CycleCompletionReceiver::class.java).apply {
-            this.action = CycleManager.action(context)
+            this.action = CycleManager.completionAction(context)
             putExtra(CycleManager.EXTRA_CYCLE_ID, cycleId)
         }
         return PendingIntent.getBroadcast(

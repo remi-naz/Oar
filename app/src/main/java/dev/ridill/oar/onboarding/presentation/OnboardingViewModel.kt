@@ -51,6 +51,7 @@ import java.time.YearMonth
 import java.util.Currency
 import javax.inject.Inject
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
@@ -241,10 +242,6 @@ class OnboardingViewModel @Inject constructor(
                 eventBus.send(OnboardingEvent.NavigateToPage(OnboardingPage.ACCOUNT_SIGN_IN_AND_DATA_RESTORE))
                 return@launch
             }
-
-            if (result[Manifest.permission.SCHEDULE_EXACT_ALARM] == false) {
-                eventBus.send(OnboardingEvent.LaunchAlarmPermissionsSettings)
-            }
         }
     }
 
@@ -268,7 +265,7 @@ class OnboardingViewModel @Inject constructor(
             }
 
             AuthState.UnAuthenticated -> {
-                delay(400L)
+                delay(400.milliseconds)
                 eventBus.send(OnboardingEvent.StartAutoSignInFlow(true))
             }
         }
@@ -454,7 +451,6 @@ class OnboardingViewModel @Inject constructor(
         data object OnboardingConcluded : OnboardingEvent
         data class ShowUiMessage(val uiText: UiText) : OnboardingEvent
         data object LaunchPermissionsRequest : OnboardingEvent
-        data object LaunchAlarmPermissionsSettings : OnboardingEvent
         data class StartAutoSignInFlow(val filterByAuthorizedAccounts: Boolean) :
             OnboardingEvent
 
