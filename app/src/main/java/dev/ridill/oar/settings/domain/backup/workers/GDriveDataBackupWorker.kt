@@ -5,8 +5,6 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.google.android.gms.auth.GoogleAuthException
-import com.google.android.gms.auth.UserRecoverableAuthException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dev.ridill.oar.R
@@ -16,6 +14,7 @@ import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.di.BackupFeature
 import dev.ridill.oar.settings.data.remote.dto.GDriveErrorDto
+import dev.ridill.oar.settings.data.remote.interceptors.GoogleAuthorizationRequiredException
 import dev.ridill.oar.settings.data.repository.InvalidEncryptionPasswordThrowable
 import dev.ridill.oar.settings.domain.backup.BackupCachingFailedThrowable
 import dev.ridill.oar.settings.domain.backup.BackupWorkManager
@@ -61,32 +60,9 @@ class GDriveDataBackupWorker @AssistedInject constructor(
                     BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_download_backup_failed)
                 )
             )
-        } catch (e: UserRecoverableAuthException) {
-            logE(e, GDriveDataBackupWorker::class.simpleName) { "UserRecoverableAuthException" }
-            repo.setBackupError(FatalBackupError.GOOGLE_AUTH_FAILURE)
-            notificationHelper.postNotification(
-                BackupWorkManager.BACKUP_WORKER_NOTIFICATION_ID.hashCode(),
-                appContext.getString(R.string.error_google_auth_failed)
-            )
-            workManager.cancelPeriodicBackupWork()
-            Result.failure(
-                workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_google_auth_failed)
-                )
-            )
-        } catch (e: GoogleAuthException) {
-            logE(e, GDriveDataBackupWorker::class.simpleName) { "GoogleAuthException" }
-            repo.setBackupError(FatalBackupError.GOOGLE_AUTH_FAILURE)
-            notificationHelper.postNotification(
-                BackupWorkManager.BACKUP_WORKER_NOTIFICATION_ID.hashCode(),
-                appContext.getString(R.string.error_google_auth_failed)
-            )
-            workManager.cancelPeriodicBackupWork()
-            Result.failure(
-                workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_google_auth_failed)
-                )
-            )
+        } catch (e: GoogleAuthorizationRequiredException) {
+            logE(e, GDriveDataBackupWorker::class.simpleName) { "GoogleAuthorizationRequiredException" }
+            authFailureResult()
         } catch (e: HttpException) {
             logE(e, GDriveDataBackupWorker::class.simpleName) { "HttpException" }
             val errorBody = e.response()?.errorBody()?.charStream()?.let {
@@ -99,6 +75,9 @@ class GDriveDataBackupWorker @AssistedInject constructor(
                 "teamDriveFileLimitExceeded" -> FatalBackupError.STORAGE_QUOTA_EXCEEDED
                 else -> null
             }
+            if (e.code() == 401 || error == FatalBackupError.GOOGLE_AUTH_FAILURE)
+                return@withContext authFailureResult()
+
             repo.setBackupError(error)
             resultForHttpCode(e.code())
         } catch (t: BackupCachingFailedThrowable) {
@@ -113,6 +92,20 @@ class GDriveDataBackupWorker @AssistedInject constructor(
         } finally {
             repo.tryClearLocalCache()
         }
+    }
+
+    // Periodic work is kept scheduled so backups resume once the user re-authorizes
+    private suspend fun authFailureResult(): Result {
+        repo.setBackupError(FatalBackupError.GOOGLE_AUTH_FAILURE)
+        notificationHelper.postNotification(
+            BackupWorkManager.BACKUP_WORKER_NOTIFICATION_ID.hashCode(),
+            appContext.getString(R.string.error_google_auth_failed)
+        )
+        return Result.failure(
+            workDataOf(
+                BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_google_auth_failed)
+            )
+        )
     }
 
     private fun resultForHttpCode(code: Int): Result = when (code) {

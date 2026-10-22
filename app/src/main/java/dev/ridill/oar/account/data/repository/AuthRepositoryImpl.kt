@@ -6,7 +6,6 @@ import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.model.AuthState
 import dev.ridill.oar.account.domain.model.UserAccount
 import dev.ridill.oar.account.domain.repository.AuthRepository
-import dev.ridill.oar.account.domain.service.AccessTokenService
 import dev.ridill.oar.account.domain.service.AuthService
 import dev.ridill.oar.account.presentation.util.AuthorizationFailedThrowable
 import dev.ridill.oar.account.presentation.util.AuthorizationNeedsResolutionThrowable
@@ -22,8 +21,7 @@ import kotlinx.coroutines.flow.Flow
 class AuthRepositoryImpl(
     private val credentialService: CredentialService,
     private val authService: AuthService,
-    private val authorizationService: AuthorizationService,
-    private val accessTokenService: AccessTokenService
+    private val authorizationService: AuthorizationService
 ) : AuthRepository {
     override fun getSignedInAccount(): UserAccount? = authService
         .getSignedInAccount()
@@ -47,7 +45,6 @@ class AuthRepositoryImpl(
     override suspend fun authorizeUserAccount(): Result<PendingIntent?, AuthorizationService.AuthorizationError> =
         try {
             val result = authorizationService.getIntentSenderForAuthorization()
-            accessTokenService.updateAccessToken(result.accessToken.orEmpty())
             Result.Success(result.pendingIntent)
         } catch (t: AuthorizationNeedsResolutionThrowable) {
             Result.Error(
@@ -70,8 +67,7 @@ class AuthRepositoryImpl(
 
     override suspend fun decodeAuthorizationResult(intent: Intent): Result<Unit, AuthorizationService.AuthorizationError> =
         try {
-            val accessToken = authorizationService.decodeAccessTokenFromIntent(intent)
-            accessTokenService.updateAccessToken(accessToken)
+            authorizationService.verifyAuthorizationResult(intent)
             Result.Success(Unit)
         } catch (_: AuthorizationNeedsResolutionThrowable) {
             Result.Error(

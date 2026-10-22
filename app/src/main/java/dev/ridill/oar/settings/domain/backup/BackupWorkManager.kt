@@ -70,7 +70,7 @@ class BackupWorkManager(
             .setBackoffCriteria(
                 BackoffPolicy.EXPONENTIAL,
                 BACKOFF_DELAY_MINUTES,
-                TimeUnit.MILLISECONDS
+                TimeUnit.MINUTES
             )
             .build()
 

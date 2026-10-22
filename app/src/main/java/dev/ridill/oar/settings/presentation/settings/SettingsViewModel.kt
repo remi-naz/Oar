@@ -7,7 +7,6 @@ import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.repository.AuthRepository
-import dev.ridill.oar.account.domain.service.AccessTokenService
 import dev.ridill.oar.account.presentation.util.CredentialService
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
@@ -30,7 +29,6 @@ class SettingsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepo: SettingsRepository,
     private val authRepo: AuthRepository,
-    private val accessTokenService: AccessTokenService,
     private val remoteConfigService: FirebaseRemoteConfigService,
     private val eventBus: EventBus<SettingsEvent>
 ) : ViewModel(), SettingsActions {
@@ -209,21 +207,15 @@ class SettingsViewModel @Inject constructor(
     override fun onLogoutClick() {
         logoutJob?.cancel()
         logoutJob = viewModelScope.launch {
-            when (authRepo.signUserOut()) {
-                is Result.Error -> {
-                    eventBus.send(
-                        SettingsEvent.ShowUiMessage(
-                            UiText.StringResource(
-                                R.string.error_sign_out_failed,
-                                true
-                            )
+            if (authRepo.signUserOut() is Result.Error) {
+                eventBus.send(
+                    SettingsEvent.ShowUiMessage(
+                        UiText.StringResource(
+                            R.string.error_sign_out_failed,
+                            true
                         )
                     )
-                }
-
-                is Result.Success -> {
-                    accessTokenService.updateAccessToken(null)
-                }
+                )
             }
         }
     }

@@ -13,7 +13,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dev.ridill.oar.account.domain.service.AccessTokenKeystoreService
 import dev.ridill.oar.application.OarViewModel
 import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.MIGRATION_5_6
@@ -138,16 +137,6 @@ object AppModule {
     @Provides
     fun provideKeystoreCryptoManager(): KeystoreCryptoManager = DefaultKeystoreCryptoManager()
 
-    @AccessTokenPreferences
-    @Singleton
-    @Provides
-    fun provideAccessTokenPrefDataStoreInstance(
-        @ApplicationContext context: Context
-    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-        corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
-        produceFile = { context.preferencesDataStoreFile(AccessTokenKeystoreService.NAME) }
-    )
-
     @Provides
     @Singleton
     fun provideJson(): Json = Json {
@@ -175,10 +164,6 @@ object AppModule {
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ApplicationScope
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class AccessTokenPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
