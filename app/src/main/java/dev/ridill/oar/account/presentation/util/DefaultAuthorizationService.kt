@@ -7,7 +7,6 @@ import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
-import dev.ridill.oar.core.domain.util.logD
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -21,35 +20,38 @@ class DefaultAuthorizationService(
         get() = listOf(Scopes.DRIVE_APPFOLDER)
             .map { Scope(it) }
 
+    private fun buildAuthorizationRequest(): AuthorizationRequest = AuthorizationRequest.Builder()
+        .setRequestedScopes(scopes)
+        .build()
+
     @Throws(AuthorizationNeedsResolutionThrowable::class)
     override suspend fun getIntentSenderForAuthorization(): AuthorizationResult =
         withContext(Dispatchers.IO) {
-            val request = AuthorizationRequest.Builder()
-                .setRequestedScopes(scopes)
-                .build()
-
-            val result = authorizationClient.authorize(request).await()
+            val result = authorizationClient.authorize(buildAuthorizationRequest()).await()
             if (result.hasResolution())
                 throw AuthorizationNeedsResolutionThrowable(result.pendingIntent)
 
-            val accessToken = result.accessToken
-            val pendingIntent = result.pendingIntent
-            AuthorizationResult(accessToken, pendingIntent)
+            AuthorizationResult(result.pendingIntent)
         }
 
     @Throws(AuthorizationNeedsResolutionThrowable::class, AuthorizationFailedThrowable::class)
-    override fun decodeAccessTokenFromIntent(intent: Intent?): String {
+    override fun verifyAuthorizationResult(intent: Intent?) {
         val result = authorizationClient.getAuthorizationResultFromIntent(intent)
         if (result.hasResolution()) throw AuthorizationNeedsResolutionThrowable(result.pendingIntent)
-        val accessToken = result.accessToken ?: throw AuthorizationFailedThrowable()
-        logD { "AccessToken - $accessToken" }
-        return accessToken
+        if (result.accessToken == null) throw AuthorizationFailedThrowable()
     }
 
-    /*companion object {
-        private const val OAUTH_SCOPE_STRING =
-            "oauth2:${Scopes.DRIVE_APPFOLDER} ${Scopes.DRIVE_FILE}"
-    }*/
+    /**
+     * Returns a valid access token without UI if the user has already granted the scopes.
+     * Play Services caches the token and refreshes it on expiry, so call this before every use
+     * instead of persisting the token.
+     */
+    @Throws(AuthorizationNeedsResolutionThrowable::class, AuthorizationFailedThrowable::class)
+    override suspend fun getAccessToken(): String = withContext(Dispatchers.IO) {
+        val result = authorizationClient.authorize(buildAuthorizationRequest()).await()
+        if (result.hasResolution()) throw AuthorizationNeedsResolutionThrowable(result.pendingIntent)
+        result.accessToken ?: throw AuthorizationFailedThrowable()
+    }
 }
 
 class AuthorizationNeedsResolutionThrowable(val pendingIntent: PendingIntent?) : Throwable()

@@ -17,6 +17,7 @@ import dev.ridill.oar.core.domain.util.logE
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.di.BackupFeature
+import dev.ridill.oar.settings.data.remote.interceptors.GoogleAuthorizationRequiredException
 import dev.ridill.oar.settings.data.repository.BackupDownloadFailedThrowable
 import dev.ridill.oar.settings.domain.backup.BackupWorkManager
 import dev.ridill.oar.settings.domain.repositoty.BackupRepository
@@ -54,6 +55,13 @@ class GDriveDataDownloadWorker @AssistedInject constructor(
             Result.failure(
                 workDataOf(
                     BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_download_backup_failed)
+                )
+            )
+        } catch (e: GoogleAuthorizationRequiredException) {
+            logE(e, GDriveDataDownloadWorker::class.simpleName) { "GoogleAuthorizationRequiredException" }
+            Result.failure(
+                workDataOf(
+                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_google_auth_failed)
                 )
             )
         } catch (t: Throwable) {

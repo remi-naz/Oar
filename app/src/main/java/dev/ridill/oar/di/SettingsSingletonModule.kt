@@ -8,7 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ridill.oar.BuildConfig
 import dev.ridill.oar.account.domain.repository.AuthRepository
-import dev.ridill.oar.account.domain.service.AccessTokenService
+import dev.ridill.oar.account.presentation.util.AuthorizationService
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
@@ -45,9 +45,9 @@ object SettingsSingletonModule {
     @GoogleApis
     @Provides
     fun provideGoogleAccessTokenInterceptor(
-        tokenService: AccessTokenService
+        authorizationService: AuthorizationService
     ): GoogleAccessTokenInterceptor = GoogleAccessTokenInterceptor(
-        tokenService = tokenService
+        authorizationService = authorizationService
     )
 
     @Provides

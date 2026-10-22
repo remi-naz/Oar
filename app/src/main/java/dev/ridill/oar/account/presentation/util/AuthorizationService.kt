@@ -6,7 +6,8 @@ import dev.ridill.oar.core.domain.model.Error
 
 interface AuthorizationService {
     suspend fun getIntentSenderForAuthorization(): AuthorizationResult
-    fun decodeAccessTokenFromIntent(intent: Intent?): String
+    fun verifyAuthorizationResult(intent: Intent?)
+    suspend fun getAccessToken(): String
 
     enum class AuthorizationError : Error {
         NEEDS_RESOLUTION,
@@ -15,6 +16,5 @@ interface AuthorizationService {
 }
 
 data class AuthorizationResult(
-    val accessToken: String?,
     val pendingIntent: PendingIntent?
 )
