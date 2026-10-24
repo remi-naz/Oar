@@ -12,8 +12,6 @@ import dev.ridill.oar.core.domain.util.logE
 import dev.ridill.oar.core.domain.util.orFalse
 import dev.ridill.oar.core.domain.util.orTrue
 import dev.ridill.oar.core.domain.util.tryOrNull
-import java.time.Instant
-import java.time.ZoneId
 import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
 import dev.ridill.oar.settings.domain.modal.AppTheme
 import dev.ridill.oar.settings.domain.repositoty.FatalBackupError
@@ -23,7 +21,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 class PreferencesManagerImpl(
     private val dataStore: DataStore<Preferences>
@@ -44,7 +44,9 @@ class PreferencesManagerImpl(
             val dynamicColorsEnabled = preferences[Keys.DYNAMIC_COLORS_ENABLED].orFalse()
             val lastBackupDateTime = preferences[Keys.LAST_BACKUP_TIMESTAMP]
                 ?.let { str ->
-                    tryOrNull { Instant.parse(str).atZone(ZoneId.systemDefault()).toLocalDateTime() }
+                    tryOrNull {
+                        Instant.parse(str).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                    }
                         ?: DateUtil.parseDateTimeOrNull(str)
                 }
             val transactionAutoDetectEnabled =
@@ -185,6 +187,10 @@ class PreferencesManagerImpl(
                 preferences.remove(Keys.ALL_TX_SHOW_EXCLUDED_OPTION)
                 // Budget and currency live in the cleared database, so onboarding has to run again
                 preferences.remove(Keys.SHOW_ONBOARDING)
+                // Security toggles all default to off when absent
+                preferences.remove(Keys.APP_LOCK_ENABLED)
+                preferences.remove(Keys.IS_APP_LOCKED)
+                preferences.remove(Keys.SCREEN_SECURITY_ENABLED)
             }
         }
     }
