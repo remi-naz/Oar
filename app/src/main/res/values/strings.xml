@@ -122,6 +122,7 @@
     <string name="error_app_data_backup_failed">Failed to backup App Data</string>
     <string name="error_sign_in_failed">Failed to sign in to your account</string>
     <string name="error_sign_out_failed">Sign out failed</string>
+    <string name="error_export_logs_failed">Failed to export logs</string>
     <string name="error_unknown">An Unknown error occurred</string>
     <string name="error_authorization_required">Authorization required</string>
     <string name="error_authorization_failed">An Unknown error occurred</string>
@@ -184,6 +185,9 @@
     <string name="preference_source_code">Source Code</string>
     <string name="preference_source_code_summary">Take a look at the app\'s Source Code</string>
     <string name="preference_version">Version</string>
+    <string name="preference_export_logs">Export Logs</string>
+    <string name="preference_export_logs_summary">Share diagnostic logs to help fix issues. Personal data is removed.</string>
+    <string name="export_logs_chooser_title">Share logs</string>
     <string name="preference_backup">Backup</string>
     <string name="preference_backup_summary">Backup your transactions</string>
     <string name="preference_title_google_drive">Google Drive</string>

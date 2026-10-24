@@ -14,6 +14,7 @@ import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
 import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.notification.NotificationHelper
+import dev.ridill.oar.core.domain.util.BuildUtil
 import dev.ridill.oar.settings.data.local.ConfigDao
 import dev.ridill.oar.settings.data.remote.GDriveApi
 import dev.ridill.oar.settings.data.remote.interceptors.GoogleAccessTokenInterceptor
@@ -52,7 +53,10 @@ object SettingsSingletonModule {
 
     @Provides
     fun provideLoggingInterceptor(): HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        // Bodies carry backup payloads, so only log request lines and headers in debug builds
+        level = if (BuildUtil.isDebug) HttpLoggingInterceptor.Level.HEADERS
+        else HttpLoggingInterceptor.Level.NONE
+        redactHeader("Authorization")
     }
 
     @GoogleApis

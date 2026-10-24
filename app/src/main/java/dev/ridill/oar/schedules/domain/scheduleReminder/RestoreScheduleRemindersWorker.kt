@@ -14,6 +14,7 @@ import dagger.assisted.AssistedInject
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.logE
+import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.di.BackupFeature
 import dev.ridill.oar.schedules.domain.repository.SchedulesRepository
@@ -31,8 +32,10 @@ class RestoreScheduleRemindersWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         startForegroundService()
+        logI(RestoreScheduleRemindersWorker::class.simpleName) { "Restoring schedule reminders" }
         try {
             repo.setAllFutureScheduleReminders()
+            logI(RestoreScheduleRemindersWorker::class.simpleName) { "Schedule reminders restored" }
             Result.success()
         } catch (t: Throwable) {
             t.rethrowIfCoroutineCancellation()

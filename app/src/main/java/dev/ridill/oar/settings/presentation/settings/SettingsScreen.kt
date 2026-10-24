@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.BrightnessMedium
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
@@ -195,6 +196,13 @@ fun SettingsScreen(
                     }
                 )
             }
+
+            SimpleSettingsPreference(
+                titleRes = R.string.preference_export_logs,
+                summary = stringResource(R.string.preference_export_logs_summary),
+                leadingIcon = Icons.Rounded.BugReport,
+                onClick = actions::onExportLogsClick
+            )
 
             SimpleSettingsPreference(
                 titleRes = R.string.preference_version,

@@ -35,6 +35,7 @@ class GDriveDataRestoreWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         startForegroundService()
+        logI(GDriveDataRestoreWorker::class.simpleName) { "Backup restore started" }
         try {
             val password = inputData.getString(BackupWorkManager.KEY_PASSWORD).orEmpty()
                 .ifEmpty { throw InvalidEncryptionPasswordThrowable() }

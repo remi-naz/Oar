@@ -14,6 +14,7 @@ import dagger.assisted.AssistedInject
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.logE
+import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.di.BackupFeature
 import dev.ridill.oar.settings.domain.appInit.AppInitWorkManager
@@ -31,8 +32,10 @@ class RestoreBackupJobsWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         startForegroundService()
+        logI(RestoreBackupJobsWorker::class.simpleName) { "Restoring backup jobs" }
         try {
             repo.restoreBackupJobs()
+            logI(RestoreBackupJobsWorker::class.simpleName) { "Backup jobs restored" }
             Result.success()
         } catch (t: Throwable) {
             t.rethrowIfCoroutineCancellation()

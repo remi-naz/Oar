@@ -5,11 +5,16 @@ import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.core.domain.util.isAnyOf
+import dev.ridill.oar.core.domain.util.logE
+import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.settings.domain.appInit.AppInitWorkManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "TimeChangeReceiver"
 
 @AndroidEntryPoint
 class TimeOrTimezoneChangeReceiver : BroadcastReceiver() {
@@ -28,10 +33,14 @@ class TimeOrTimezoneChangeReceiver : BroadcastReceiver() {
                 Intent.ACTION_TIMEZONE_CHANGED
             ) != true
         ) return
+        logI(TAG) { "Received ${intent.action}, starting init workers" }
         val pendingResult = goAsync()
         applicationScope.launch {
             try {
                 appInitManager.startAlarmsAndReminderInitWorkers()
+            } catch (t: Throwable) {
+                t.rethrowIfCoroutineCancellation()
+                logE(t, TAG) { "Failed to start init workers" }
             } finally {
                 pendingResult.finish()
             }

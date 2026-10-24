@@ -14,6 +14,8 @@ import dev.ridill.oar.account.presentation.util.CredentialService
 import dev.ridill.oar.core.data.util.tryNetworkCall
 import dev.ridill.oar.core.domain.model.DataError
 import dev.ridill.oar.core.domain.model.Result
+import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.core.domain.util.logW
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.core.ui.util.UiText
 import kotlinx.coroutines.flow.Flow
@@ -33,12 +35,14 @@ class AuthRepositoryImpl(
         idToken: String
     ): Result<Unit, DataError> = tryNetworkCall {
         authService.signinUserWithIdToken(idToken)
+        logI { "User signed in" }
         Result.Success(Unit)
     }
 
     override suspend fun signUserOut(): Result<Unit, DataError> = tryNetworkCall {
         authService.signUserOut()
         credentialService.clearCredentials()
+        logI { "User signed out" }
         Result.Success(Unit)
     }
 
@@ -47,18 +51,21 @@ class AuthRepositoryImpl(
             val result = authorizationService.getIntentSenderForAuthorization()
             Result.Success(result.pendingIntent)
         } catch (t: AuthorizationNeedsResolutionThrowable) {
+            logI { "Authorization needs user resolution" }
             Result.Error(
                 error = AuthorizationService.AuthorizationError.NEEDS_RESOLUTION,
                 message = UiText.StringResource(R.string.error_authorization_required, true),
                 data = t.pendingIntent
             )
         } catch (_: AuthorizationFailedThrowable) {
+            logW { "Authorization request failed" }
             Result.Error(
                 error = AuthorizationService.AuthorizationError.AUTHORIZATION_FAILED,
                 message = UiText.StringResource(R.string.error_authorization_failed, true)
             )
         } catch (t: Throwable) {
             t.rethrowIfCoroutineCancellation()
+            logW { "Authorization request failed: ${t::class.simpleName}" }
             Result.Error(
                 error = AuthorizationService.AuthorizationError.AUTHORIZATION_FAILED,
                 message = UiText.StringResource(R.string.error_authorization_failed, true)
@@ -70,17 +77,20 @@ class AuthRepositoryImpl(
             authorizationService.verifyAuthorizationResult(intent)
             Result.Success(Unit)
         } catch (_: AuthorizationNeedsResolutionThrowable) {
+            logI { "Authorization result needs user resolution" }
             Result.Error(
                 error = AuthorizationService.AuthorizationError.NEEDS_RESOLUTION,
                 message = UiText.StringResource(R.string.error_authorization_required, true)
             )
         } catch (_: AuthorizationFailedThrowable) {
+            logW { "Authorization result verification failed" }
             Result.Error(
                 error = AuthorizationService.AuthorizationError.AUTHORIZATION_FAILED,
                 message = UiText.StringResource(R.string.error_authorization_failed, true)
             )
         } catch (t: Throwable) {
             t.rethrowIfCoroutineCancellation()
+            logW { "Authorization result verification failed: ${t::class.simpleName}" }
             Result.Error(
                 error = AuthorizationService.AuthorizationError.AUTHORIZATION_FAILED,
                 message = UiText.StringResource(R.string.error_authorization_failed, true)

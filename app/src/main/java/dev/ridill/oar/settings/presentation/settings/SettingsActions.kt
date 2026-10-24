@@ -14,4 +14,5 @@ interface SettingsActions {
     fun onSmsPermissionRationaleSettingsClick()
     fun onLoginClick()
     fun onLogoutClick()
+    fun onExportLogsClick()
 }

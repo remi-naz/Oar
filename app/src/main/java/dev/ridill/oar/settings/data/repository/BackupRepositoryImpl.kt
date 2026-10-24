@@ -64,11 +64,10 @@ class BackupRepositoryImpl(
             val email = authRepo.getSignedInAccount()?.email
                 ?: throw GoogleAuthException()
             val backupFolderName = backupFolderName(email)
-            logD { "Checking Backup folder - $backupFolderName" }
             val backupFolder = gDriveApi.getFilesList(
                 q = "trashed=false and name = '$backupFolderName'"
             ).files.firstOrNull() ?: throw NoBackupFoundThrowable()
-            logD { "Backup folder - $backupFolder" }
+            logD { "Backup folder found: ${backupFolder.id}" }
             logD { "Checking backup file in backup folder: ${backupFolder.id}" }
             val backupFiles = gDriveApi.getFilesList(
                 q = "trashed=false and '${backupFolder.id}' in parents and name = '${
@@ -77,9 +76,9 @@ class BackupRepositoryImpl(
                     )
                 }'",
             ).files
-            logD { "Files in backup folder: ${backupFolder.name} = ${backupFiles.map { it.id }}" }
+            logD { "Files in backup folder ${backupFolder.id}: ${backupFiles.map { it.id }}" }
             val backupFile = backupFiles.firstOrNull() ?: throw NoBackupFoundThrowable()
-            logD { "Backup Found - $backupFile" }
+            logI { "Backup found: ${backupFile.id}" }
             val backupDetails = backupFile.toBackupDetails()
             Result.Success(backupDetails)
         }
@@ -105,17 +104,16 @@ class BackupRepositoryImpl(
         val email = authRepo.getSignedInAccount()?.email
             ?: throw GoogleAuthException()
         val backupFolderName = backupFolderName(email)
-        logD { "Checking Backup folder - $backupFolderName" }
         var backupFolder = gDriveApi.getFilesList(
             q = "name = '$backupFolderName' and trashed=false"
         ).files.firstOrNull()
-        logD { "Received backup folder - $backupFolder" }
+        logD { "Backup folder exists: ${backupFolder != null}" }
         if (backupFolder == null) {
             val createBackupFolderRequest = CreateGDriveFolderRequestDto(backupFolderName(email))
             val createBackupFolderMetadataPart = json.encodeToString(createBackupFolderRequest)
                 .toRequestBody(JSON_MIME_TYPE.toMediaTypeOrNull())
-            logD { "Create backup folder request - $createBackupFolderRequest" }
             backupFolder = gDriveApi.createFolder(createBackupFolderMetadataPart)
+            logI { "Created backup folder: ${backupFolder.id}" }
         }
         val backupFile = backupService.buildBackupFile(
             password = passwordHash,
@@ -141,12 +139,12 @@ class BackupRepositoryImpl(
             fileBody
         )
 
-        logD { "Backup file generated - ${backupFile.name}" }
+        logD { "Backup file generated, size = ${backupFile.length()} bytes" }
         val gDriveBackup = gDriveApi.uploadFile(
             metadata = metadataPart,
             file = mediaPart
         )
-        logI { "Backup file uploaded - $gDriveBackup" }
+        logI { "Backup file uploaded: ${gDriveBackup.id}" }
 
         preferencesManager.updateLastBackupTimestamp(DateUtil.now())
         val backupFolderFiles = gDriveApi.getFilesList(
@@ -156,16 +154,11 @@ class BackupRepositoryImpl(
                 )
             }'"
         ).files
-        logD { "Files in backup folder: ${backupFolder.name} = ${backupFolderFiles.map { it.id }}" }
-        backupFolderFiles
-            .filter { it.id != gDriveBackup.id }
-            .map {
-                async {
-                    logI { "Deleting file ${it.id}" }
-                    gDriveApi.deleteFile(it.id)
-                }
-            }.awaitAll()
-        logI { "Cleaned up Drive" }
+        val outdatedBackups = backupFolderFiles.filter { it.id != gDriveBackup.id }
+        outdatedBackups
+            .map { async { gDriveApi.deleteFile(it.id) } }
+            .awaitAll()
+        logI { "Cleaned up Drive, deleted ${outdatedBackups.size} outdated backup(s)" }
     }
 
     @Throws(

@@ -63,7 +63,7 @@ class FirebaseRemoteConfigService(
             autoDetectTransactionRegexPatterns = txAutoDetectPatterns
         )
 
-        logI(TAG) { "getConfig() completed with: remoteConfig = $remoteConfig" }
+        logI(TAG) { "getConfig() completed" }
         return remoteConfig
     }
 

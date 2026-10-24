@@ -10,7 +10,6 @@ import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.ifNaN
 import dev.ridill.oar.core.domain.util.joinToCapitalizedString
 import dev.ridill.oar.core.domain.util.logD
-import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.domain.model.FundMovement
 import kotlinx.coroutines.CoroutineScope
@@ -77,17 +76,11 @@ class RegexTransactionDataExtractor(
         val processedContent = processText(messageBody)
 
         val amount = extractTransactionAmount(processedContent)
-        logD { "Extracted amount - $amount" }
-        println("Extracted amount - $amount")
         val transactionType = extractTransactionType(processedContent)
         logD { "Extracted type - $transactionType" }
-        println("Extracted type - $transactionType")
         val note = buildNote(processedContent, transactionType)
-        logD { "Transaction note - $note" }
-        println("note - $note")
         val timestamp = extractTimestamp(messageBody)
         logD { "Extracted timestamp - $timestamp" }
-        println("Extracted timestamp - $timestamp")
 
         return ExtractedTransactionData(
             amount = amount,
@@ -102,17 +95,16 @@ class RegexTransactionDataExtractor(
         RegexUnavailableThrowable::class
     )
     private fun extractTransactionAmount(content: List<String>): Double {
-        println("Content for amount extraction - $content")
         val index = content.indexOfFirst { it.startsWith("rs.") }
             .takeIf { it > -1 }
-            ?: throw AmountExtractionFailedThrowable("Failed to find 'rs' keyword\nContent: $content")
+            ?: throw AmountExtractionFailedThrowable("Failed to find 'rs' keyword in ${content.size} tokens")
 
         val amountString = content[index + 1]
         val amount = amountString
             .removePrefix("rs.")
             .replace(",", String.Empty)
             .let(TextFormat::parseNumber)
-            ?: throw AmountExtractionFailedThrowable("Failed parsing amount string '$amountString' to double")
+            ?: throw AmountExtractionFailedThrowable("Failed parsing amount string to double")
 
         return amount.ifNaN { Double.Zero }
     }
@@ -128,15 +120,12 @@ class RegexTransactionDataExtractor(
         ) throw RegexUnavailableThrowable()
 
         val joinedString = content.joinToString(String.WhiteSpace)
-        println("Second party joined string - $joinedString")
         var secondParty: String? = null
         if ("vpa" in content) {
-            println("Content contains vpa")
             val index = content.indexOf("vpa")
             if (index < content.lastIndex) {
                 val nextStr = content[index + 1]
                 secondParty = nextStr
-                println("Got vpa of second party - $secondParty")
             }
         }
 
@@ -149,7 +138,6 @@ class RegexTransactionDataExtractor(
 
         if (match.isNotEmpty()) {
             val nextWord = getNextWord(joinedString, match)
-            println("Next work from vpa - $nextWord")
 
             if (secondParty.isNullOrEmpty()) secondParty = nextWord
         }*/
@@ -157,19 +145,16 @@ class RegexTransactionDataExtractor(
         if (secondParty.isNullOrEmpty()) {
             val secondPartyStartIndex = content.indexOfFirst { it.matches(secondPartyStartRegex) }
                 .takeIf { it > -1 }
-                ?: throw TransactionNoteBuildFailedThrowable("Failed to find start index of second party keyword\nContent: $joinedString")
+                ?: throw TransactionNoteBuildFailedThrowable("Failed to find start index of second party keyword")
 
             val secondPartyEndIndex = content
                 .subList(secondPartyStartIndex + 1, content.size)
-                .also { println("sublist to find end index - $it") }
                 .indexOfFirst { it.matches(secondPartyEndRegex) }
-                .also { println("Second party end index - $it") }
                 .takeIf { it > -1 }
-                ?: throw TransactionNoteBuildFailedThrowable("Failed to find ending index of second party\nContent: $joinedString")
+                ?: throw TransactionNoteBuildFailedThrowable("Failed to find ending index of second party")
 
             secondParty = content
                 .subList(secondPartyStartIndex + 1, secondPartyStartIndex + secondPartyEndIndex + 1)
-                .also { println("Second party sublist - $it") }
                 .joinToCapitalizedString()
         }
 
@@ -201,7 +186,7 @@ class RegexTransactionDataExtractor(
             contentString.contains(debitRegex) -> FundMovement.OUT
             contentString.contains(miscPaymentRegex) -> FundMovement.OUT
             contentString.contains(creditRegex) -> FundMovement.IN
-            else -> throw TransactionTypeExtractionFailedThrowable("Failed to find type match in\nContent: $contentString")
+            else -> throw TransactionTypeExtractionFailedThrowable("Failed to find type match")
         }
     }
 
@@ -215,25 +200,19 @@ class RegexTransactionDataExtractor(
 
         val timestampMatchGroups = timestampRegex.find(messageBody)?.groupValues
         logD { "Timestamp match groups - $timestampMatchGroups" }
-        println("Timestamp match groups - $timestampMatchGroups")
         if (timestampMatchGroups.isNullOrEmpty())
-            throw TimestampExtractionFailedThrowable("Failed to find timestamp match groups\nContent: $messageBody\n")
+            throw TimestampExtractionFailedThrowable("Failed to find timestamp match groups")
 
         val dateString = timestampMatchGroups.getOrNull(1)
-            ?: throw TimestampExtractionFailedThrowable("Failed to get date string\nContent: $messageBody\nMatch Groups: '$timestampMatchGroups'")
+            ?: throw TimestampExtractionFailedThrowable("Failed to get date string from ${timestampMatchGroups.size} match groups")
         logD { "Date string - $dateString" }
-        println("Date string - $dateString")
         val timeString = timestampMatchGroups.getOrNull(3).orEmpty()
         logD { "Time string - $timeString" }
-        println("Time string - $timeString")
         val dateTimeNow = DateUtil.now()
         val dateTimeFormatterBuilder = DateTimeFormatterBuilder().apply {
             // Build date section
             val dateDelimiter = dateString.find { !it.isDigit() }
-                ?.also {
-                    println("Date Delimiter - $it")
-                }
-                ?: throw TimestampExtractionFailedThrowable("Failed to find date delimiter in date string: $dateString")
+                ?: throw TimestampExtractionFailedThrowable("Failed to find date delimiter in date string")
             val dateParts = dateString.split(dateDelimiter)
             val isFirstPartYear = dateParts[0].length == 4
             dateParts.forEachIndexed { index, part ->
@@ -241,11 +220,9 @@ class RegexTransactionDataExtractor(
                     0 -> {
                         if (isFirstPartYear) {
                             val pattern = part.map { 'y' }.joinToString(String.Empty)
-                            println("Adding first year part: $pattern")
                             appendPattern(pattern)
                         } else {
                             val pattern = part.map { 'd' }.joinToString(String.Empty)
-                            println("Adding first day part: $pattern")
                             appendPattern(pattern)
                         }
                     }
@@ -254,10 +231,8 @@ class RegexTransactionDataExtractor(
                         appendPattern(dateDelimiter.toString())
                         if (isFirstPartYear) {
                             val pattern = part.map { 'd' }.joinToString(String.Empty)
-                            println("Adding last day part: $pattern")
                             appendPattern(pattern)
                         } else {
-                            println("Adding last year part")
                             optionalStart()
                             appendPattern("yyyy")
                             optionalEnd()
@@ -270,7 +245,6 @@ class RegexTransactionDataExtractor(
                     else -> {
                         appendPattern(dateDelimiter.toString())
                         val pattern = part.map { 'M' }.joinToString(String.Empty)
-                        println("Adding middle month: $pattern")
                         appendPattern(pattern)
                     }
                 }
@@ -279,7 +253,7 @@ class RegexTransactionDataExtractor(
             if (timeString.isNotEmpty()) {
                 // Built time section
                 val timeDelimiter = timeString.find { !it.isDigit() }
-                    ?: throw TimestampExtractionFailedThrowable("Failed to find time delimiter in time string: $timeString")
+                    ?: throw TimestampExtractionFailedThrowable("Failed to find time delimiter in time string")
                 val timeParts = timeString.split(timeDelimiter)
                 if (timeParts.isNotEmpty()) appendPattern(":")
                 timeParts.forEachIndexed { index, part ->
@@ -310,8 +284,7 @@ class RegexTransactionDataExtractor(
         }
 
         val timestampString = "$dateString${timeString}".trim()
-        logI { "Timestamp string - $timestampString" }
-        println("Timestamp string - $timestampString")
+        logD { "Timestamp string - $timestampString" }
 
         return try {
             DateUtil.parseDateTime(
@@ -319,7 +292,7 @@ class RegexTransactionDataExtractor(
                 formatter = dateTimeFormatterBuilder.toFormatter()
             )
         } catch (t: Throwable) {
-            throw TransactionDataExtractionFailedThrowable("Timestamp parse failed\nContent: $messageBody\nvalue - $timestampString | pattern - ${dateTimeFormatterBuilder.toFormatter()}\nThrowable message - ${t.message.orEmpty()}")
+            throw TransactionDataExtractionFailedThrowable("Timestamp parse failed | pattern - ${dateTimeFormatterBuilder.toFormatter()} | cause - ${t::class.simpleName}")
         }
     }
 
@@ -398,8 +371,8 @@ private const val ENGLISH_CHARS_PATTERN = "(?i)^[a-zA-Z0-9 !@#$%^&*()-_+=/?\n]*\
 
 class RegexUnavailableThrowable : Throwable()
 
-class UnsupportedLanguageThrowable(content: String) :
-    TransactionDataExtractionFailedThrowable("AmountExtractionThrowable:Message is not supported language | content - $content")
+class UnsupportedLanguageThrowable :
+    TransactionDataExtractionFailedThrowable("UnsupportedLanguageThrowable:Message is not supported language")
 
 class AmountExtractionFailedThrowable(message: String) :
     TransactionDataExtractionFailedThrowable("AmountExtractionThrowable:\n$message")

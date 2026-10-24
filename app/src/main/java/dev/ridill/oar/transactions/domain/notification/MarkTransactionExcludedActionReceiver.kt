@@ -6,12 +6,15 @@ import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.Zero
+import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "TxExcludeReceiver"
 
 @AndroidEntryPoint
 class MarkTransactionExcludedActionReceiver : BroadcastReceiver() {
@@ -34,6 +37,7 @@ class MarkTransactionExcludedActionReceiver : BroadcastReceiver() {
         applicationScope.launch {
             try {
                 repo.toggleExcluded(id, true)
+                logI(TAG) { "Transaction $id excluded from notification" }
                 notificationHelper.dismissNotification(id.hashCode())
             } finally {
                 pendingResult.finish()

@@ -55,6 +55,7 @@ import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.launchAppNotificationSettings
 import dev.ridill.oar.core.ui.util.launchAppSettings
+import dev.ridill.oar.core.ui.util.launchShareFile
 import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionScreen
 import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionViewModel
 import dev.ridill.oar.settings.presentation.backupEncryption.ENCRYPTION_PASSWORD_UPDATED
@@ -83,6 +84,7 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
         val credentialService = rememberCredentialService(context = context)
         val activity = LocalActivity.current
 
+        val shareLogsChooserTitle = stringResource(R.string.export_logs_chooser_title)
         CollectFlowEffect(
             viewModel.events,
             snackbarController,
@@ -103,6 +105,14 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
 
                 SettingsViewModel.SettingsEvent.LaunchAppSettings -> {
                     context.launchAppSettings()
+                }
+
+                is SettingsViewModel.SettingsEvent.ShareLogs -> {
+                    context.launchShareFile(
+                        uri = event.uri,
+                        mimeType = "application/zip",
+                        chooserTitle = shareLogsChooserTitle
+                    )
                 }
 
                 SettingsViewModel.SettingsEvent.StartManualSignInFlow -> {
