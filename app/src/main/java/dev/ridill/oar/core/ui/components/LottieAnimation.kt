@@ -8,6 +8,7 @@ import androidx.compose.ui.layout.ContentScale
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.LottieDynamicProperties
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 
@@ -15,13 +16,15 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 fun LottieAnim(
     @RawRes resId: Int,
     modifier: Modifier = Modifier,
-    contentScale: ContentScale = ContentScale.Fit
+    contentScale: ContentScale = ContentScale.Fit,
+    dynamicProperties: LottieDynamicProperties? = null
 ) {
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(resId))
     LottieAnimation(
         composition = composition,
         modifier = modifier,
-        contentScale = contentScale
+        contentScale = contentScale,
+        dynamicProperties = dynamicProperties
     )
 }
 
@@ -30,14 +33,16 @@ fun ManualLottieAnim(
     @RawRes resId: Int,
     progress: () -> Float,
     modifier: Modifier = Modifier,
-    contentScale: ContentScale = ContentScale.Fit
+    contentScale: ContentScale = ContentScale.Fit,
+    dynamicProperties: LottieDynamicProperties? = null
 ) {
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(resId))
     LottieAnimation(
         composition = composition,
         modifier = modifier,
         contentScale = contentScale,
-        progress = progress
+        progress = progress,
+        dynamicProperties = dynamicProperties
     )
 }
 
@@ -45,7 +50,8 @@ fun ManualLottieAnim(
 fun InfiniteLottieAnim(
     @RawRes resId: Int,
     modifier: Modifier = Modifier,
-    contentScale: ContentScale = ContentScale.Fit
+    contentScale: ContentScale = ContentScale.Fit,
+    dynamicProperties: LottieDynamicProperties? = null
 ) {
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(resId))
     val progress by animateLottieCompositionAsState(
@@ -56,6 +62,7 @@ fun InfiniteLottieAnim(
         composition = composition,
         progress = { progress },
         modifier = modifier,
-        contentScale = contentScale
+        contentScale = contentScale,
+        dynamicProperties = dynamicProperties
     )
 }

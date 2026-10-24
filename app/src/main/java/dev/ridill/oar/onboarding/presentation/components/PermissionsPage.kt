@@ -13,13 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -38,8 +35,6 @@ import dev.ridill.oar.core.ui.components.DisplayMediumText
 import dev.ridill.oar.core.ui.components.MultiplePermissionsState
 import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.icons.Message
-import dev.ridill.oar.core.ui.theme.PrimaryBrandColor
-import dev.ridill.oar.core.ui.theme.contentColor
 import dev.ridill.oar.core.ui.theme.spacing
 
 @Composable
@@ -105,32 +100,21 @@ fun PermissionsPage(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(
+                OnboardingTextButton(
                     onClick = onSkipClick,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = LocalContentColor.current
-                    )
                 ) {
                     Text(stringResource(R.string.action_skip))
                 }
 
-                Button(
+                OnboardingButton(
                     onClick = onGivePermissionClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
                 ) {
                     Text(stringResource(R.string.give_permission))
                 }
             }
         } else {
-            Button(
+            OnboardingButton(
                 onClick = onGivePermissionClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
                 modifier = Modifier
                     .align(Alignment.End)
             ) {
@@ -148,7 +132,7 @@ private fun PermissionDetails(
     modifier: Modifier = Modifier
 ) {
     CompositionLocalProvider(
-        LocalContentColor provides PrimaryBrandColor.contentColor()
+//        LocalContentColor provides MaterialTheme.colorScheme.onPrimary
     ) {
         Row(
             modifier = modifier,

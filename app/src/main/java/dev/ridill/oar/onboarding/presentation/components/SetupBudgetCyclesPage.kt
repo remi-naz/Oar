@@ -11,8 +11,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
@@ -74,15 +72,11 @@ fun SetupBudgetCyclesPage(
             modifier = Modifier
                 .align(Alignment.End)
         ) {
-            Button(
+            OnboardingButton(
                 onClick = {
                     keyboardController?.hide()
                     onStartBudgetingClick()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                }
             ) {
                 Text(stringResource(R.string.start_budgeting))
             }
@@ -123,7 +117,8 @@ private fun BudgetInput(
                 unfocusedPlaceholderColor = contentColor,
                 focusedPlaceholderColor = contentColor,
                 unfocusedSupportingTextColor = contentColor,
-                focusedSupportingTextColor = contentColor
+                focusedSupportingTextColor = contentColor,
+                cursorColor = contentColor,
             ),
             shape = MaterialTheme.shapes.medium,
             placeholder = { Text(stringResource(R.string.enter_budget)) },
