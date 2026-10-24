@@ -31,25 +31,21 @@ class DeleteTransactionActionReceiver : BroadcastReceiver() {
         val id = intent.getLongExtra(ARG_TRANSACTION_ID, -1L)
         if (id < Long.Zero) return
 
+        val title = context.resources.getQuantityString(R.plurals.transaction_deleted, 1)
         val pendingResult = goAsync()
-        try {
-            applicationScope.launch {
+        applicationScope.launch {
+            try {
                 repo.deleteById(id)
                 notificationHelper.updateNotification(
                     id = id.hashCode(),
                     notification = notificationHelper.buildBaseNotification()
-                        .setContentTitle(
-                            context.resources.getQuantityString(
-                                R.plurals.transaction_deleted,
-                                1
-                            )
-                        )
+                        .setContentTitle(title)
                         .setTimeoutAfter(NotificationHelper.Utils.TIMEOUT_MILLIS)
                         .build()
                 )
+            } finally {
+                pendingResult.finish()
             }
-        } finally {
-            pendingResult.finish()
         }
     }
 }

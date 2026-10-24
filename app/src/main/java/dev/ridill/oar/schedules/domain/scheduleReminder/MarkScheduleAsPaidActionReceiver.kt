@@ -31,12 +31,14 @@ class MarkScheduleAsPaidActionReceiver : BroadcastReceiver() {
         if (intent?.action != ScheduleReminderNotificationHelper.ACTION_MARK_SCHEDULED_AS_PAID)
             return
 
+        val scheduleId = intent.getLongExtra(ScheduleReminder.EXTRA_SCHEDULE_ID, -1L)
+            .takeIf { it > -1L }
+            ?: return
+
+        val title = context?.getString(R.string.schedule_marked_as_paid)
         val pendingResult = goAsync()
-        try {
-            applicationScope.launch {
-                val scheduleId = intent.getLongExtra(ScheduleReminder.EXTRA_SCHEDULE_ID, -1L)
-                    .takeIf { it > -1L }
-                    ?: return@launch
+        applicationScope.launch {
+            try {
                 val schedule = repo.getScheduleById(scheduleId)
                     ?: return@launch
                 repo.addPaymentToSchedule(schedule)
@@ -45,13 +47,13 @@ class MarkScheduleAsPaidActionReceiver : BroadcastReceiver() {
                     id = scheduleId.hashCode(),
                     notification = notificationHelper
                         .buildBaseNotification()
-                        .setContentTitle(context?.getString(R.string.schedule_marked_as_paid))
+                        .setContentTitle(title)
                         .setTimeoutAfter(NotificationHelper.Utils.TIMEOUT_MILLIS)
                         .build()
                 )
+            } finally {
+                pendingResult.finish()
             }
-        } finally {
-            pendingResult.finish()
         }
     }
 }

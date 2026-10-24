@@ -42,17 +42,19 @@ class ScheduledPaymentReminderReceiver : BroadcastReceiver() {
             ?: return
 
         val pendingResult = goAsync()
-        try {
-            notifyAndSetNextNextReminder(id)
-        } finally {
-            pendingResult.finish()
+        applicationContext.launch {
+            try {
+                notifyAndSetNextNextReminder(id)
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 
-    private fun notifyAndSetNextNextReminder(id: Long) = applicationContext.launch {
+    private suspend fun notifyAndSetNextNextReminder(id: Long) {
         logI(ScheduledPaymentReminderReceiver::class.simpleName) { "notifyAndSetNextNextReminder() called with: id = $id" }
         val schedule = repo.getScheduleById(id)
-            ?: return@launch
+            ?: return
         notificationHelper.postNotification(
             id = schedule.id.hashCode(),
             data = schedule
