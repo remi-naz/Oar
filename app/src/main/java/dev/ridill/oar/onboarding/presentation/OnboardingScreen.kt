@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -36,8 +36,6 @@ import dev.ridill.oar.core.ui.components.MultiplePermissionsState
 import dev.ridill.oar.core.ui.components.OarScaffold
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.theme.BorderWidthStandard
-import dev.ridill.oar.core.ui.theme.PrimaryBrandColor
-import dev.ridill.oar.core.ui.theme.onPrimaryBrandColor
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.onboarding.domain.model.OnboardingPage
 import dev.ridill.oar.onboarding.presentation.components.PermissionsPage
@@ -56,86 +54,83 @@ fun OnboardingScreen(
     actions: OnboardingActions
 ) {
     val view = LocalView.current
+    val isBackgroundLight = MaterialTheme.colorScheme.primary.luminance() > 0.5f
     if (!view.isInEditMode) {
-        // Set isAppearanceLightStatusBars = true for Onboarding Screen only
-//      // and revert it back to original value when screen disposes
-        DisposableEffect(view) {
+        // Match status bar icons to the primary background for Onboarding Screen only
+        // and revert to the original value when screen disposes
+        DisposableEffect(view, isBackgroundLight) {
             val window = (view.context as Activity).window
-            val originalLightStatusBarValue = WindowCompat.getInsetsController(window, view)
-                .isAppearanceLightStatusBars
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            val originalLightStatusBarValue = insetsController.isAppearanceLightStatusBars
+            insetsController.isAppearanceLightStatusBars = isBackgroundLight
             onDispose {
-                WindowCompat.getInsetsController(window, view)
-                    .isAppearanceLightStatusBars = originalLightStatusBarValue
+                insetsController.isAppearanceLightStatusBars = originalLightStatusBarValue
             }
         }
     }
-    CompositionLocalProvider(
-        LocalContentColor provides onPrimaryBrandColor
-    ) {
-        OarScaffold(
-            containerColor = PrimaryBrandColor,
-            snackbarController = snackbarController,
+    OarScaffold(
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        snackbarController = snackbarController,
+        modifier = Modifier
+            .imePadding()
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
-                .imePadding()
-        ) { paddingValues ->
-            Column(
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .weight(Float.One)
-                ) { page ->
-                    when (page) {
-                        OnboardingPage.WELCOME.ordinal -> {
-                            WelcomeMessagePage()
-                        }
+                    .weight(Float.One)
+            ) { page ->
+                when (page) {
+                    OnboardingPage.WELCOME.ordinal -> {
+                        WelcomeMessagePage()
+                    }
 
-                        OnboardingPage.APP_PERMISSIONS.ordinal -> {
-                            PermissionsPage(
-                                permissionsState = permissionsState,
-                                onGivePermissionClick = actions::onGivePermissionsClick,
-                                onSkipClick = actions::onSkipPermissionsClick
-                            )
-                        }
+                    OnboardingPage.APP_PERMISSIONS.ordinal -> {
+                        PermissionsPage(
+                            permissionsState = permissionsState,
+                            onGivePermissionClick = actions::onGivePermissionsClick,
+                            onSkipClick = actions::onSkipPermissionsClick
+                        )
+                    }
 
-                        OnboardingPage.ACCOUNT_SIGN_IN_AND_DATA_RESTORE.ordinal -> {
-                            SignInAndDataRestore(
-                                state = state.signInAndDataRestoreState,
-                                authState = state.authState,
-                                onSignInClick = actions::onSignInClick,
-                                onSignInSkip = actions::onSkipSignInClick,
-                                restoreState = state.dataRestoreState,
-                                onCheckForBackupClick = actions::onCheckOrRestoreClick,
-                                onSkipClick = actions::onDataRestoreSkip,
-                                showEncryptionPasswordInput = state.showEncryptionPasswordInput,
-                                onEncryptionPasswordInputDismiss = actions::onEncryptionPasswordInputDismiss,
-                                onEncryptionPasswordSubmit = actions::onEncryptionPasswordSubmit,
-                                appRestartTimer = state.appRestartTimer
-                            )
-                        }
+                    OnboardingPage.ACCOUNT_SIGN_IN_AND_DATA_RESTORE.ordinal -> {
+                        SignInAndDataRestore(
+                            state = state.signInAndDataRestoreState,
+                            authState = state.authState,
+                            onSignInClick = actions::onSignInClick,
+                            onSignInSkip = actions::onSkipSignInClick,
+                            restoreState = state.dataRestoreState,
+                            onCheckForBackupClick = actions::onCheckOrRestoreClick,
+                            onSkipClick = actions::onDataRestoreSkip,
+                            showEncryptionPasswordInput = state.showEncryptionPasswordInput,
+                            onEncryptionPasswordInputDismiss = actions::onEncryptionPasswordInputDismiss,
+                            onEncryptionPasswordSubmit = actions::onEncryptionPasswordSubmit,
+                            appRestartTimer = state.appRestartTimer
+                        )
+                    }
 
-                        OnboardingPage.SETUP_BUDGET_CYCLES.ordinal -> {
-                            SetupBudgetCyclesPage(
-                                budgetInput = budgetInputState,
-                                selectedCurrency = state.appCurrency,
-                                onCurrencyClick = navigateToCurrencySelection,
-                                onStartBudgetingClick = actions::onStartBudgetingClick
-                            )
-                        }
+                    OnboardingPage.SETUP_BUDGET_CYCLES.ordinal -> {
+                        SetupBudgetCyclesPage(
+                            budgetInput = budgetInputState,
+                            selectedCurrency = state.appCurrency,
+                            onCurrencyClick = navigateToCurrencySelection,
+                            onStartBudgetingClick = actions::onStartBudgetingClick
+                        )
                     }
                 }
-
-                WelcomeFlowProgress(
-                    pageCount = pagerState.pageCount,
-                    currentPage = pagerState.currentPage,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
             }
+
+            WelcomeFlowProgress(
+                pageCount = pagerState.pageCount,
+                currentPage = pagerState.currentPage,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
         }
     }
 }

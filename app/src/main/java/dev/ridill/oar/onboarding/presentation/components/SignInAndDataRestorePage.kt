@@ -12,13 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -208,11 +205,8 @@ private fun GoogleSignInActions(
             )
         }
 
-        TextButton(
+        OnboardingTextButton(
             onClick = onSkipClick,
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = LocalContentColor.current
-            )
         ) {
             Text(
                 stringResource(
@@ -373,19 +367,13 @@ private fun RestoreBackupActions(
     onSkipClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val buttonContainerColor = MaterialTheme.colorScheme.primaryContainer
-    val buttonContentColor = MaterialTheme.colorScheme.onPrimaryContainer
     Column(
         modifier = modifier
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Button(
+        OnboardingButton(
             onClick = onRestoreClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = buttonContainerColor,
-                contentColor = buttonContentColor
-            ),
             enabled = !isRestoreInProgress
         ) {
             Text(
@@ -396,12 +384,8 @@ private fun RestoreBackupActions(
             )
         }
 
-        TextButton(
+        OnboardingTextButton(
             onClick = onSkipClick,
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = LocalContentColor.current,
-                disabledContentColor = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
-            ),
             enabled = !isRestoreInProgress
         ) {
             Text(stringResource(R.string.do_not_restore))
