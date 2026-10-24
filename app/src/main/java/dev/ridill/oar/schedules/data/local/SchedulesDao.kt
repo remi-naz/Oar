@@ -17,6 +17,9 @@ interface SchedulesDao : BaseDao<ScheduleEntity> {
     @RawQuery
     suspend fun getSchedulesPagedRaw(query: RoomRawQuery): List<ScheduleEntity>
 
+    @Query("SELECT id FROM schedules_table")
+    suspend fun getAllScheduleIds(): List<Long>
+
     @Query("SELECT * FROM schedules_table WHERE id = :id")
     suspend fun getScheduleById(id: Long): ScheduleEntity?
 

@@ -17,6 +17,12 @@ class OarNavigator(
         backStack.removeLastOrNull()
     }
 
+    /** Navigate to [route] after dropping every other entry from the back stack. */
+    fun navigateClearingBackStack(route: NavKey) {
+        backStack.clear()
+        backStack.add(route)
+    }
+
     /** Navigate to [route] replacing the current top entry (used for duplicate-transaction flow). */
     fun replaceTop(route: NavKey) {
         backStack.removeLastOrNull()

@@ -18,14 +18,18 @@ import dev.ridill.oar.core.domain.util.logE
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.settings.domain.modal.AppTheme
+import dev.ridill.oar.settings.domain.repositoty.BackupSettingsRepository
+import dev.ridill.oar.settings.domain.repositoty.DataResetRepository
 import dev.ridill.oar.settings.domain.repositoty.SettingsRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,6 +37,8 @@ class SettingsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepo: SettingsRepository,
     private val authRepo: AuthRepository,
+    private val backupSettingsRepo: BackupSettingsRepository,
+    private val dataResetRepo: DataResetRepository,
     private val remoteConfigService: FirebaseRemoteConfigService,
     private val logFileManager: LogFileManager,
     private val eventBus: EventBus<SettingsEvent>
@@ -63,6 +69,15 @@ class SettingsViewModel @Inject constructor(
 
     private val _appSourceCodeUrl = MutableStateFlow<String?>(null)
 
+    private val logoutDialog = savedStateHandle
+        .getStateFlow<String?>(LOGOUT_DIALOG, null)
+        .mapLatest { name -> LogoutDialog.entries.firstOrNull { it.name == name } }
+        .distinctUntilChanged()
+
+    private val lastBackupDateTime = backupSettingsRepo.getLastBackupTime()
+
+    private val isClearingLocalData = MutableStateFlow(false)
+
     val state = combineTuple(
         authState,
         appTheme,
@@ -72,7 +87,10 @@ class SettingsViewModel @Inject constructor(
         transactionAutoDetectEnabled,
         showSmsPermissionRationale,
         showTransactionAutoDetectInfo,
-        _appSourceCodeUrl
+        _appSourceCodeUrl,
+        logoutDialog,
+        lastBackupDateTime,
+        isClearingLocalData
     ).mapLatest { (
                       authState,
                       appTheme,
@@ -82,7 +100,10 @@ class SettingsViewModel @Inject constructor(
                       autoAddTransactionEnabled,
                       showSmsPermissionRationale,
                       showTransactionAutoDetectInfo,
-                      appSourceCodeUrl
+                      appSourceCodeUrl,
+                      logoutDialog,
+                      lastBackupDateTime,
+                      isClearingLocalData
                   ) ->
         SettingsState(
             authState = authState,
@@ -94,6 +115,9 @@ class SettingsViewModel @Inject constructor(
             showSmsPermissionRationale = showSmsPermissionRationale,
             showAutoDetectTransactionFeatureInfo = showTransactionAutoDetectInfo,
             sourceCodeUrl = appSourceCodeUrl,
+            logoutDialog = logoutDialog,
+            lastBackupDateTime = lastBackupDateTime,
+            isClearingLocalData = isClearingLocalData
         )
     }
         .onStart { settingsRepo.refreshCurrentDate() }
@@ -208,20 +232,68 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private var logoutJob: Job? = null
     override fun onLogoutClick() {
+        savedStateHandle[LOGOUT_DIALOG] = LogoutDialog.CHOICE.name
+    }
+
+    override fun onLogoutDialogDismiss() {
+        savedStateHandle[LOGOUT_DIALOG] = null
+    }
+
+    override fun onLogoutKeepDataClick() {
+        savedStateHandle[LOGOUT_DIALOG] = null
+        startLogout()
+    }
+
+    override fun onLogoutClearDataClick() {
+        savedStateHandle[LOGOUT_DIALOG] = LogoutDialog.CONFIRM_CLEAR_DATA.name
+    }
+
+    override fun onLogoutClearDataConfirm() {
+        savedStateHandle[LOGOUT_DIALOG] = null
+        startLogout(clearLocalData = true)
+    }
+
+    private var logoutJob: Job? = null
+    private fun startLogout(clearLocalData: Boolean = false) {
         logoutJob?.cancel()
         logoutJob = viewModelScope.launch {
-            if (authRepo.signUserOut() is Result.Error) {
-                eventBus.send(
-                    SettingsEvent.ShowUiMessage(
-                        UiText.StringResource(
-                            R.string.error_sign_out_failed,
-                            true
+            // Sign-out and clear must not be interrupted halfway, e.g. by leaving the screen
+            val dataCleared = withContext(NonCancellable) {
+                try {
+                    if (clearLocalData) isClearingLocalData.update { true }
+                    if (authRepo.signUserOut() is Result.Error) {
+                        eventBus.send(
+                            SettingsEvent.ShowUiMessage(
+                                UiText.StringResource(R.string.error_sign_out_failed, true)
+                            )
                         )
-                    )
-                )
+                        // Keep the data if the account is still signed in
+                        return@withContext false
+                    }
+                    clearLocalData && clearLocalData()
+                } finally {
+                    isClearingLocalData.update { false }
+                }
             }
+            // Sent outside the uncancellable block: the screen may already be gone by now
+            if (dataCleared) eventBus.send(SettingsEvent.StartOnboarding)
+        }
+    }
+
+    private suspend fun clearLocalData(): Boolean {
+        return try {
+            dataResetRepo.clearAllLocalData()
+            true
+        } catch (t: Throwable) {
+            t.rethrowIfCoroutineCancellation()
+            logE(t) { "Failed to clear local data" }
+            eventBus.send(
+                SettingsEvent.ShowUiMessage(
+                    UiText.StringResource(R.string.error_clear_local_data_failed, true)
+                )
+            )
+            false
         }
     }
 
@@ -257,6 +329,7 @@ class SettingsViewModel @Inject constructor(
         data object LaunchAppSettings : SettingsEvent
         data object StartManualSignInFlow : SettingsEvent
         data class ShareLogs(val uri: Uri) : SettingsEvent
+        data object StartOnboarding : SettingsEvent
     }
 }
 
@@ -264,3 +337,4 @@ private const val SHOW_APP_THEME_SELECTION = "SHOW_APP_THEME_SELECTION"
 private const val SHOW_SMS_PERMISSION_RATIONALE = "SHOW_SMS_PERMISSION_RATIONALE"
 private const val TEMP_AUTO_ADD_TRANSACTION_STATE = "TEMP_AUTO_ADD_TRANSACTION_STATE"
 private const val SHOW_AUTO_DETECT_TX_INFO = "SHOW_AUTO_DETECT_TX_INFO"
+private const val LOGOUT_DIALOG = "LOGOUT_DIALOG"

@@ -20,6 +20,9 @@ interface BudgetCycleDao : BaseDao<BudgetCycleEntity> {
     suspend fun getLastCycle(): BudgetCycleDetailsView?
 
     @RewriteQueriesToDropUnusedColumns
+    @Query("SELECT id FROM budget_cycle_table")
+    suspend fun getAllCycleIds(): List<Long>
+
     @Query("SELECT * FROM budget_cycle_details_view WHERE active = 1 LIMIT 1")
     fun getActiveCycleFlow(): Flow<BudgetCycleDetailsView?>
 

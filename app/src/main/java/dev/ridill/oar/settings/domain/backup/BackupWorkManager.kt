@@ -88,6 +88,12 @@ class BackupWorkManager(
         workManager.cancelWorkById(periodicBackupWorkName.toUUID())
     }
 
+    fun cancelAllBackupAndRestoreWork() {
+        workManager.cancelAllWorkByTag(dataBackupWorkerTag)
+        workManager.cancelAllWorkByTag(dataRestoreWorkerTag)
+        cancelPeriodicBackupWork()
+    }
+
     fun runImmediateBackupWork() {
         val workRequest = OneTimeWorkRequestBuilder<GDriveDataBackupWorker>()
             .setExpedited(OutOfQuotaPolicy.DROP_WORK_REQUEST)
