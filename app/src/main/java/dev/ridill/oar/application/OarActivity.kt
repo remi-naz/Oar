@@ -85,7 +85,9 @@ class OarActivity : AppCompatActivity() {
     private val pendingDeepLink = mutableStateOf<NavKey?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { viewModel.showOnboarding.value == null }
+        }
         super.onCreate(savedInstanceState)
         this.intent?.let {
             val runConfigRestore = it.getBooleanExtra(RUN_CONFIG_RESTORE_EXTRA, false)
@@ -122,7 +124,7 @@ class OarActivity : AppCompatActivity() {
 
         setContent {
             val appTheme by viewModel.appTheme.collectAsStateWithLifecycle(AppTheme.SYSTEM_DEFAULT)
-            val showOnboarding by viewModel.showOnboarding.collectAsStateWithLifecycle(false)
+            val showOnboarding by viewModel.showOnboarding.collectAsStateWithLifecycle()
             val dynamicTheme by viewModel.dynamicThemeEnabled.collectAsStateWithLifecycle(false)
             val isAppLocked by viewModel.isAppLocked.collectAsStateWithLifecycle(false)
             val appLockErrorMessage by viewModel.appLockAuthErrorMessage.collectAsStateWithLifecycle()
@@ -149,19 +151,22 @@ class OarActivity : AppCompatActivity() {
                 )
             }
 
-            val backStack = rememberNavBackStack(DashboardRoute)
+            val onboardingResolved = showOnboarding ?: return@setContent
+            val backStack = rememberNavBackStack(
+                if (onboardingResolved) OnboardingRoute else DashboardRoute
+            )
             val navigator = rememberOarNavigator(backStack)
 
-            LaunchedEffect(showOnboarding) {
-                if (showOnboarding) {
+            LaunchedEffect(onboardingResolved) {
+                if (onboardingResolved && backStack.lastOrNull() != OnboardingRoute) {
                     backStack.clear()
                     backStack.add(OnboardingRoute)
                 }
             }
 
             val deepLinkKey = pendingDeepLink.value
-            LaunchedEffect(deepLinkKey, showOnboarding) {
-                if (deepLinkKey != null && !showOnboarding) {
+            LaunchedEffect(deepLinkKey, onboardingResolved) {
+                if (deepLinkKey != null && !onboardingResolved) {
                     backStack.clear()
                     backStack.add(DashboardRoute)
                     backStack.add(deepLinkKey)
@@ -210,7 +215,7 @@ class OarActivity : AppCompatActivity() {
     }
 
     private fun checkAppPermissions() {
-        if (viewModel.showOnboarding.value) return
+        if (viewModel.showOnboarding.value != false) return
         val isSmsPermissionGranted = isPermissionGranted(Manifest.permission.RECEIVE_SMS)
         viewModel.onSmsPermissionCheck(isSmsPermissionGranted)
 
