@@ -92,6 +92,8 @@ class BackupWorkManager(
         workManager.cancelAllWorkByTag(dataBackupWorkerTag)
         workManager.cancelAllWorkByTag(dataRestoreWorkerTag)
         cancelPeriodicBackupWork()
+        // Cancelling leaves finished work in the DB, e.g. a SUCCEEDED restore that onboarding would act on
+        workManager.pruneWork()
     }
 
     fun runImmediateBackupWork() {
