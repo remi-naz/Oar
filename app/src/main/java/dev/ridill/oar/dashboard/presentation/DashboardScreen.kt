@@ -347,7 +347,10 @@ private fun FeatureMenu(
             val menuItemContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             bottomNavItems.forEach { (route, iconRes, labelRes) ->
                 FloatingActionButtonMenuItem(
-                    onClick = { navigateToRoute(route) },
+                    onClick = {
+                        onExpandedChange(false)
+                        navigateToRoute(route)
+                    },
                     text = {
                         Text(
                             text = stringResource(id = labelRes),
