@@ -10,6 +10,8 @@ class OarNavigator(
 ) {
 
     fun navigate(route: NavKey) {
+        // Guard against double taps stacking the same destination twice
+        if (backStack.lastOrNull() == route) return
         backStack.add(route)
     }
 
