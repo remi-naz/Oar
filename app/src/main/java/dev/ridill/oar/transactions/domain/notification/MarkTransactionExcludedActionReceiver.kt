@@ -31,13 +31,13 @@ class MarkTransactionExcludedActionReceiver : BroadcastReceiver() {
         if (id < Long.Zero) return
 
         val pendingResult = goAsync()
-        try {
-            applicationScope.launch {
+        applicationScope.launch {
+            try {
                 repo.toggleExcluded(id, true)
                 notificationHelper.dismissNotification(id.hashCode())
+            } finally {
+                pendingResult.finish()
             }
-        } finally {
-            pendingResult.finish()
         }
     }
 }
