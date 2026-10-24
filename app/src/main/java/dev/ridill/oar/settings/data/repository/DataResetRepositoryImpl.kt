@@ -44,7 +44,6 @@ internal class DataResetRepositoryImpl(
         // clearAllTables runs in its own Room transaction; the rest live outside the database
         coroutineScope {
             launch { database.clearAllTables() }
-            launch { preferencesManager.resetDataPreferences() }
             launch {
                 securityPreferencesManager.updateBackupEncryptionHash(
                     hash = null,
@@ -58,6 +57,9 @@ internal class DataResetRepositoryImpl(
         // clearAllTables also wipes the currency list and the active cycle, so seed them again
         appInitWorkManager.startAppInitWorker()
         appInitWorkManager.startAlarmsAndReminderInitWorkers()
+
+        // Last, since it drops the onboarding flag and sends the UI back to onboarding
+        preferencesManager.resetDataPreferences()
         logI(TAG) { "Local data cleared" }
     }
 }
