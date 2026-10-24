@@ -11,6 +11,8 @@ import dev.ridill.oar.aggregations.data.local.AggregationsDao
 import dev.ridill.oar.budgetCycles.data.local.BudgetCycleDao
 import dev.ridill.oar.budgetCycles.data.local.entity.BudgetCycleEntity
 import dev.ridill.oar.budgetCycles.data.local.view.BudgetCycleDetailsView
+import dev.ridill.oar.core.domain.util.logE
+import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.folders.data.local.FolderDao
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
 import dev.ridill.oar.folders.data.local.entity.FolderFtsEntity
@@ -157,14 +159,18 @@ class TagTrigramBackfillSpec : AutoMigrationSpec {
     }
 }
 
+private const val MIGRATION_TAG = "OarDatabaseMigration"
+
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
+        logI(MIGRATION_TAG) { "Migrating database 5 -> 6" }
         val zone = ZoneId.systemDefault()
         migrateColumn(db, zone, "transaction_table", "id", "timestamp")
         migrateColumn(db, zone, "schedules_table", "id", "last_payment_timestamp")
         migrateColumn(db, zone, "schedules_table", "id", "next_payment_timestamp")
         migrateColumn(db, zone, "folder_table", "id", "created_timestamp")
         migrateColumn(db, zone, "tag_table", "id", "created_timestamp")
+        logI(MIGRATION_TAG) { "Migrated database 5 -> 6" }
     }
 
     private fun migrateColumn(
@@ -177,6 +183,8 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         val cursor = db.query(
             "SELECT $idColumn, $column FROM $table WHERE $column IS NOT NULL"
         )
+        var convertedCount = 0
+        var unparsableCount = 0
         try {
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(0)
@@ -188,15 +196,23 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
                         .atZone(zone)
                         .toInstant()
                         .toString()
-                }.getOrNull() ?: continue
+                }.getOrNull() ?: run {
+                    unparsableCount++
+                    continue
+                }
                 db.execSQL(
                     "UPDATE $table SET $column = ? WHERE $idColumn = ?",
                     arrayOf<Any>(utcStr, id)
                 )
+                convertedCount++
             }
-        } catch (_: Throwable) {
-
+        } catch (t: Throwable) {
+            // Swallowed so a bad row can't block the upgrade, but the skipped conversion must be traceable
+            logE(t, MIGRATION_TAG) { "Failed converting $table.$column after $convertedCount row(s)" }
         } finally {
+            logI(MIGRATION_TAG) {
+                "$table.$column: converted = $convertedCount, unparsable = $unparsableCount"
+            }
             cursor.close()
         }
     }
@@ -206,6 +222,7 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
 // be rewritten and the dependent views recreated with the updated column/literal references.
 val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(db: SupportSQLiteDatabase) {
+        logI(MIGRATION_TAG) { "Migrating database 6 -> 7" }
         // Views reference the `type` column and old enum literals; drop dependents before views.
         db.execSQL("DROP VIEW IF EXISTS `budget_cycle_details_view`")
         db.execSQL("DROP VIEW IF EXISTS `transaction_details_view`")
@@ -261,5 +278,6 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         LEFT OUTER JOIN transaction_details_view tx ON (tx.cycleId = bdgt.id AND tx.currencyCode = bdgt.currency_code AND tx.excluded = 0)
         GROUP BY bdgt.id"""
         )
+        logI(MIGRATION_TAG) { "Migrated database 6 -> 7" }
     }
 }

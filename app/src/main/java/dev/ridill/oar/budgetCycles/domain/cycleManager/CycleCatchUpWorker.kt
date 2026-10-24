@@ -10,7 +10,9 @@ import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleEntry
 import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleError
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.domain.notification.NotificationHelper
+import dev.ridill.oar.core.domain.util.logD
 import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.core.domain.util.logW
 
 private const val TAG = "CycleCatchUpWorker"
 
@@ -26,11 +28,12 @@ class CycleCatchUpWorker @AssistedInject constructor(
     private val notificationHelper: NotificationHelper<BudgetCycleEntry>
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        logI(TAG) { "$TAG started" }
+        logI(TAG) { "$TAG started, attempt = $runAttemptCount" }
         val overdueCycleId = repo.getActiveCycle()?.id
         return when (val result = repo.completeOverdueCycleIfAny()) {
             is dev.ridill.oar.core.domain.model.Result.Success -> {
                 val summary = result.data
+                logI(TAG) { "$TAG succeeded, overdue cycle completed = ${summary != null}" }
                 if (summary != null && overdueCycleId != null) {
                     notificationHelper.postCycleCompleted(appContext, overdueCycleId, summary)
                 }
@@ -39,8 +42,15 @@ class CycleCatchUpWorker @AssistedInject constructor(
 
             is dev.ridill.oar.core.domain.model.Result.Error -> when (result.error) {
                 // Completed by the alarm or manually in the meantime
-                BudgetCycleError.CYCLE_NOT_ACTIVE -> Result.success()
-                else -> Result.retry()
+                BudgetCycleError.CYCLE_NOT_ACTIVE -> {
+                    logD(TAG) { "$TAG: cycle already completed" }
+                    Result.success()
+                }
+
+                else -> {
+                    logW(TAG) { "$TAG retrying, attempt = $runAttemptCount, error = ${result.error}" }
+                    Result.retry()
+                }
             }
         }
     }

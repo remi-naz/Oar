@@ -6,6 +6,8 @@ import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.notification.NotificationHelper
+import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.core.domain.util.logW
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.schedules.domain.model.Schedule
 import dev.ridill.oar.schedules.domain.notification.ScheduleReminderNotificationHelper
@@ -13,6 +15,8 @@ import dev.ridill.oar.schedules.domain.repository.SchedulesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "SchedulePaidReceiver"
 
 @AndroidEntryPoint
 class MarkScheduleAsPaidActionReceiver : BroadcastReceiver() {
@@ -39,9 +43,19 @@ class MarkScheduleAsPaidActionReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         applicationScope.launch {
             try {
+                val scheduleId = intent.getLongExtra(ScheduleReminder.EXTRA_SCHEDULE_ID, -1L)
+                    .takeIf { it > -1L }
+                    ?: run {
+                        logW(TAG) { "Mark as paid action received without a valid schedule ID" }
+                        return@launch
+                    }
                 val schedule = repo.getScheduleById(scheduleId)
-                    ?: return@launch
+                    ?: run {
+                        logW(TAG) { "Mark as paid action, schedule $scheduleId not found" }
+                        return@launch
+                    }
                 repo.addPaymentToSchedule(schedule)
+                logI(TAG) { "Schedule $scheduleId marked as paid from notification" }
 
                 notificationHelper.updateNotification(
                     id = scheduleId.hashCode(),

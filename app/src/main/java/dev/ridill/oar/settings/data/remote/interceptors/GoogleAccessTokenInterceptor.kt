@@ -1,6 +1,7 @@
 package dev.ridill.oar.settings.data.remote.interceptors
 
 import dev.ridill.oar.account.presentation.util.AuthorizationService
+import dev.ridill.oar.core.domain.util.logW
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -16,6 +17,7 @@ class GoogleAccessTokenInterceptor(
                 authorizationService.getAccessToken()
             } catch (t: Throwable) {
                 t.rethrowIfCoroutineCancellation()
+                logW { "Access token fetch failed: ${t::class.simpleName}" }
                 throw GoogleAuthorizationRequiredException(t)
             }
         }

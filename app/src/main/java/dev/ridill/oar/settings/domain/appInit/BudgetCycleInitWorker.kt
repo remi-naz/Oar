@@ -16,6 +16,7 @@ import dev.ridill.oar.budgetCycles.domain.model.BudgetCycleEntry
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.core.domain.util.logW
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -30,7 +31,7 @@ class BudgetCycleInitWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         startForeground()
-        logI(TAG) { "$TAG started" }
+        logI(TAG) { "$TAG started, attempt = $runAttemptCount" }
         // Close an overdue cycle first so the user still gets the completion summary
         val overdueCycleId = repo.getActiveCycle()?.id
         val overdueResult = repo.completeOverdueCycleIfAny()
@@ -39,13 +40,18 @@ class BudgetCycleInitWorker @AssistedInject constructor(
             if (summary != null && overdueCycleId != null)
                 notificationHelper.postCycleCompleted(appContext, overdueCycleId, summary)
         }
+        if (overdueResult is dev.ridill.oar.core.domain.model.Result.Error) {
+            logW(TAG) { "Completing overdue cycle failed: ${overdueResult.error}" }
+        }
         val result = repo.scheduleLastCycleOrNew()
         return@withContext when (result) {
             is dev.ridill.oar.core.domain.model.Result.Error -> {
+                logW(TAG) { "$TAG retrying, attempt = $runAttemptCount, error = ${result.error}" }
                 Result.retry()
             }
 
             is dev.ridill.oar.core.domain.model.Result.Success -> {
+                logI(TAG) { "$TAG succeeded" }
                 Result.success()
             }
         }

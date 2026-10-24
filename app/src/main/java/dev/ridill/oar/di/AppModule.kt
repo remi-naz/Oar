@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +20,8 @@ import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.MIGRATION_5_6
 import dev.ridill.oar.core.data.db.MIGRATION_6_7
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.data.logging.LogFileManager
+import dev.ridill.oar.core.domain.logging.LogRedactor
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.PreferencesManagerImpl
 import dev.ridill.oar.core.data.preferences.animPreferences.AnimPreferencesManager
@@ -37,11 +41,15 @@ import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.EventBus
+import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.core.domain.util.logW
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import javax.inject.Qualifier
 import javax.inject.Singleton
+
+private const val DB_TAG = "OarDatabase"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -58,6 +66,15 @@ object AppModule {
         )
         .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
         .fallbackToDestructiveMigration(dropAllTables = false)
+        .addCallback(object : RoomDatabase.Callback() {
+            override fun onOpen(db: SupportSQLiteDatabase) {
+                logI(DB_TAG) { "Database opened, version = ${db.version}" }
+            }
+
+            override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
+                logW(DB_TAG) { "Destructive migration performed, version = ${db.version}" }
+            }
+        })
         .build()
 
     @AppPreferences
@@ -155,6 +172,19 @@ object AppModule {
 
     @Provides
     fun provideCrashlyticsManager(): CrashlyticsManager = FirebaseCrashlyticsManager()
+
+    @Provides
+    fun provideLogRedactor(): LogRedactor = LogRedactor()
+
+    @Singleton
+    @Provides
+    fun provideLogFileManager(
+        @ApplicationContext context: Context,
+        @ApplicationScope applicationScope: CoroutineScope
+    ): LogFileManager = LogFileManager(
+        context = context,
+        applicationScope = applicationScope
+    )
 
     @Singleton
     @Provides

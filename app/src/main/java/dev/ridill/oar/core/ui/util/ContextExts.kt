@@ -36,6 +36,19 @@ fun Context.launchAppNotificationSettings() {
     startActivity(intent)
 }
 
+fun Context.launchShareFile(
+    uri: Uri,
+    mimeType: String,
+    chooserTitle: String
+) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = mimeType
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    startActivity(Intent.createChooser(intent, chooserTitle))
+}
+
 fun Context.launchAppSettings() {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
         data = Uri.fromParts("package", packageName, null)

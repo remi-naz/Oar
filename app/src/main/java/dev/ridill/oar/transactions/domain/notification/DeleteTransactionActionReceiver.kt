@@ -7,12 +7,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.Zero
+import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.transactions.domain.model.Transaction
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "TxDeleteReceiver"
 
 @AndroidEntryPoint
 class DeleteTransactionActionReceiver : BroadcastReceiver() {
@@ -36,6 +39,7 @@ class DeleteTransactionActionReceiver : BroadcastReceiver() {
         applicationScope.launch {
             try {
                 repo.deleteById(id)
+                logI(TAG) { "Transaction $id deleted from notification" }
                 notificationHelper.updateNotification(
                     id = id.hashCode(),
                     notification = notificationHelper.buildBaseNotification()

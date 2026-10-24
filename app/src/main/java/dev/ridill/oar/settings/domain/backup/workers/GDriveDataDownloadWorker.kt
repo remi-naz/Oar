@@ -15,6 +15,7 @@ import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.logE
 import dev.ridill.oar.core.domain.util.logI
+import dev.ridill.oar.core.domain.util.logW
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.di.BackupFeature
 import dev.ridill.oar.settings.data.remote.interceptors.GoogleAuthorizationRequiredException
@@ -33,13 +34,19 @@ class GDriveDataDownloadWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         startForegroundService()
+        logI(GDriveDataDownloadWorker::class.simpleName) { "Backup download started" }
         val timestamp = inputData.getString(BackupWorkManager.KEY_BACKUP_TIMESTAMP)
             ?.let { DateUtil.parseDateTimeOrNull(it) }
-            ?: return@withContext Result.failure(
-                workDataOf(
-                    BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_download_backup_failed)
+            ?: run {
+                logW(GDriveDataDownloadWorker::class.simpleName) {
+                    "Backup download failed, missing or invalid timestamp input"
+                }
+                return@withContext Result.failure(
+                    workDataOf(
+                        BackupWorkManager.KEY_MESSAGE to appContext.getString(R.string.error_download_backup_failed)
+                    )
                 )
-            )
+            }
         try {
             val backupFileId = inputData.getString(BackupWorkManager.KEY_BACKUP_FILE_ID)
                 ?: throw BackupDownloadFailedThrowable()

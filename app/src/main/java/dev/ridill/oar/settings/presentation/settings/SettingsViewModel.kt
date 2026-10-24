@@ -1,5 +1,6 @@
 package dev.ridill.oar.settings.presentation.settings
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,10 +9,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.account.presentation.util.CredentialService
+import dev.ridill.oar.core.data.logging.LogFileManager
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
+import dev.ridill.oar.core.domain.util.logE
+import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.settings.domain.modal.AppTheme
 import dev.ridill.oar.settings.domain.repositoty.SettingsRepository
@@ -30,6 +34,7 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepo: SettingsRepository,
     private val authRepo: AuthRepository,
     private val remoteConfigService: FirebaseRemoteConfigService,
+    private val logFileManager: LogFileManager,
     private val eventBus: EventBus<SettingsEvent>
 ) : ViewModel(), SettingsActions {
 
@@ -220,6 +225,25 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private var exportLogsJob: Job? = null
+    override fun onExportLogsClick() {
+        exportLogsJob?.cancel()
+        exportLogsJob = viewModelScope.launch {
+            try {
+                val logsUri = logFileManager.exportLogs()
+                eventBus.send(SettingsEvent.ShareLogs(logsUri))
+            } catch (t: Throwable) {
+                t.rethrowIfCoroutineCancellation()
+                logE(t) { "Failed to export logs" }
+                eventBus.send(
+                    SettingsEvent.ShowUiMessage(
+                        UiText.StringResource(R.string.error_export_logs_failed, true)
+                    )
+                )
+            }
+        }
+    }
+
     private fun refreshConfigs() = viewModelScope.launch {
         val config = remoteConfigService.getConfig()
         _appSourceCodeUrl.update { config.sourceCodeUrl }
@@ -232,6 +256,7 @@ class SettingsViewModel @Inject constructor(
         data object RequestSMSPermission : SettingsEvent
         data object LaunchAppSettings : SettingsEvent
         data object StartManualSignInFlow : SettingsEvent
+        data class ShareLogs(val uri: Uri) : SettingsEvent
     }
 }
 

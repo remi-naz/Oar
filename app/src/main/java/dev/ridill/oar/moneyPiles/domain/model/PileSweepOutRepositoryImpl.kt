@@ -9,6 +9,7 @@ import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
+import dev.ridill.oar.core.domain.util.logW
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
@@ -92,12 +93,14 @@ internal class PileSweepOutRepositoryImpl(
 
                 Result.Success(Unit)
             } catch (_: PileNotFoundThrowable) {
+                logW { "Sweep out failed, pile $pileId not found" }
                 Result.Error(
                     MoneyPileError.NotFound,
                     UiText.StringResource(R.string.error_pile_not_found, isErrorText = true)
                 )
             } catch (t: Throwable) {
                 t.rethrowIfCoroutineCancellation()
+                logW { "Sweep out failed for pile $pileId: ${t::class.simpleName}" }
                 Result.Error(
                     MoneyPileError.Unknown,
                     UiText.StringResource(R.string.error_unknown, isErrorText = true)

@@ -8,6 +8,7 @@ import dev.ridill.oar.core.domain.model.BasicError
 import dev.ridill.oar.core.domain.model.FundMovement
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.model.RootError
+import dev.ridill.oar.core.domain.util.logW
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.moneyPiles.domain.model.ContributionSource
@@ -69,12 +70,14 @@ internal class PileFundMovementRepositoryImpl(
                 Result.Success(Unit)
             }
         } catch (_: PileFundMovementThrowable) {
+            logW { "Move fund failed, pile $pileId not found" }
             Result.Error(
                 PileFundMovementError.PileNotFound,
                 UiText.StringResource(R.string.error_pile_not_found, isErrorText = true)
             )
         } catch (t: Throwable) {
             t.rethrowIfCoroutineCancellation()
+            logW { "Move fund failed for pile $pileId: ${t::class.simpleName}" }
             Result.Error(BasicError.UNKNOWN, UiText.StringResource(R.string.error_unknown))
         }
     }

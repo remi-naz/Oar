@@ -12,6 +12,7 @@ import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.UtilConstants
 import dev.ridill.oar.core.domain.util.isSameMonthAs
+import dev.ridill.oar.core.domain.util.logW
 import dev.ridill.oar.core.domain.util.rethrowIfCoroutineCancellation
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.di.ApplicationScope
@@ -115,12 +116,14 @@ class AllSchedulesRepositoryImpl(
             repo.addPaymentToSchedule(schedule)
             Result.Success(Unit)
         } catch (_: ScheduleNotFoundThrowable) {
+            logW { "Mark schedule as paid failed, schedule $id not found" }
             Result.Error(
                 ScheduleError.SCHEDULE_NOT_FOUND,
                 UiText.StringResource(R.string.error_schedule_not_found)
             )
         } catch (t: Throwable) {
             t.rethrowIfCoroutineCancellation()
+            logW { "Mark schedule as paid failed for schedule $id: ${t::class.simpleName}" }
             Result.Error(
                 ScheduleError.UNKNOWN,
                 t.localizedMessage?.let {
