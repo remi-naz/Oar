@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,10 +21,13 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -35,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.model.AuthState
@@ -218,6 +223,78 @@ fun SettingsScreen(
                 currentOption = state.appTheme,
                 onDismiss = actions::onAppThemeSelectionDismiss,
                 onOptionSelect = actions::onAppThemeSelectionConfirm
+            )
+        }
+
+        when (state.logoutDialog) {
+            LogoutDialog.CHOICE -> {
+                AlertDialog(
+                    onDismissRequest = actions::onLogoutDialogDismiss,
+                    title = { Text(stringResource(R.string.logout_dialog_title)) },
+                    text = { Text(stringResource(R.string.logout_dialog_message)) },
+                    confirmButton = {
+                        TextButton(onClick = actions::onLogoutKeepDataClick) {
+                            Text(stringResource(R.string.logout_keep_local_data))
+                        }
+                    },
+                    dismissButton = {
+                        Row {
+                            TextButton(onClick = actions::onLogoutDialogDismiss) {
+                                Text(stringResource(R.string.action_cancel))
+                            }
+                            TextButton(onClick = actions::onLogoutClearDataClick) {
+                                Text(
+                                    text = stringResource(R.string.logout_clear_local_data),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+
+            LogoutDialog.CONFIRM_CLEAR_DATA -> {
+                AlertDialog(
+                    onDismissRequest = actions::onLogoutDialogDismiss,
+                    title = { Text(stringResource(R.string.logout_clear_data_confirm_title)) },
+                    text = {
+                        Text(
+                            stringResource(
+                                R.string.logout_clear_data_confirm_message,
+                                state.lastBackupDateFormatted?.asString()
+                                    ?: stringResource(R.string.never_backed_up)
+                            )
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = actions::onLogoutDialogDismiss) {
+                            Text(stringResource(R.string.action_cancel))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = actions::onLogoutClearDataConfirm) {
+                            Text(
+                                text = stringResource(R.string.logout_clear_and_logout),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                )
+            }
+
+            null -> Unit
+        }
+
+        if (state.isClearingLocalData) {
+            AlertDialog(
+                onDismissRequest = {},
+                properties = DialogProperties(
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false
+                ),
+                title = { Text(stringResource(R.string.logout_clearing_data)) },
+                text = { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) },
+                confirmButton = {}
             )
         }
 

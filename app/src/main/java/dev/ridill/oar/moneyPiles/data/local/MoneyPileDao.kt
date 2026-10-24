@@ -15,6 +15,9 @@ interface MoneyPileDao : BaseDao<MoneyPileEntity> {
     @RawQuery
     suspend fun getMoneyPilesWithAggregatePagedRaw(query: RoomRawQuery): List<MoneyPileAggregateView>
 
+    @Query("SELECT id FROM money_pile_table")
+    suspend fun getAllPileIds(): List<Long>
+
     @Query("SELECT * FROM money_pile_table WHERE id = :id")
     suspend fun getPileById(id: Long): MoneyPileEntity?
 

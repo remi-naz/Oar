@@ -58,6 +58,8 @@ argon2kt = "1.6.0"
 
 com-google-truth = "1.4.5"
 robolectric = "4.17"
+mockk = "1.14.5"
+kotlinx-coroutines = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -157,6 +159,8 @@ com-lambdapioneer-argon2kt = { group = "com.lambdapioneer.argon2kt", name = "arg
 # Test
 com-google-truth = { group = "com.google.truth", name = "truth", version.ref = "com-google-truth" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+io-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+org-jetbrains-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }

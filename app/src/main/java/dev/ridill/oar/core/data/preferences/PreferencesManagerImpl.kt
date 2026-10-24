@@ -177,6 +177,18 @@ class PreferencesManagerImpl(
         }
     }
 
+    override suspend fun resetDataPreferences() {
+        withContext(Dispatchers.IO) {
+            dataStore.edit { preferences ->
+                preferences.remove(Keys.LAST_BACKUP_TIMESTAMP)
+                preferences.remove(Keys.FATAL_BACKUP_ERROR)
+                preferences.remove(Keys.ALL_TX_SHOW_EXCLUDED_OPTION)
+                // Budget and currency live in the cleared database, so onboarding has to run again
+                preferences.remove(Keys.SHOW_ONBOARDING)
+            }
+        }
+    }
+
     private object Keys {
         val SHOW_ONBOARDING = booleanPreferencesKey("SHOW_ONBOARDING")
         val APP_THEME = stringPreferencesKey("APP_THEME")

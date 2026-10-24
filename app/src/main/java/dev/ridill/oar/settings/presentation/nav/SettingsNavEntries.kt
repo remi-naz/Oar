@@ -47,6 +47,7 @@ import dev.ridill.oar.core.ui.navigation.CycleSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.EncryptionPasswordUpdatedResult
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.OarNavigator
+import dev.ridill.oar.core.ui.navigation.OnboardingRoute
 import dev.ridill.oar.core.ui.navigation.ResultEffect
 import dev.ridill.oar.core.ui.navigation.SecuritySettingsRoute
 import dev.ridill.oar.core.ui.navigation.SettingsRoute
@@ -113,6 +114,10 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
                         mimeType = "application/zip",
                         chooserTitle = shareLogsChooserTitle
                     )
+                }
+
+                SettingsViewModel.SettingsEvent.StartOnboarding -> {
+                    navigator.navigateClearingBackStack(OnboardingRoute)
                 }
 
                 SettingsViewModel.SettingsEvent.StartManualSignInFlow -> {
