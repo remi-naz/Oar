@@ -34,10 +34,11 @@ class OarViewModel @Inject constructor(
 ) : ViewModel() {
     private val preferences = preferencesManager.preferences
 
+    // null until the preference is loaded, so the splash can be held and the start destination resolved
     val showOnboarding = preferences
         .mapLatest { it.showOnboarding }
         .distinctUntilChanged()
-        .asStateFlow(viewModelScope, false)
+        .asStateFlow(viewModelScope, null)
 
     val appTheme = preferences.mapLatest { it.appTheme }
         .distinctUntilChanged()
