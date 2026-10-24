@@ -29,8 +29,9 @@ object AccountModule {
 
     @Provides
     fun provideAuthorizationService(
-        @ApplicationContext context: Context
-    ): AuthorizationService = DefaultAuthorizationService(context)
+        @ApplicationContext context: Context,
+        authService: AuthService
+    ): AuthorizationService = DefaultAuthorizationService(context, authService)
 
     @Provides
     fun provideAuthRepository(
