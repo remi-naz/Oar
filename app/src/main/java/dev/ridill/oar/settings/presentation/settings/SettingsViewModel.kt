@@ -259,7 +259,7 @@ class SettingsViewModel @Inject constructor(
         logoutJob?.cancel()
         logoutJob = viewModelScope.launch {
             // Sign-out and clear must not be interrupted halfway, e.g. by leaving the screen
-            val dataCleared = withContext(NonCancellable) {
+            withContext(NonCancellable) {
                 try {
                     if (clearLocalData) isClearingLocalData.update { true }
                     if (authRepo.signUserOut() is Result.Error) {
@@ -269,22 +269,19 @@ class SettingsViewModel @Inject constructor(
                             )
                         )
                         // Keep the data if the account is still signed in
-                        return@withContext false
+                        return@withContext
                     }
-                    clearLocalData && clearLocalData()
+                    if (clearLocalData) clearLocalData()
                 } finally {
                     isClearingLocalData.update { false }
                 }
             }
-            // Sent outside the uncancellable block: the screen may already be gone by now
-            if (dataCleared) eventBus.send(SettingsEvent.StartOnboarding)
         }
     }
 
-    private suspend fun clearLocalData(): Boolean {
+    private suspend fun clearLocalData() {
         return try {
             dataResetRepo.clearAllLocalData()
-            true
         } catch (t: Throwable) {
             t.rethrowIfCoroutineCancellation()
             logE(t) { "Failed to clear local data" }
@@ -293,7 +290,6 @@ class SettingsViewModel @Inject constructor(
                     UiText.StringResource(R.string.error_clear_local_data_failed, true)
                 )
             )
-            false
         }
     }
 
@@ -329,7 +325,6 @@ class SettingsViewModel @Inject constructor(
         data object LaunchAppSettings : SettingsEvent
         data object StartManualSignInFlow : SettingsEvent
         data class ShareLogs(val uri: Uri) : SettingsEvent
-        data object StartOnboarding : SettingsEvent
     }
 }
 

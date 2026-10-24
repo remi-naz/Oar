@@ -159,8 +159,7 @@ class OarActivity : AppCompatActivity() {
 
             LaunchedEffect(onboardingResolved) {
                 if (onboardingResolved && backStack.lastOrNull() != OnboardingRoute) {
-                    backStack.clear()
-                    backStack.add(OnboardingRoute)
+                    navigator.navigateClearingBackStack(OnboardingRoute)
                 }
             }
 
