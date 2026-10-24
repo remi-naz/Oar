@@ -76,7 +76,7 @@ class BackupWorkManager(
 
         workManager.enqueueUniquePeriodicWork(
             periodicBackupWorkName,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            ExistingPeriodicWorkPolicy.UPDATE,
             backupWorkRequest
         )
     }

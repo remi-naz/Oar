@@ -3,16 +3,19 @@ package dev.ridill.oar.account.presentation.util
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.accounts.Account
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
+import dev.ridill.oar.account.domain.service.AuthService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class DefaultAuthorizationService(
-    context: Context
+    context: Context,
+    private val authService: AuthService
 ) : AuthorizationService {
     private val authorizationClient = Identity.getAuthorizationClient(context)
 
@@ -22,6 +25,9 @@ class DefaultAuthorizationService(
 
     private fun buildAuthorizationRequest(): AuthorizationRequest = AuthorizationRequest.Builder()
         .setRequestedScopes(scopes)
+        .apply {
+            authService.getSignedInAccount()?.email?.let { setAccount(Account(it, "com.google")) }
+        }
         .build()
 
     @Throws(AuthorizationNeedsResolutionThrowable::class)
