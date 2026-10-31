@@ -17,10 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Archive
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material.icons.rounded.Unarchive
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,7 +86,6 @@ import dev.ridill.oar.transactions.presentation.components.TransactionListItem
 import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun FolderDetailsScreen(
     snackbarController: SnackbarController,
@@ -151,6 +151,20 @@ internal fun FolderDetailsScreen(
                             )
                         }
                     } else {
+                        IconButton(
+                            onClick = if (state.isArchived) actions::onUnarchiveClick
+                            else actions::onArchiveClick
+                        ) {
+                            Icon(
+                                imageVector = if (state.isArchived) Icons.Rounded.Unarchive
+                                else Icons.Rounded.Archive,
+                                contentDescription = stringResource(
+                                    if (state.isArchived) R.string.cd_unarchive_folder
+                                    else R.string.cd_archive_folder
+                                )
+                            )
+                        }
+
                         IconButton(onClick = navigateToEditFolder) {
                             Icon(
                                 imageVector = Icons.Rounded.Edit,
@@ -555,6 +569,8 @@ private fun PreviewFolderDetailsScreen() {
             transactionPagingItems = transactionPagingItems,
             actions = object : FolderDetailsActions {
                 override fun onCycleSelect(id: Long) {}
+                override fun onArchiveClick() {}
+                override fun onUnarchiveClick() {}
                 override fun onDeleteClick() {}
                 override fun onDeleteDismiss() {}
                 override fun onDeleteFolderOnlyClick() {}

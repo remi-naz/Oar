@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface FolderDetailsRepository {
     fun getFolderDetailsById(id: Long): Flow<FolderDetails?>
+    suspend fun archiveFolder(id: Long)
+    suspend fun unarchiveFolder(id: Long)
     suspend fun deleteFolderById(id: Long)
     suspend fun deleteFolderWithTransactions(id: Long)
     fun getTransactionsInFolderPaged(

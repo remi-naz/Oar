@@ -8,7 +8,8 @@ fun FolderEntity.toFolder(): Folder = Folder(
     id = id,
     name = name,
     createdTimestamp = createdTimestamp,
-    excluded = isExcluded
+    excluded = isExcluded,
+    archivedTimestamp = archivedTimestamp
 )
 
 fun FolderEntity.toFolderDetails(): FolderDetails = FolderDetails(
@@ -16,4 +17,5 @@ fun FolderEntity.toFolderDetails(): FolderDetails = FolderDetails(
     name = name,
     createdTimestamp = createdTimestamp,
     excluded = isExcluded,
+    archivedTimestamp = archivedTimestamp
 )

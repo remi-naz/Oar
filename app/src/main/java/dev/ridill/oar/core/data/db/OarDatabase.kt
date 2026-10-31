@@ -64,7 +64,7 @@ import java.time.ZoneId
         TransactionDetailsView::class,
         MoneyPileAggregateView::class,
     ],
-    version = 12,
+    version = 13,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -75,6 +75,7 @@ import java.time.ZoneId
         AutoMigration(from = 9, to = 10, spec = FtsIndexRebuildSpec::class),
         AutoMigration(from = 10, to = 11),
         AutoMigration(from = 11, to = 12, spec = TagTrigramBackfillSpec::class),
+        AutoMigration(from = 12, to = 13),
     ]
 )
 @TypeConverters(DateTimeConverter::class)

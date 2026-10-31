@@ -2,6 +2,7 @@ package dev.ridill.oar.folders.data.repository
 
 import androidx.paging.PagingData
 import dev.ridill.oar.core.data.preferences.animPreferences.AnimPreferencesManager
+import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.folders.data.local.FolderDao
 import dev.ridill.oar.folders.data.toFolderDetails
 import dev.ridill.oar.folders.domain.model.FolderDetails
@@ -36,6 +37,14 @@ internal class FolderDetailsRepositoryImpl(
                 folderId = folderId
             )
         }
+
+    override suspend fun archiveFolder(id: Long) = withContext(Dispatchers.IO) {
+        dao.updateArchivedTimestamp(id, DateUtil.now())
+    }
+
+    override suspend fun unarchiveFolder(id: Long) = withContext(Dispatchers.IO) {
+        dao.updateArchivedTimestamp(id, null)
+    }
 
     override suspend fun deleteFolderById(id: Long) = withContext(Dispatchers.IO) {
         dao.deleteFolderOnlyById(id)

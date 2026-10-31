@@ -4,6 +4,8 @@ import dev.ridill.oar.folders.domain.model.FolderTransactionsMultiSelectionOptio
 
 interface FolderDetailsActions {
     fun onCycleSelect(id: Long)
+    fun onArchiveClick()
+    fun onUnarchiveClick()
     fun onDeleteClick()
     fun onDeleteDismiss()
     fun onDeleteFolderOnlyClick()

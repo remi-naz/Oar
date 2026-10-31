@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,6 +23,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
@@ -30,6 +33,7 @@ import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.times
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,6 +58,7 @@ private fun buildFolderContentDesc(
     name: String,
     created: String,
     excluded: Boolean,
+    archived: Boolean,
 ): String = buildString {
     append(stringResource(R.string.cd_folder_list_item, name, created))
 
@@ -62,6 +67,12 @@ private fun buildFolderContentDesc(
         append(String.WhiteSpace)
         append(stringResource(R.string.cd_excluded_append))
     }
+
+    if (archived) {
+        append(",")
+        append(String.WhiteSpace)
+        append(stringResource(R.string.cd_archived_append))
+    }
 }
 
 @Composable
@@ -69,6 +80,7 @@ internal fun FolderCard(
     name: String,
     created: String,
     excluded: Boolean,
+    archived: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -82,6 +94,7 @@ internal fun FolderCard(
         name = name,
         created = created,
         excluded = excluded,
+        archived = archived,
     )
 
     val border = CardDefaults.outlinedCardBorder()
@@ -158,12 +171,25 @@ internal fun FolderCard(
                             .padding(top = MaterialTheme.spacing.extraSmall)
                     )
                 }
+
+                if (archived) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_archive),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(top = MaterialTheme.spacing.extraSmall)
+                            .size(16.dp)
+                    )
+                }
+                
                 Text(
                     text = name,
                     style = nameStyle,
                     maxLines = 2,
                     minLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f, fill = false)
                 )
             }
 
@@ -235,6 +261,7 @@ private fun PreviewFolderCard() {
                 name = LoremIpsum(2).values.joinToString(),
                 created = DateUtil.now().format(DateUtil.Formatters.localizedDateLong),
                 excluded = true,
+                archived = true,
                 onClick = {},
             )
         }

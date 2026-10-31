@@ -24,7 +24,10 @@ class FolderListRepositoryImpl(
     private val db: OarDatabase,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : FolderListRepository {
-    override fun getFoldersListPaged(searchQuery: String): Flow<PagingData<Folder>> = Pager(
+    override fun getFoldersListPaged(
+        searchQuery: String,
+        includeArchived: Boolean
+    ): Flow<PagingData<Folder>> = Pager(
         config = PagingConfig(pageSize = UtilConstants.DEFAULT_PAGE_SIZE),
         pagingSourceFactory = {
             FolderPagingSource(
@@ -32,7 +35,8 @@ class FolderListRepositoryImpl(
                 queryBuilder = queryBuilder,
                 db = db,
                 applicationScope = applicationScope,
-                query = searchQuery
+                query = searchQuery,
+                includeArchived = includeArchived
             )
         }
     ).flow

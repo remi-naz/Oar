@@ -49,8 +49,8 @@ class FolderDetailsViewModel @AssistedInject constructor(
     private val createdTimestamp = folderDetails
         .mapLatest { it?.createdTimestamp ?: DateUtil.now() }
         .distinctUntilChanged()
-    private val excluded = folderDetails
-        .mapLatest { it?.excluded.orFalse() }
+    private val excludedAndArchived = folderDetails
+        .mapLatest { it?.excluded.orFalse() to it?.isArchived.orFalse() }
         .distinctUntilChanged()
 
     val transactionPagingData = repo.getTransactionsInFolderPaged(route.folderId)
@@ -94,7 +94,7 @@ class FolderDetailsViewModel @AssistedInject constructor(
     val state = combineTuple(
         folderName,
         createdTimestamp,
-        excluded,
+        excludedAndArchived,
         shouldShowActionPreview,
         showDeleteFolderConfirmation,
         selectedTransactionIds,
@@ -107,7 +107,7 @@ class FolderDetailsViewModel @AssistedInject constructor(
     ).mapLatest { (
                       name,
                       createdTimestamp,
-                      excluded,
+                      excludedAndArchived,
                       shouldShowActionPreview,
                       showDeleteConfirmation,
                       selectedTransactionIds,
@@ -121,7 +121,8 @@ class FolderDetailsViewModel @AssistedInject constructor(
         FolderDetailsState(
             folderName = name,
             createdTimestamp = createdTimestamp,
-            isExcluded = excluded,
+            isExcluded = excludedAndArchived.first,
+            isArchived = excludedAndArchived.second,
             shouldShowActionPreview = shouldShowActionPreview,
             showDeleteConfirmation = showDeleteConfirmation,
             selectedTransactionIds = selectedTransactionIds,
@@ -141,6 +142,20 @@ class FolderDetailsViewModel @AssistedInject constructor(
             val cycleTransactionIds = repo
                 .getTransactionIdsInFolder(cycleId = id, folderId = route.folderId)
             savedStateHandle[SELECTED_TRANSACTION_IDS] = cycleTransactionIds.toSet()
+        }
+    }
+
+    override fun onArchiveClick() {
+        viewModelScope.launch {
+            repo.archiveFolder(route.folderId)
+            eventBus.send(FolderDetailsEvent.FolderArchived)
+        }
+    }
+
+    override fun onUnarchiveClick() {
+        viewModelScope.launch {
+            repo.unarchiveFolder(route.folderId)
+            eventBus.send(FolderDetailsEvent.FolderUnarchived)
         }
     }
 
@@ -282,6 +297,8 @@ class FolderDetailsViewModel @AssistedInject constructor(
 
     sealed interface FolderDetailsEvent {
         data class ShowUiMessage(val uiText: UiText) : FolderDetailsEvent
+        data object FolderArchived : FolderDetailsEvent
+        data object FolderUnarchived : FolderDetailsEvent
         data object FolderDeleted : FolderDetailsEvent
         data class TransactionRemovedFromFolder(val txId: Long) : FolderDetailsEvent
     }

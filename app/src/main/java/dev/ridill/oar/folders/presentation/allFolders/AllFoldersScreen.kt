@@ -8,9 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Text
@@ -18,7 +23,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,6 +56,8 @@ import kotlin.random.Random
 fun AllFoldersScreen(
     snackbarController: SnackbarController,
     foldersPagingItems: LazyPagingItems<Folder>,
+    showArchived: Boolean,
+    onShowArchivedToggle: (Boolean) -> Unit,
     navigateToAddFolder: () -> Unit,
     navigateToFolderDetails: (Long) -> Unit,
     navigateUp: () -> Unit
@@ -62,6 +71,34 @@ fun AllFoldersScreen(
             MediumFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.destination_all_folders)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) },
+                actions = {
+                    var showOptionsMenu by remember { mutableStateOf(false) }
+                    IconButton(onClick = { showOptionsMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.cd_more_options)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showOptionsMenu,
+                        onDismissRequest = { showOptionsMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(
+                                        if (showArchived) R.string.hide_archived
+                                        else R.string.show_archived
+                                    )
+                                )
+                            },
+                            onClick = {
+                                onShowArchivedToggle(!showArchived)
+                                showOptionsMenu = false
+                            }
+                        )
+                    }
+                },
                 scrollBehavior = topAppBarScrollBehavior
             )
         },
@@ -114,6 +151,7 @@ fun AllFoldersScreen(
                                     name = item.name,
                                     created = item.createdTimestamp.format(DateUtil.Formatters.localizedDateMedium),
                                     excluded = item.excluded,
+                                    archived = item.isArchived,
                                     onClick = { navigateToFolderDetails(item.id) },
                                     modifier = Modifier
                                         .animateItem()
@@ -144,6 +182,8 @@ private fun PreviewAllFoldersScreen() {
                         )
                     }
                 )).collectAsLazyPagingItems(),
+            showArchived = false,
+            onShowArchivedToggle = {},
             navigateToAddFolder = {},
             navigateToFolderDetails = {},
             navigateUp = {}

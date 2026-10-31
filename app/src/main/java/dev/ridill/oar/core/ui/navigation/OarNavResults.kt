@@ -25,6 +25,9 @@ data class FolderSavedResult(val id: Long) : Parcelable
 @Parcelize
 data object FolderDeletedResult : Parcelable
 
+@Parcelize
+data object FolderArchivedResult : Parcelable
+
 // Cycle selection result
 @Parcelize
 data class CycleSelectedResult(val id: Long?) : Parcelable
