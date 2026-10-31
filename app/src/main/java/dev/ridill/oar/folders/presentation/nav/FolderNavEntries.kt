@@ -19,6 +19,7 @@ import dev.ridill.oar.core.ui.navigation.AddEditTransactionRoute
 import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.navigation.AllFoldersRoute
 import dev.ridill.oar.core.ui.navigation.BottomSheetSceneStrategy
+import dev.ridill.oar.core.ui.navigation.FolderArchivedResult
 import dev.ridill.oar.core.ui.navigation.FolderDeletedResult
 import dev.ridill.oar.core.ui.navigation.FolderDetailsRoute
 import dev.ridill.oar.core.ui.navigation.FolderSavedResult
@@ -45,6 +46,8 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
         val viewModel: AllFoldersViewModel = hiltViewModel()
         val foldersPagingItems = viewModel.folderListPagingData.collectAsLazyPagingItems()
 
+        val showArchived by viewModel.showArchived.collectAsStateWithLifecycle()
+
         val snackbarController = rememberSnackbarController()
         ResultEffect<FolderSavedResult> { result ->
             navigator.navigate(FolderDetailsRoute(result.id))
@@ -53,10 +56,16 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
         ResultEffect<FolderDeletedResult> { _ ->
             snackbarController.showSnackbar(folderDeletedMessage)
         }
+        val folderArchivedMessage = stringResource(R.string.folder_archived)
+        ResultEffect<FolderArchivedResult> { _ ->
+            snackbarController.showSnackbar(folderArchivedMessage)
+        }
 
         AllFoldersScreen(
             snackbarController = snackbarController,
             foldersPagingItems = foldersPagingItems,
+            showArchived = showArchived,
+            onShowArchivedToggle = viewModel::onShowArchivedToggle,
             navigateToFolderDetails = { navigator.navigate(FolderDetailsRoute(it)) },
             navigateUp = navigator::goBack,
             navigateToAddFolder = { navigator.navigate(AddEditFolderSheetRoute()) }
@@ -86,6 +95,7 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
             snackbarController.showSnackbar(folderUpdatedMessage)
         }
 
+        val folderUnarchivedMessage = stringResource(R.string.folder_unarchived)
         val transactionRemovedMessage = pluralStringResource(
             R.plurals.transaction_removed_from_this_folder, 1
         )
@@ -97,6 +107,15 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
                         event.uiText.asString(context),
                         event.uiText.isErrorText
                     )
+                }
+
+                FolderDetailsViewModel.FolderDetailsEvent.FolderArchived -> {
+                    resultBus.sendResult<FolderArchivedResult>(FolderArchivedResult)
+                    navigator.goBack()
+                }
+
+                FolderDetailsViewModel.FolderDetailsEvent.FolderUnarchived -> {
+                    snackbarController.showSnackbar(folderUnarchivedMessage)
                 }
 
                 FolderDetailsViewModel.FolderDetailsEvent.FolderDeleted -> {

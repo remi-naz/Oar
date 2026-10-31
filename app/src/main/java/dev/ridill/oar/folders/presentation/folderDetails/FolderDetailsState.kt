@@ -11,6 +11,7 @@ data class FolderDetailsState(
     val folderName: String = String.Empty,
     val createdTimestamp: LocalDateTime = DateUtil.now(),
     val isExcluded: Boolean = false,
+    val isArchived: Boolean = false,
     val currency: Currency = LocaleUtil.defaultCurrency,
     val shouldShowActionPreview: Boolean = false,
     val showDeleteConfirmation: Boolean = false,

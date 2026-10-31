@@ -87,6 +87,9 @@
     <string name="cd_filter_options">Filter options</string>
     <string name="cd_new_folder">New folder</string>
     <string name="cd_edit_folder">Edit folder details</string>
+    <string name="cd_archive_folder">Archive folder</string>
+    <string name="cd_unarchive_folder">Unarchive folder</string>
+    <string name="cd_archived_append">archived</string>
     <string name="cd_folder_created_date">Folder created date</string>
     <string name="cd_create_new_folder">Create new folder</string>
     <string name="cd_add_transaction_to_folder">Add transaction to a folder</string>
@@ -674,6 +677,10 @@
     <string name="completed">Completed</string>
     <string name="completed_on">Completed on %s</string>
     <string name="show_completed">Show Completed</string>
+    <string name="show_archived">Show Archived</string>
+    <string name="hide_archived">Hide Archived</string>
+    <string name="folder_archived">Folder Archived</string>
+    <string name="folder_unarchived">Folder Unarchived</string>
     <string name="hide_completed">Hide Completed</string>
     <string name="contribution_source_to_pile">%1$s towards %2$s</string>
     <string name="contribution_source_from_pile">%1$s from %2$s</string>

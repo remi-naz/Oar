@@ -19,5 +19,8 @@ data class FolderEntity(
     val createdTimestamp: LocalDateTime,
 
     @ColumnInfo(name = "is_excluded")
-    val isExcluded: Boolean
+    val isExcluded: Boolean,
+
+    @ColumnInfo(name = "archived_timestamp")
+    val archivedTimestamp: LocalDateTime? = null
 )

@@ -16,7 +16,8 @@ class FolderPagingSource(
     private val queryBuilder: FolderPagedQueryBuilder,
     db: OarDatabase,
     applicationScope: CoroutineScope,
-    private val query: String
+    private val query: String,
+    private val includeArchived: Boolean
 ) : KeysetPagingSource<FolderPageKey, FolderEntity>(
     db = db,
     applicationScope = applicationScope,
@@ -30,6 +31,7 @@ class FolderPagingSource(
     ): List<FolderEntity> {
         val rawQuery = queryBuilder.build(
             query = query,
+            includeArchived = includeArchived,
             cursor = cursor,
             direction = direction,
             limit = loadSize

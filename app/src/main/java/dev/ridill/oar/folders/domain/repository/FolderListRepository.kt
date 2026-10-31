@@ -6,5 +6,8 @@ import dev.ridill.oar.folders.domain.model.Folder
 import kotlinx.coroutines.flow.Flow
 
 interface FolderListRepository {
-    fun getFoldersListPaged(searchQuery: String = String.Empty): Flow<PagingData<Folder>>
+    fun getFoldersListPaged(
+        searchQuery: String = String.Empty,
+        includeArchived: Boolean = false
+    ): Flow<PagingData<Folder>>
 }

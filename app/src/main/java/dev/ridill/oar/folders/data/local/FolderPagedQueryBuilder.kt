@@ -19,12 +19,17 @@ class FolderPagedQueryBuilder(
 
     fun build(
         query: String,
+        includeArchived: Boolean,
         cursor: FolderPageKey?,
         direction: PageLoadDirection,
         limit: Int
     ): RoomRawQuery {
         val builder = KeysetPagedQuery("folder_table", columns)
         val matchQuery = formatter.prefixMatchOrNull(query)
+
+        if (!includeArchived) {
+            builder.where("archived_timestamp IS NULL")
+        }
 
         if (matchQuery != null) {
             builder.where("id IN (SELECT rowid FROM folder_fts WHERE folder_fts MATCH ?)") { s, i ->

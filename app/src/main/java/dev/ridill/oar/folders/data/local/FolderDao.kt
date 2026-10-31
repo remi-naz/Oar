@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import dev.ridill.oar.core.data.db.BaseDao
 import dev.ridill.oar.folders.data.local.entity.FolderEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 @Dao
 interface FolderDao : BaseDao<FolderEntity> {
@@ -31,6 +32,9 @@ interface FolderDao : BaseDao<FolderEntity> {
         deleteTransactionsByFolderId(id)
         deleteFolderById(id)
     }
+
+    @Query("UPDATE folder_table SET archived_timestamp = :timestamp WHERE id = :id")
+    suspend fun updateArchivedTimestamp(id: Long, timestamp: LocalDateTime?)
 
     @Query("DELETE FROM folder_table WHERE id = :id")
     suspend fun deleteFolderById(id: Long)

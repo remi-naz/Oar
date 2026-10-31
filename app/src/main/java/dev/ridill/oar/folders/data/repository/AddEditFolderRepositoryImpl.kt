@@ -26,7 +26,8 @@ class AddEditFolderRepositoryImpl(
             id = id,
             name = name,
             createdTimestamp = timestamp,
-            isExcluded = excluded
+            isExcluded = excluded,
+            archivedTimestamp = dao.getFolderById(id)?.archivedTimestamp
         )
         dao.upsert(entity).first()
     }

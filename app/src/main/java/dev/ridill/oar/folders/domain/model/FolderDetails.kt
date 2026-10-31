@@ -7,4 +7,7 @@ data class FolderDetails(
     val name: String,
     val createdTimestamp: LocalDateTime,
     val excluded: Boolean,
-)
+    val archivedTimestamp: LocalDateTime? = null
+) {
+    val isArchived: Boolean get() = archivedTimestamp != null
+}

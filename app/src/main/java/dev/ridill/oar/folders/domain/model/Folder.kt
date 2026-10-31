@@ -12,8 +12,11 @@ data class Folder(
     val id: Long,
     val name: String,
     val createdTimestamp: LocalDateTime,
-    val excluded: Boolean
+    val excluded: Boolean,
+    val archivedTimestamp: LocalDateTime? = null
 ) : Parcelable {
+    val isArchived: Boolean get() = archivedTimestamp != null
+
     companion object {
         val NEW get() = Folder(
             id = OarDatabase.DEFAULT_ID_LONG,
