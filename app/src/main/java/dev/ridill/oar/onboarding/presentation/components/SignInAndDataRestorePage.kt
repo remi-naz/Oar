@@ -105,7 +105,7 @@ fun SignInAndDataRestore(
                 .align(Alignment.CenterHorizontally)
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_filled_cloud_download),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_outlined_cloud_download),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxHeight(DOWNLOAD_ICON_HEIGHT_FRACTION)

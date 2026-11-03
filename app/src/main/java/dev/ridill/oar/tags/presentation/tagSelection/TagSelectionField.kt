@@ -1,5 +1,7 @@
 package dev.ridill.oar.tags.presentation.tagSelection
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +18,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChipDefaults
@@ -238,7 +238,7 @@ private fun TagSelectionField(
                                 onClick = { onTagRemove(tag.id) },
                                 trailingIcon = {
                                     Icon(
-                                        imageVector = Icons.Rounded.Close,
+                                        imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                                         contentDescription = null,
                                         modifier = Modifier.size(InputChipDefaults.IconSize)
                                     )
@@ -313,7 +313,7 @@ private fun TagSelectionField(
                                     },
                                     trailingIcon = {
                                         Icon(
-                                            imageVector = Icons.Default.Add,
+                                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_add),
                                             contentDescription = null
                                         )
                                     }

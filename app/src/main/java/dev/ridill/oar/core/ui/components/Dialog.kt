@@ -310,7 +310,7 @@ fun FeatureInfoDialog(
                             )
                     ) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_filled_experiment),
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_flask_conical),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier

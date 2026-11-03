@@ -1,5 +1,7 @@
 package dev.ridill.oar.core.ui.components
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +15,6 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -66,7 +67,7 @@ fun SearchField(
             if (!isSearchQueryEmpty) {
                 IconButton(onClick = state::clearText) {
                     Icon(
-                        imageVector = Icons.Rounded.Clear,
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                         contentDescription = stringResource(R.string.cd_clear)
                     )
                 }

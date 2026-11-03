@@ -1,5 +1,7 @@
 package dev.ridill.oar.tags.presentation.allTags
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,10 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.DeleteForever
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -107,7 +105,7 @@ fun AllTagsScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = { navigateToAddEditTag(null) }) {
                 Icon(
-                    imageVector = Icons.Rounded.Add,
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_add),
                     contentDescription = stringResource(R.string.cd_create_new_tag)
                 )
             }
@@ -212,7 +210,7 @@ private fun AllTagsTopAppBar(
                 {
                     IconButton(onClick = onClearSearchQuery) {
                         Icon(
-                            imageVector = Icons.Rounded.Close,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                             contentDescription = stringResource(R.string.cd_clear_search_query)
                         )
                     }
@@ -238,7 +236,7 @@ private fun AllTagsTopAppBar(
             if (multiSelectionModeActive) {
                 IconButton(onClick = onMultiSelectionModeDismiss) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                         contentDescription = stringResource(R.string.cd_clear_tag_selection)
                     )
                 }
@@ -250,14 +248,14 @@ private fun AllTagsTopAppBar(
             if (multiSelectionModeActive) {
                 IconButton(onClick = onDeleteTagsClick) {
                     Icon(
-                        imageVector = Icons.Rounded.DeleteForever,
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_delete),
                         contentDescription = stringResource(R.string.cd_delete_selected_tags)
                     )
                 }
             } else {
                 IconButton(onClick = { coroutineScope.launch { searchBarState.animateToExpanded() } }) {
                     Icon(
-                        imageVector = Icons.Rounded.Search,
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_search),
                         contentDescription = stringResource(R.string.search_tags)
                     )
                 }

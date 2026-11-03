@@ -6,11 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -107,7 +102,7 @@ fun AllSchedulesScreen(
                     if (state.multiSelectionModeActive) {
                         IconButton(onClick = actions::onDeleteSelectedSchedulesClick) {
                             Icon(
-                                imageVector = Icons.Outlined.DeleteForever,
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_delete),
                                 contentDescription = stringResource(R.string.cd_delete_selected_schedules)
                             )
                         }
@@ -126,7 +121,7 @@ fun AllSchedulesScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = { navigateToAddEditSchedule(null) }) {
                 Icon(
-                    imageVector = Icons.Rounded.Add,
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_add),
                     contentDescription = stringResource(R.string.cd_new_schedule_fab)
                 )
             }
@@ -209,7 +204,7 @@ fun AllSchedulesScreen(
 
         if (state.showNotificationRationale) {
             PermissionRationaleDialog(
-                icon = Icons.Outlined.Notifications,
+                icon = ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell),
                 rationaleText = stringResource(
                     R.string.permission_rationale_notification,
                     stringResource(R.string.app_name)
@@ -231,7 +226,7 @@ private fun NotificationPermissionWarning(
         modifier = modifier
     ) {
         Icon(
-            imageVector = Icons.Rounded.NotificationsOff,
+            imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell_off),
             contentDescription = stringResource(R.string.cd_notification_off_warning)
         )
     }

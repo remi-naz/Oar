@@ -13,9 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -130,7 +127,7 @@ internal fun MovePileFundScreen(
                 onClick = actions::onConfirm,
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Save,
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_save),
                     contentDescription = stringResource(R.string.cd_save_transaction)
                 )
             }
@@ -265,7 +262,7 @@ private fun PileInfoField(
         summary = summary,
         leadingIcon = {
             Icon(
-                imageVector = Icons.Rounded.Info,
+                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_info),
                 contentDescription = null
             )
         },

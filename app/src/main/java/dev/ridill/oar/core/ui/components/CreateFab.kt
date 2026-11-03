@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
@@ -126,8 +125,9 @@ fun CreateFloatingActionMenu(
                         }
                 ) {
                     val optionIcon = ImageVector.vectorResource(defaultOption.iconRes)
+                    val closeIcon = ImageVector.vectorResource(R.drawable.ic_rounded_close)
                     val icon by remember {
-                        derivedStateOf { if (checkedProgress.value > 0.5f) Icons.Default.Close else optionIcon }
+                        derivedStateOf { if (checkedProgress.value > 0.5f) closeIcon else optionIcon }
                     }
                     Icon(
                         painter = rememberVectorPainter(icon),

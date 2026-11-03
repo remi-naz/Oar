@@ -21,7 +21,7 @@ fun OarImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
     shape: CornerBasedShape = CircleShape,
-    @DrawableRes errorRes: Int? = R.drawable.ic_filled_broken_image,
+    @DrawableRes errorRes: Int? = R.drawable.ic_outlined_image_not_found,
     @DrawableRes placeholderRes: Int? = null
 ) {
     AsyncImage(
