@@ -10,4 +10,6 @@ interface FolderListRepository {
         searchQuery: String = String.Empty,
         includeArchived: Boolean = false
     ): Flow<PagingData<Folder>>
+
+    fun archivedFoldersExist(): Flow<Boolean>
 }
