@@ -1,5 +1,7 @@
 package dev.ridill.oar.transactions.presentation.allTransactions
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
@@ -27,10 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExpandedFullScreenSearchBar
@@ -337,7 +335,7 @@ internal fun AllTransactionsScreen(
                         shape = CircleShape
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowUpward,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_chevron_arrow_up),
                             contentDescription = stringResource(R.string.cd_scroll_to_top),
                         )
                     }
@@ -447,7 +445,7 @@ private fun AllTransactionsTopAppBar(
                 {
                     IconButton(onClick = onClearSearchQuery) {
                         Icon(
-                            imageVector = Icons.Rounded.Close,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                             contentDescription = stringResource(R.string.cd_clear_search_query)
                         )
                     }
@@ -479,7 +477,7 @@ private fun AllTransactionsTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onDismissMultiSelectionMode) {
                         Icon(
-                            imageVector = Icons.Rounded.Close,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                             contentDescription = stringResource(R.string.cd_clear_transaction_selection)
                         )
                     }
@@ -487,7 +485,7 @@ private fun AllTransactionsTopAppBar(
                 actions = {
                     IconButton(onClick = onMultiSelectionOptionsClick) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_more_vert),
                             contentDescription = stringResource(R.string.cd_more_options)
                         )
                     }
@@ -505,7 +503,7 @@ private fun AllTransactionsTopAppBar(
                 actions = {
                     IconButton(onClick = onFilterOptionsClick) {
                         Icon(
-                            imageVector = Icons.Default.FilterList,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_filter),
                             contentDescription = stringResource(id = R.string.cd_filter_options)
                         )
                     }

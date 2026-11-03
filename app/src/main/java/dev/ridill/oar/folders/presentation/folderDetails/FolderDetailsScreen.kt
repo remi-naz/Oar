@@ -16,12 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.rounded.Archive
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.DeleteForever
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Unarchive
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -69,7 +63,6 @@ import dev.ridill.oar.core.ui.components.OptionListItem
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.SpacerSmall
 import dev.ridill.oar.core.ui.components.SwipeActionsContainer
-import dev.ridill.oar.core.ui.components.icons.CalendarClock
 import dev.ridill.oar.core.ui.components.listEmptyIndicator
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.OarTheme
@@ -134,7 +127,7 @@ internal fun FolderDetailsScreen(
                     if (state.transactionMultiSelectionModeActive) {
                         IconButton(onClick = actions::onMultiSelectionModeDismiss) {
                             Icon(
-                                imageVector = Icons.Rounded.Close,
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                                 contentDescription = stringResource(R.string.cd_clear_transaction_selection)
                             )
                         }
@@ -146,7 +139,7 @@ internal fun FolderDetailsScreen(
                     if (state.transactionMultiSelectionModeActive) {
                         IconButton(onClick = actions::onMultiSelectionOptionsClick) {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_more_vert),
                                 contentDescription = stringResource(R.string.cd_more_options)
                             )
                         }
@@ -156,8 +149,8 @@ internal fun FolderDetailsScreen(
                             else actions::onArchiveClick
                         ) {
                             Icon(
-                                imageVector = if (state.isArchived) Icons.Rounded.Unarchive
-                                else Icons.Rounded.Archive,
+                                imageVector = if (state.isArchived) ImageVector.vectorResource(R.drawable.ic_outlined_archive_out)
+                                else ImageVector.vectorResource(R.drawable.ic_outlined_archive_in),
                                 contentDescription = stringResource(
                                     if (state.isArchived) R.string.cd_unarchive_folder
                                     else R.string.cd_archive_folder
@@ -167,14 +160,14 @@ internal fun FolderDetailsScreen(
 
                         IconButton(onClick = navigateToEditFolder) {
                             Icon(
-                                imageVector = Icons.Rounded.Edit,
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_edit),
                                 contentDescription = stringResource(R.string.cd_edit_folder)
                             )
                         }
 
                         IconButton(onClick = actions::onDeleteClick) {
                             Icon(
-                                imageVector = Icons.Rounded.DeleteForever,
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_delete),
                                 contentDescription = stringResource(R.string.cd_delete_folder)
                             )
                         }
@@ -429,7 +422,7 @@ private fun FolderCreatedDate(
         }
         SpacerSmall()
         Icon(
-            imageVector = Icons.Outlined.CalendarClock,
+            imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_calendar_clock),
             contentDescription = stringResource(R.string.cd_folder_created_date)
         )
     }

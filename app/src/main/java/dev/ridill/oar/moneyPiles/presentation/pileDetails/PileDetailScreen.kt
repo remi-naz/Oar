@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -134,7 +129,7 @@ internal fun PileDetailScreen(
                     if (!state.isComplete && pile != null) {
                         IconButton(onClick = navigateToEditPile) {
                             Icon(
-                                imageVector = Icons.Rounded.Edit,
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_edit),
                                 contentDescription = stringResource(R.string.cd_edit_pile)
                             )
                         }
@@ -150,7 +145,7 @@ internal fun PileDetailScreen(
                     var showOptionsMenu by remember { mutableStateOf(false) }
                     IconButton(onClick = { showOptionsMenu = true }) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_more_vert),
                             contentDescription = stringResource(R.string.cd_more_options)
                         )
                     }
@@ -532,8 +527,8 @@ private fun PileReminderRow(
                 .padding(MaterialTheme.spacing.medium)
         ) {
             Icon(
-                imageVector = if (cadence == PileReminderCadence.NO_REMIND) Icons.Rounded.NotificationsOff
-                else Icons.Rounded.Notifications,
+                imageVector = if (cadence == PileReminderCadence.NO_REMIND) ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell_off)
+                else ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell),
                 contentDescription = null
             )
             Column {

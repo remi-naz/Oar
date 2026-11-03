@@ -1,5 +1,7 @@
 package dev.ridill.oar.moneyPiles.presentation.allPiles
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +15,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -105,7 +105,7 @@ fun AllPilesScreen(
                     var showOptionsMenu by remember { mutableStateOf(false) }
                     IconButton(onClick = { showOptionsMenu = true }) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_more_vert),
                             contentDescription = stringResource(R.string.cd_more_options)
                         )
                     }
@@ -137,7 +137,7 @@ fun AllPilesScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = navigateToAddPile) {
                 Icon(
-                    imageVector = Icons.Rounded.Add,
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_add),
                     contentDescription = stringResource(R.string.cd_new_pile)
                 )
             }

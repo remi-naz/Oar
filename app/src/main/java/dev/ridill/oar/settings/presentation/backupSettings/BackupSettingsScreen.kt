@@ -1,5 +1,7 @@
 package dev.ridill.oar.settings.presentation.backupSettings
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import android.content.Context
 import android.text.format.DateFormat
 import androidx.compose.animation.AnimatedVisibility
@@ -15,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AddToDrive
-import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -142,7 +142,7 @@ fun BackupSettingsScreen(
                 leadingIcon = {
                     if (!state.isEncryptionPasswordAvailable) {
                         PreferenceIcon(
-                            imageVector = Icons.Rounded.ErrorOutline,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_alert_triangle),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -178,7 +178,7 @@ private fun BackupInfoText(
         },
         leadingIcon = {
             Icon(
-                imageVector = Icons.Rounded.AddToDrive,
+                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_google_drive),
                 contentDescription = null,
                 modifier = Modifier
                     .size(PreferenceIconSize)
@@ -256,7 +256,7 @@ private fun FatalBackupErrorMessage(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
         ) {
             Icon(
-                imageVector = Icons.Rounded.ErrorOutline,
+                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_alert_triangle),
                 contentDescription = null
             )
 

@@ -1,5 +1,7 @@
 package dev.ridill.oar.settings.presentation.securitySettings
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -93,7 +93,7 @@ fun SecuritySettingsScreen(
 
     if (state.showNotificationPermissionRationale) {
         PermissionRationaleDialog(
-            icon = Icons.Rounded.Notifications,
+            icon = ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell),
             rationaleText = stringResource(
                 R.string.permission_rationale_notification,
                 stringResource(R.string.app_name)

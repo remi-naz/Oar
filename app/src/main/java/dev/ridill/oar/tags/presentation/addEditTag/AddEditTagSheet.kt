@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import dev.ridill.oar.R
 import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.ui.components.ButtonWithLoadingIndicator
@@ -73,7 +74,7 @@ fun AddEditTagSheet(
                 if (isEditMode) {
                     IconButton(onClick = actions::onDeleteClick) {
                         Icon(
-                            imageVector = Icons.Outlined.DeleteForever,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_delete),
                             contentDescription = stringResource(R.string.cd_delete_tag)
                         )
                     }

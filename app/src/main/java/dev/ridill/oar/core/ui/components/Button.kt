@@ -1,12 +1,12 @@
 package dev.ridill.oar.core.ui.components
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -38,7 +38,7 @@ fun BackArrowButton(
         modifier = modifier
     ) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_automirrorred_arrow_back),
             contentDescription = stringResource(R.string.cd_navigate_back)
         )
     }
@@ -125,7 +125,7 @@ fun CancelButton(
         modifier = modifier
     ) {
         Icon(
-            imageVector = Icons.Default.Close,
+            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
             contentDescription = contentDescription
         )
     }

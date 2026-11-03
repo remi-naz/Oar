@@ -1,5 +1,6 @@
 package dev.ridill.oar.onboarding.presentation.components
 
+import androidx.compose.ui.res.vectorResource
 import android.Manifest
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -67,7 +67,7 @@ fun PermissionsPage(
         ) {
             permissionsState.permissions.forEach { permission ->
                 val icon = when (permission) {
-                    Manifest.permission.POST_NOTIFICATIONS -> Icons.Rounded.Notifications
+                    Manifest.permission.POST_NOTIFICATIONS -> ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell)
                     Manifest.permission.RECEIVE_SMS -> Icons.Rounded.Message
                     else -> null
                 }

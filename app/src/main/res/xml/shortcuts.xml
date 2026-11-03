@@ -2,7 +2,7 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
         android:enabled="true"
-        android:icon="@drawable/ic_add"
+        android:icon="@drawable/ic_rounded_add"
         android:shortcutId="add_new_expense_static_shortcut"
         android:shortcutLongLabel="@string/shortcut_add_new_transaction_label"
         android:shortcutShortLabel="@string/shortcut_add_new_transaction_label">

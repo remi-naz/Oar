@@ -1,5 +1,7 @@
 package dev.ridill.oar.moneyPiles.presentation.sweepout
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -225,7 +225,7 @@ private fun PileCompletionWarningBanner(
                 .padding(MaterialTheme.spacing.medium)
         ) {
             Icon(
-                imageVector = Icons.Rounded.WarningAmber,
+                imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_alert_triangle),
                 contentDescription = null,
                 tint = WarningColor,
                 modifier = Modifier.size(IconSizeMedium)

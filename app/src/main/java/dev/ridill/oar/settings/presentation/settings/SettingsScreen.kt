@@ -12,15 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Launch
-import androidx.compose.material.icons.automirrored.rounded.Logout
-import androidx.compose.material.icons.rounded.BrightnessMedium
-import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +28,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
@@ -51,6 +44,7 @@ import dev.ridill.oar.core.ui.components.PermissionRationaleDialog
 import dev.ridill.oar.core.ui.components.RadioOptionListDialog
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.components.icons.Message
+import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.settings.domain.modal.AppTheme
@@ -58,7 +52,6 @@ import dev.ridill.oar.settings.presentation.components.PreferenceIcon
 import dev.ridill.oar.settings.presentation.components.SimpleSettingsPreference
 import dev.ridill.oar.settings.presentation.components.SwitchPreference
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     snackbarController: SnackbarController,
@@ -102,7 +95,7 @@ fun SettingsScreen(
                 titleRes = R.string.preference_app_theme,
                 summary = stringResource(state.appTheme.labelRes),
                 onClick = actions::onAppThemePreferenceClick,
-                leadingIcon = Icons.Rounded.BrightnessMedium
+                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_sun_medium)
             )
 
             if (BuildUtil.isDynamicColorsSupported()) {
@@ -111,7 +104,7 @@ fun SettingsScreen(
                     summary = stringResource(R.string.preference_dynamic_colors_summary),
                     value = state.dynamicColorsEnabled,
                     onValueChange = actions::onDynamicThemeEnabledChange,
-                    leadingIcon = { PreferenceIcon(imageVector = Icons.Rounded.Palette) }
+                    leadingIcon = { PreferenceIcon(imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_palette)) }
                 )
             }
 
@@ -119,7 +112,7 @@ fun SettingsScreen(
                 titleRes = R.string.preference_notifications,
                 summary = stringResource(R.string.preference_notification_summary),
                 onClick = navigateToNotificationSettings,
-                leadingIcon = Icons.Rounded.Notifications
+                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell)
             )
 
             HorizontalDivider(
@@ -172,7 +165,7 @@ fun SettingsScreen(
                     is AuthState.Authenticated -> {
                         SimpleSettingsPreference(
                             titleRes = R.string.preference_logout,
-                            leadingIcon = Icons.AutoMirrored.Rounded.Logout,
+                            leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_login),
                             onClick = actions::onLogoutClick,
                             contentColor = MaterialTheme.colorScheme.error
                         )
@@ -181,7 +174,7 @@ fun SettingsScreen(
                     AuthState.UnAuthenticated -> {
                         SimpleSettingsPreference(
                             titleRes = R.string.preference_login,
-                            leadingIcon = Icons.AutoMirrored.Rounded.Logout,
+                            leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_logout),
                             onClick = actions::onLoginClick,
                         )
                     }
@@ -192,8 +185,8 @@ fun SettingsScreen(
                 SimpleSettingsPreference(
                     titleRes = R.string.preference_source_code,
                     summary = stringResource(R.string.preference_source_code_summary),
-                    leadingIcon = ImageVector.vectorResource(R.drawable.ic_filled_source_code),
-                    trailingIcon = Icons.AutoMirrored.Filled.Launch,
+                    leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_code),
+                    trailingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_link_square),
                     onClick = {
                         state.sourceCodeUrl?.let {
                             launchUriInBrowser(it.toUri())
@@ -205,13 +198,13 @@ fun SettingsScreen(
             SimpleSettingsPreference(
                 titleRes = R.string.preference_export_logs,
                 summary = stringResource(R.string.preference_export_logs_summary),
-                leadingIcon = Icons.Rounded.BugReport,
+                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_tree),
                 onClick = actions::onExportLogsClick
             )
 
             SimpleSettingsPreference(
                 titleRes = R.string.preference_version,
-                leadingIcon = Icons.Rounded.Info,
+                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_git_commit),
                 summary = BuildUtil.versionName
             )
         }
@@ -307,8 +300,47 @@ fun PreviewSimplePreference() {
                 modifier = Modifier
                     .fillMaxWidth(),
                 summary = stringResource(AppTheme.SYSTEM_DEFAULT.labelRes),
-                leadingIcon = Icons.Rounded.BrightnessMedium
+                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_sun_medium)
             )
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewSettingsScreen() {
+    OarTheme {
+        SettingsScreen(
+            snackbarController = rememberSnackbarController(),
+            state = SettingsState(
+                showAutoDetectTxOption = true,
+                sourceCodeUrl = "https://github.com"
+            ),
+            actions = object : SettingsActions {
+                override fun onAppThemePreferenceClick() {}
+                override fun onAppThemeSelectionDismiss() {}
+                override fun onAppThemeSelectionConfirm(appTheme: AppTheme) {}
+                override fun onDynamicThemeEnabledChange(enabled: Boolean) {}
+                override fun onToggleAutoAddTransactions(enabled: Boolean) {}
+                override fun onAutoDetectTxFeatureInfoDismiss() {}
+                override fun onAutoDetectTxFeatureInfoAcknowledge() {}
+                override fun onSmsPermissionRationaleDismiss() {}
+                override fun onSmsPermissionRationaleSettingsClick() {}
+                override fun onLoginClick() {}
+                override fun onLogoutClick() {}
+                override fun onLogoutDialogDismiss() {}
+                override fun onLogoutKeepDataClick() {}
+                override fun onLogoutClearDataClick() {}
+                override fun onLogoutClearDataConfirm() {}
+                override fun onExportLogsClick() {}
+            },
+            navigateUp = {},
+            navigateToNotificationSettings = {},
+            navigateToCycles = {},
+            navigateToManageTags = {},
+            navigateToBackupSettings = {},
+            navigateToSecuritySettings = {},
+            launchUriInBrowser = {}
+        )
     }
 }

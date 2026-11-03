@@ -18,7 +18,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -272,7 +271,7 @@ fun AddEditScheduleScreen(
                         onClick = actions::onSaveClick,
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Save,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_outlined_save),
                             contentDescription = stringResource(R.string.cd_save_schedule)
                         )
                     }

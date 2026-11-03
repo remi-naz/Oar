@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -80,7 +79,7 @@ fun AllFoldersScreen(
                     var showOptionsMenu by remember { mutableStateOf(false) }
                     IconButton(onClick = { showOptionsMenu = true }) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_more_vert),
                             contentDescription = stringResource(R.string.cd_more_options)
                         )
                     }

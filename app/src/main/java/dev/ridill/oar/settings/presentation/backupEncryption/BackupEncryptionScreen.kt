@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CloudDone
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,8 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -88,7 +88,7 @@ fun BackupEncryptionScreen(
             verticalArrangement = ArrangementTopWithFooter(MaterialTheme.spacing.medium)
         ) {
             Icon(
-                imageVector = Icons.Rounded.CloudDone,
+                imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_shield_key),
                 contentDescription = null,
                 modifier = Modifier
                     .size(IconSize)
@@ -129,7 +129,7 @@ fun BackupEncryptionScreen(
     }
 }
 
-private val IconSize = 80.dp
+private val IconSize = 64.dp
 
 @Composable
 private fun PasswordUpdateSheet(

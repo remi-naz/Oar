@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -236,7 +235,7 @@ internal fun PileGridItem(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_add),
                     contentDescription = null,
                 )
             }

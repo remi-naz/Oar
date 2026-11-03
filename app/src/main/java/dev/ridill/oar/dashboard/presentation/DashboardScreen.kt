@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.FilledTonalIconToggleButton
@@ -334,7 +333,7 @@ private fun FeatureMenu(
                     ),
                 ) {
                     Icon(
-                        imageVector = if (expanded) Icons.Default.Close
+                        imageVector = if (expanded) ImageVector.vectorResource(R.drawable.ic_rounded_close)
                         else ImageVector.vectorResource(R.drawable.ic_rounded_menu_grid),
                         contentDescription = null,
                     )

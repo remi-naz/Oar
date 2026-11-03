@@ -1,5 +1,7 @@
 package dev.ridill.oar.core.ui.components
 
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
@@ -23,7 +25,6 @@ import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -248,7 +249,7 @@ fun OutlinedTextFieldSheetContent(
                 if (!isInputEmpty) {
                     IconButton(onClick = inputState::clearText) {
                         Icon(
-                            imageVector = Icons.Default.Clear,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                             contentDescription = stringResource(R.string.cd_clear)
                         )
                     }
@@ -547,7 +548,7 @@ fun TextFieldSheetContent(
                 if (showClearOption && !isInputEmpty) {
                     IconButton(onClick = inputState::clearText) {
                         Icon(
-                            imageVector = Icons.Default.Clear,
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_rounded_close),
                             contentDescription = stringResource(R.string.cd_clear)
                         )
                     }
