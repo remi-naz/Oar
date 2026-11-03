@@ -12,6 +12,7 @@ class FolderPagedQueryBuilder(
 ) {
 
     private val columns = listOf(
+        KeysetColumn("(archived_timestamp IS NOT NULL)", SortDirection.ASC),
         KeysetColumn("name", SortDirection.ASC),
         KeysetColumn("DATETIME(created_timestamp)", SortDirection.DESC),
         KeysetColumn("id", SortDirection.ASC)

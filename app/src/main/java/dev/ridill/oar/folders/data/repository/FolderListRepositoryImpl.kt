@@ -41,4 +41,6 @@ class FolderListRepositoryImpl(
         }
     ).flow
         .mapLatest { it.map(FolderEntity::toFolder) }
+
+    override fun archivedFoldersExist(): Flow<Boolean> = folderDao.archivedFoldersExist()
 }

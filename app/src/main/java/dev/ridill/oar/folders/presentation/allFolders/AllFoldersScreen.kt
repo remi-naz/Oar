@@ -4,16 +4,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +35,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -48,15 +52,16 @@ import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.core.ui.util.isEmpty
 import dev.ridill.oar.folders.domain.model.Folder
+import dev.ridill.oar.folders.domain.model.FolderListItemUiModel
 import kotlinx.coroutines.flow.flowOf
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AllFoldersScreen(
     snackbarController: SnackbarController,
-    foldersPagingItems: LazyPagingItems<Folder>,
+    foldersPagingItems: LazyPagingItems<FolderListItemUiModel>,
     showArchived: Boolean,
+    archivedFoldersExist: Boolean,
     onShowArchivedToggle: (Boolean) -> Unit,
     navigateToAddFolder: () -> Unit,
     navigateToFolderDetails: (Long) -> Unit,
@@ -142,26 +147,81 @@ fun AllFoldersScreen(
                     verticalItemSpacing = MaterialTheme.spacing.medium
                 ) {
                     repeat(foldersPagingItems.itemCount) { index ->
-                        foldersPagingItems[index]?.let { item ->
-                            item(
-                                key = item.id,
-                                contentType = "FolderCard"
-                            ) {
-                                FolderCard(
-                                    name = item.name,
-                                    created = item.createdTimestamp.format(DateUtil.Formatters.localizedDateMedium),
-                                    excluded = item.excluded,
-                                    archived = item.isArchived,
-                                    onClick = { navigateToFolderDetails(item.id) },
-                                    modifier = Modifier
-                                        .animateItem()
-                                )
+                        when (val entry = foldersPagingItems[index]) {
+                            FolderListItemUiModel.ArchivedSeparator -> {
+                                item(
+                                    key = "ArchivedSeparator",
+                                    contentType = "ArchivedSeparator",
+                                    span = StaggeredGridItemSpan.FullLine
+                                ) {
+                                    ArchivedSeparator(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateItem()
+                                    )
+                                }
                             }
+
+                            is FolderListItemUiModel.FolderItem -> {
+                                val item = entry.folder
+                                item(
+                                    key = item.id,
+                                    contentType = "FolderCard"
+                                ) {
+                                    FolderCard(
+                                        name = item.name,
+                                        created = item.createdTimestamp.format(DateUtil.Formatters.localizedDateMedium),
+                                        excluded = item.excluded,
+                                        archived = item.isArchived,
+                                        onClick = { navigateToFolderDetails(item.id) },
+                                        modifier = Modifier
+                                            .animateItem()
+                                    )
+                                }
+                            }
+
+                            null -> Unit
+                        }
+                    }
+                    if (archivedFoldersExist && !showArchived) {
+                        item(
+                            key = "ArchivedFoldersPresent",
+                            contentType = "ArchivedFoldersPresent",
+                            span = StaggeredGridItemSpan.FullLine
+                        ) {
+                            Text(
+                                text = stringResource(R.string.archived_folders_present),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem()
+                            )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ArchivedSeparator(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(R.string.archived),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = MaterialTheme.spacing.small)
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f))
     }
 }
 
@@ -173,16 +233,19 @@ private fun PreviewAllFoldersScreen() {
             snackbarController = rememberSnackbarController(),
             foldersPagingItems = flowOf(
                 PagingData.from(
-                    List(5) {
-                        Folder(
-                            id = it.toLong(),
-                            name = "Folder $it",
-                            createdTimestamp = DateUtil.now(),
-                            excluded = Random.nextBoolean()
+                    List<FolderListItemUiModel>(5) {
+                        FolderListItemUiModel.FolderItem(
+                            Folder(
+                                id = it.toLong(),
+                                name = "Folder $it",
+                                createdTimestamp = DateUtil.now(),
+                                excluded = Random.nextBoolean()
+                            )
                         )
                     }
                 )).collectAsLazyPagingItems(),
             showArchived = false,
+            archivedFoldersExist = true,
             onShowArchivedToggle = {},
             navigateToAddFolder = {},
             navigateToFolderDetails = {},

@@ -36,6 +36,9 @@ interface FolderDao : BaseDao<FolderEntity> {
     @Query("UPDATE folder_table SET archived_timestamp = :timestamp WHERE id = :id")
     suspend fun updateArchivedTimestamp(id: Long, timestamp: LocalDateTime?)
 
+    @Query("SELECT EXISTS(SELECT 1 FROM folder_table WHERE archived_timestamp IS NOT NULL)")
+    fun archivedFoldersExist(): Flow<Boolean>
+
     @Query("DELETE FROM folder_table WHERE id = :id")
     suspend fun deleteFolderById(id: Long)
 

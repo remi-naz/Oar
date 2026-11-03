@@ -679,6 +679,8 @@
     <string name="show_completed">Show Completed</string>
     <string name="show_archived">Show Archived</string>
     <string name="hide_archived">Hide Archived</string>
+    <string name="archived">Archived</string>
+    <string name="archived_folders_present">Archived folders present</string>
     <string name="folder_archived">Folder Archived</string>
     <string name="folder_unarchived">Folder Unarchived</string>
     <string name="hide_completed">Hide Completed</string>

@@ -47,6 +47,7 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
         val foldersPagingItems = viewModel.folderListPagingData.collectAsLazyPagingItems()
 
         val showArchived by viewModel.showArchived.collectAsStateWithLifecycle()
+        val archivedFoldersExist by viewModel.archivedFoldersExist.collectAsStateWithLifecycle()
 
         val snackbarController = rememberSnackbarController()
         ResultEffect<FolderSavedResult> { result ->
@@ -65,6 +66,7 @@ fun EntryProviderScope<NavKey>.folderEntries(navigator: OarNavigator) {
             snackbarController = snackbarController,
             foldersPagingItems = foldersPagingItems,
             showArchived = showArchived,
+            archivedFoldersExist = archivedFoldersExist,
             onShowArchivedToggle = viewModel::onShowArchivedToggle,
             navigateToFolderDetails = { navigator.navigate(FolderDetailsRoute(it)) },
             navigateUp = navigator::goBack,
