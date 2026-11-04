@@ -2,7 +2,7 @@ package dev.ridill.oar.settings.data.repository
 
 import androidx.work.WorkInfo
 import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
 import dev.ridill.oar.core.domain.crypto.EncryptionScheme
 import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.di.Argon2PasswordBasedCryptoManager
@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 class BackupSettingsRepositoryImpl(
     private val dao: ConfigDao,
     private val preferencesManager: PreferencesManager,
-    private val securityPreferencesManager: SecurityPreferencesManager,
+    private val backupEncryptionPreferencesManager: BackupEncryptionPreferencesManager,
     private val backupWorkManager: BackupWorkManager,
     @Argon2PasswordBasedCryptoManager private val argon2CryptoManager: PasswordBasedCryptoManager,
     private val legacyCryptoManager: PasswordBasedCryptoManager
@@ -78,9 +78,9 @@ class BackupSettingsRepositoryImpl(
     }
 
     override suspend fun isCurrentPasswordMatch(currentPasswordInput: String): Boolean {
-        val securityPreferences = securityPreferencesManager.preferences.first()
-        val passwordHash = securityPreferences.backupEncryptionHash
-        return when (securityPreferences.backupEncryptionScheme) {
+        val backupEncryptionPreferences = backupEncryptionPreferencesManager.preferences.first()
+        val passwordHash = backupEncryptionPreferences.backupEncryptionHash
+        return when (backupEncryptionPreferences.backupEncryptionScheme) {
             EncryptionScheme.ARGON2_GCM -> argon2CryptoManager.areHashesMatch(
                 value = currentPasswordInput,
                 hash2 = passwordHash
@@ -97,7 +97,7 @@ class BackupSettingsRepositoryImpl(
         password: String
     ): Unit = withContext(Dispatchers.IO) {
         val (hash, salt) = argon2CryptoManager.hash(password)
-        securityPreferencesManager.updateBackupEncryptionHash(
+        backupEncryptionPreferencesManager.updateBackupEncryptionHash(
             hash = hash,
             salt = salt,
             scheme = EncryptionScheme.ARGON2_GCM
@@ -110,7 +110,7 @@ class BackupSettingsRepositoryImpl(
         .distinctUntilChanged()
 
     override fun isEncryptionPasswordAvailable(): Flow<Boolean> =
-        securityPreferencesManager.preferences
+        backupEncryptionPreferencesManager.preferences
             .mapLatest { it.hasValidBackupEncryptionPassword }
             .distinctUntilChanged()
 }

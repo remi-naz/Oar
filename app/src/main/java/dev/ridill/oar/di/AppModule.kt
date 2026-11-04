@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.PreferencesFileSerializer
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.datastore.tink.AeadSerializer
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -26,8 +27,12 @@ import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.PreferencesManagerImpl
 import dev.ridill.oar.core.data.preferences.animPreferences.AnimPreferencesManager
 import dev.ridill.oar.core.data.preferences.animPreferences.AnimPreferencesManagerImpl
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManagerImpl
+import dev.ridill.oar.core.data.preferences.backupEncryption.DecryptionCorruptionSerializer
+import dev.ridill.oar.core.data.preferences.backupEncryption.LegacyBackupEncryptionPreferencesMigration
+import dev.ridill.oar.core.data.preferences.backupEncryption.BACKUP_ENCRYPTION_STORE_FILE_NAME
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManagerImpl
+import dev.ridill.oar.core.data.preferences.backupEncryption.buildBackupEncryptionAead
 import dev.ridill.oar.core.data.util.AndroidConnectivityObserver
 import dev.ridill.oar.core.data.util.ConnectivityObserver
 import dev.ridill.oar.core.domain.crashlytics.CrashlyticsManager
@@ -105,22 +110,33 @@ object AppModule {
         @AnimPreferences dataStore: DataStore<Preferences>
     ): AnimPreferencesManager = AnimPreferencesManagerImpl(dataStore)
 
-    @SecurityPreferences
+    @BackupEncryptionPreferences
     @Singleton
     @Provides
-    fun provideSecurityPrefDataStoreInstance(
-        @ApplicationContext context: Context
-    ): DataStore<Preferences> = context
-        .buildPreferencesDataStore(SecurityPreferencesManager.NAME)
+    fun provideBackupEncryptionPrefDataStoreInstance(
+        @ApplicationContext context: Context,
+        keystoreCryptoManager: KeystoreCryptoManager
+    ): DataStore<Preferences> = DataStore.Builder(
+        storage = FileStorage(
+            serializer = DecryptionCorruptionSerializer(
+                AeadSerializer(
+                    aead = context.buildBackupEncryptionAead(),
+                    wrappedSerializer = PreferencesFileSerializer,
+                    associatedData = BACKUP_ENCRYPTION_STORE_FILE_NAME.encodeToByteArray()
+                )
+            ),
+            produceFile = { context.preferencesDataStoreFile(BACKUP_ENCRYPTION_STORE_FILE_NAME) }
+        ),
+        context = Dispatchers.IO + SupervisorJob()
+    )
+        .setCorruptionHandler(ReplaceFileCorruptionHandler { emptyPreferences() })
+        .addMigrations(listOf(LegacyBackupEncryptionPreferencesMigration(context, keystoreCryptoManager)))
+        .build()
 
     @Provides
-    fun provideSecurityPreferencesManager(
-        @SecurityPreferences dataStore: DataStore<Preferences>,
-        cryptoManager: KeystoreCryptoManager
-    ): SecurityPreferencesManager = SecurityPreferencesManagerImpl(
-        dataStore = dataStore,
-        cryptoManager = cryptoManager
-    )
+    fun provideBackupEncryptionPreferencesManager(
+        @BackupEncryptionPreferences dataStore: DataStore<Preferences>
+    ): BackupEncryptionPreferencesManager = BackupEncryptionPreferencesManagerImpl(dataStore)
 
     @Provides
     fun provideExpressionEvaluationService(): ExpEvalService = ExpEvalService()
@@ -212,7 +228,7 @@ annotation class AnimPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class SecurityPreferences
+annotation class BackupEncryptionPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
