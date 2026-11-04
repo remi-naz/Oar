@@ -1,9 +1,13 @@
 package dev.ridill.oar.core.data.preferences
 
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.FileStorage
+import androidx.datastore.preferences.core.PreferencesFileSerializer
 import com.google.common.truth.Truth.assertThat
 import dev.ridill.oar.settings.domain.modal.AppTheme
 import dev.ridill.oar.settings.domain.repositoty.FatalBackupError
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -17,7 +21,13 @@ class PreferencesManagerResetTest {
     val tmp = TemporaryFolder()
 
     private fun manager() = PreferencesManagerImpl(
-        PreferenceDataStoreFactory.create(produceFile = { tmp.newFile("prefs.preferences_pb") })
+        DataStore.Builder(
+            storage = FileStorage(
+                serializer = PreferencesFileSerializer,
+                produceFile = { tmp.newFile("prefs.preferences_pb") }
+            ),
+            context = Dispatchers.IO + SupervisorJob()
+        ).build()
     )
 
     @Test

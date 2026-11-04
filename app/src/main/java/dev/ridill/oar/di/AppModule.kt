@@ -2,9 +2,10 @@ package dev.ridill.oar.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.FileStorage
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferencesFileSerializer
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
@@ -21,7 +22,6 @@ import dev.ridill.oar.core.data.db.MIGRATION_5_6
 import dev.ridill.oar.core.data.db.MIGRATION_6_7
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.logging.LogFileManager
-import dev.ridill.oar.core.domain.logging.LogRedactor
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.data.preferences.PreferencesManagerImpl
 import dev.ridill.oar.core.data.preferences.animPreferences.AnimPreferencesManager
@@ -37,6 +37,7 @@ import dev.ridill.oar.core.domain.crypto.DefaultCryptoManager
 import dev.ridill.oar.core.domain.crypto.DefaultKeystoreCryptoManager
 import dev.ridill.oar.core.domain.crypto.KeystoreCryptoManager
 import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
+import dev.ridill.oar.core.domain.logging.LogRedactor
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.service.ReceiverService
@@ -44,6 +45,7 @@ import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.logW
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import javax.inject.Qualifier
@@ -82,11 +84,8 @@ object AppModule {
     @Provides
     fun provideAppPrefDataStoreInstance(
         @ApplicationContext context: Context
-    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-        corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
-        produceFile = { context.preferencesDataStoreFile(PreferencesManager.NAME) },
-        migrations = listOf()
-    )
+    ): DataStore<Preferences> = context
+        .buildPreferencesDataStore(PreferencesManager.NAME)
 
     @Provides
     fun providePreferencesManager(
@@ -98,10 +97,8 @@ object AppModule {
     @Provides
     fun provideAnimPrefDataStoreInstance(
         @ApplicationContext context: Context
-    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-        corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
-        produceFile = { context.preferencesDataStoreFile(AnimPreferencesManager.NAME) }
-    )
+    ): DataStore<Preferences> = context
+        .buildPreferencesDataStore(AnimPreferencesManager.NAME)
 
     @Provides
     fun provideAnimPreferencesManager(
@@ -113,10 +110,8 @@ object AppModule {
     @Provides
     fun provideSecurityPrefDataStoreInstance(
         @ApplicationContext context: Context
-    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-        corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
-        produceFile = { context.preferencesDataStoreFile(SecurityPreferencesManager.NAME) }
-    )
+    ): DataStore<Preferences> = context
+        .buildPreferencesDataStore(SecurityPreferencesManager.NAME)
 
     @Provides
     fun provideSecurityPreferencesManager(
@@ -190,6 +185,18 @@ object AppModule {
     @Provides
     fun provideFtsQueryFormatter(): FtsQueryFormatter = FtsQueryFormatter()
 }
+
+private fun Context.buildPreferencesDataStore(
+    name: String
+): DataStore<Preferences> = DataStore.Builder(
+    storage = FileStorage(
+        serializer = PreferencesFileSerializer,
+        produceFile = { this.preferencesDataStoreFile(name) }
+    ),
+    context = Dispatchers.IO + SupervisorJob()
+).setCorruptionHandler(
+    ReplaceFileCorruptionHandler { emptyPreferences() }
+).build()
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
