@@ -165,7 +165,7 @@ fun SettingsScreen(
                     is AuthState.Authenticated -> {
                         SimpleSettingsPreference(
                             titleRes = R.string.preference_logout,
-                            leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_login),
+                            leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_logout),
                             onClick = actions::onLogoutClick,
                             contentColor = MaterialTheme.colorScheme.error
                         )
@@ -174,7 +174,7 @@ fun SettingsScreen(
                     AuthState.UnAuthenticated -> {
                         SimpleSettingsPreference(
                             titleRes = R.string.preference_login,
-                            leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_logout),
+                            leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_login),
                             onClick = actions::onLoginClick,
                         )
                     }
