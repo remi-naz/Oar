@@ -34,7 +34,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.V_BUMP_BOT_APP_ID }}
+          client-id: ${{ secrets.V_BUMP_BOT_CLIENT_ID }}
           private-key: ${{ secrets.V_BUMP_BOT_PRIVATE_KEY }}
 
       - name: Checkout
