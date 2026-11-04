@@ -33,7 +33,7 @@ jobs:
         run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           ref: ${{ steps.resolve.outputs.tag }}
           fetch-depth: 0
@@ -53,7 +53,7 @@ jobs:
           echo "track=${track:-skip}" >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -141,7 +141,7 @@ jobs:
       # Kept as a private Actions artifact (not a public release download) so the
       # bundle used for the Play Store upload is traceable to this tag/run.
       - name: Upload AAB as workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifacts.outputs.name }}
           path: |
@@ -152,7 +152,7 @@ jobs:
 
       # No files attached: Play Store is the only distribution channel for now.
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.resolve.outputs.tag }}
           name: "v${{ steps.version.outputs.version }}"
