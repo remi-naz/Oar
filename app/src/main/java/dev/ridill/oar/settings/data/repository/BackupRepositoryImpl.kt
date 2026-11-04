@@ -5,7 +5,7 @@ import com.google.android.gms.auth.GoogleAuthException
 import com.google.android.gms.auth.UserRecoverableAuthException
 import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
 import dev.ridill.oar.core.data.util.tryNetworkCall
 import dev.ridill.oar.core.data.util.trySuspend
 import dev.ridill.oar.core.domain.crypto.EncryptionScheme
@@ -52,7 +52,7 @@ class BackupRepositoryImpl(
     private val preferencesManager: PreferencesManager,
     @Argon2PasswordBasedCryptoManager private val argon2CryptoManager: PasswordBasedCryptoManager,
     private val defaultCryptoManager: PasswordBasedCryptoManager,
-    private val securityPreferencesManager: SecurityPreferencesManager,
+    private val backupEncryptionPreferencesManager: BackupEncryptionPreferencesManager,
     private val configDao: ConfigDao,
     private val backupWorkManager: BackupWorkManager,
     private val authRepo: AuthRepository,
@@ -94,11 +94,11 @@ class BackupRepositoryImpl(
     )
     override suspend fun performAppDataBackup() = withContext(Dispatchers.IO) {
         logI { "Performing Data Backup" }
-        val securityPreferences = securityPreferencesManager.preferences.first()
-        val passwordHash = securityPreferences
+        val backupEncryptionPreferences = backupEncryptionPreferencesManager.preferences.first()
+        val passwordHash = backupEncryptionPreferences
             .backupEncryptionHash.orEmpty()
             .ifEmpty { throw InvalidEncryptionPasswordThrowable() }
-        val passwordHashSalt = securityPreferences
+        val passwordHashSalt = backupEncryptionPreferences
             .backupEncryptionHashSalt.orEmpty()
             .ifEmpty { throw InvalidEncryptionPasswordThrowable() }
         val email = authRepo.getSignedInAccount()?.email
@@ -217,7 +217,7 @@ class BackupRepositoryImpl(
         // migrates legacy-scheme local storage to Argon2 on every successful restore.
         val newSalt = argon2CryptoManager.generateSalt()
         val (newHash, _) = argon2CryptoManager.hash(password, newSalt)
-        securityPreferencesManager.updateBackupEncryptionHash(
+        backupEncryptionPreferencesManager.updateBackupEncryptionHash(
             hash = newHash,
             salt = newSalt,
             scheme = EncryptionScheme.ARGON2_GCM

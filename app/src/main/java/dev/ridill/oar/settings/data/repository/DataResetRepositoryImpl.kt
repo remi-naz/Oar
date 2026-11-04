@@ -3,7 +3,7 @@ package dev.ridill.oar.settings.data.repository
 import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleManager
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
 import dev.ridill.oar.core.domain.crypto.EncryptionScheme
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.moneyPiles.domain.pileReminder.PileReminder
@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 internal class DataResetRepositoryImpl(
     private val database: OarDatabase,
     private val preferencesManager: PreferencesManager,
-    private val securityPreferencesManager: SecurityPreferencesManager,
+    private val backupEncryptionPreferencesManager: BackupEncryptionPreferencesManager,
     private val backupRepository: BackupRepository,
     private val backupWorkManager: BackupWorkManager,
     private val appInitWorkManager: AppInitWorkManager,
@@ -45,7 +45,7 @@ internal class DataResetRepositoryImpl(
         coroutineScope {
             launch { database.clearAllTables() }
             launch {
-                securityPreferencesManager.updateBackupEncryptionHash(
+                backupEncryptionPreferencesManager.updateBackupEncryptionHash(
                     hash = null,
                     salt = null,
                     scheme = EncryptionScheme.fromTag(null)

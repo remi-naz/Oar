@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
 import dev.ridill.oar.core.domain.crypto.EncryptionScheme
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BackupEncryptionViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val securityPreferencesManager: SecurityPreferencesManager,
+    private val backupEncryptionPreferencesManager: BackupEncryptionPreferencesManager,
     private val repo: BackupSettingsRepository,
     private val eventBus: EventBus<BackupEncryptionEvent>
 ) : ViewModel(), BackupEncryptionActions {
@@ -36,7 +36,7 @@ class BackupEncryptionViewModel @Inject constructor(
 
     private val showPasswordInput = savedStateHandle.getStateFlow(SHOW_PASSWORD_INPUT, false)
 
-    private val hasExistingPassword = securityPreferencesManager.preferences
+    private val hasExistingPassword = backupEncryptionPreferencesManager.preferences
         .mapLatest { it.hasValidBackupEncryptionPassword }
         .distinctUntilChanged()
 
@@ -75,7 +75,7 @@ class BackupEncryptionViewModel @Inject constructor(
     }
 
     fun onBiometricAuthSucceeded() = viewModelScope.launch {
-        securityPreferencesManager.updateBackupEncryptionHash(
+        backupEncryptionPreferencesManager.updateBackupEncryptionHash(
             hash = null,
             salt = null,
             scheme = EncryptionScheme.ARGON2_GCM

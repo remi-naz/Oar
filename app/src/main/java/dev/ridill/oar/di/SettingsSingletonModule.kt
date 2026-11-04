@@ -11,7 +11,7 @@ import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.account.presentation.util.AuthorizationService
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
 import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.BuildUtil
@@ -106,7 +106,7 @@ object SettingsSingletonModule {
         backupService: BackupService,
         gDriveApi: GDriveApi,
         preferencesManager: PreferencesManager,
-        securityPreferencesManager: SecurityPreferencesManager,
+        backupEncryptionPreferencesManager: BackupEncryptionPreferencesManager,
         configDao: ConfigDao,
         backupWorkManager: BackupWorkManager,
         authRepository: AuthRepository,
@@ -118,7 +118,7 @@ object SettingsSingletonModule {
         backupService = backupService,
         gDriveApi = gDriveApi,
         preferencesManager = preferencesManager,
-        securityPreferencesManager = securityPreferencesManager,
+        backupEncryptionPreferencesManager = backupEncryptionPreferencesManager,
         configDao = configDao,
         backupWorkManager = backupWorkManager,
         authRepo = authRepository,

@@ -4,7 +4,7 @@ import dev.ridill.oar.budgetCycles.data.local.BudgetCycleDao
 import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleManager
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
 import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
 import dev.ridill.oar.moneyPiles.domain.pileReminder.PileReminder
 import dev.ridill.oar.schedules.data.local.SchedulesDao
@@ -29,7 +29,7 @@ class DataResetRepositoryImplTest {
 
     private val database = mockk<OarDatabase>()
     private val preferencesManager = mockk<PreferencesManager>()
-    private val securityPreferencesManager = mockk<SecurityPreferencesManager>()
+    private val backupEncryptionPreferencesManager = mockk<BackupEncryptionPreferencesManager>()
     private val backupRepository = mockk<BackupRepository>()
     private val backupWorkManager = mockk<BackupWorkManager>()
     private val appInitWorkManager = mockk<AppInitWorkManager>()
@@ -44,7 +44,7 @@ class DataResetRepositoryImplTest {
     private val repo = DataResetRepositoryImpl(
         database = database,
         preferencesManager = preferencesManager,
-        securityPreferencesManager = securityPreferencesManager,
+        backupEncryptionPreferencesManager = backupEncryptionPreferencesManager,
         backupRepository = backupRepository,
         backupWorkManager = backupWorkManager,
         appInitWorkManager = appInitWorkManager,
@@ -68,7 +68,7 @@ class DataResetRepositoryImplTest {
         every { cycleManager.cancelCycleCompletion(any()) } just Runs
         every { database.clearAllTables() } just Runs
         coEvery { preferencesManager.resetDataPreferences() } just Runs
-        coEvery { securityPreferencesManager.updateBackupEncryptionHash(any(), any(), any()) } just Runs
+        coEvery { backupEncryptionPreferencesManager.updateBackupEncryptionHash(any(), any(), any()) } just Runs
         coEvery { backupRepository.tryClearLocalCache() } just Runs
         every { appInitWorkManager.startAppInitWorker() } just Runs
         every { appInitWorkManager.startAlarmsAndReminderInitWorkers() } just Runs
@@ -115,7 +115,7 @@ class DataResetRepositoryImplTest {
         verify(exactly = 1) { database.clearAllTables() }
         coVerify(exactly = 1) { preferencesManager.resetDataPreferences() }
         coVerify(exactly = 1) {
-            securityPreferencesManager.updateBackupEncryptionHash(
+            backupEncryptionPreferencesManager.updateBackupEncryptionHash(
                 hash = null,
                 salt = null,
                 scheme = any()

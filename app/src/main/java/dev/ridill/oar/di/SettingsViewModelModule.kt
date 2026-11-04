@@ -7,7 +7,7 @@ import dagger.hilt.android.components.ViewModelComponent
 import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleManager
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.data.preferences.security.SecurityPreferencesManager
+import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
 import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.settings.data.local.ConfigDao
@@ -49,7 +49,7 @@ object SettingsViewModelModule {
     fun provideBackupSettingsRepository(
         dao: ConfigDao,
         preferencesManager: PreferencesManager,
-        securityPreferencesManager: SecurityPreferencesManager,
+        backupEncryptionPreferencesManager: BackupEncryptionPreferencesManager,
         backupWorkManager: BackupWorkManager,
         @Argon2PasswordBasedCryptoManager cryptoManager: PasswordBasedCryptoManager,
         legacyCryptoManager: PasswordBasedCryptoManager
@@ -57,7 +57,7 @@ object SettingsViewModelModule {
         dao = dao,
         preferencesManager = preferencesManager,
         backupWorkManager = backupWorkManager,
-        securityPreferencesManager = securityPreferencesManager,
+        backupEncryptionPreferencesManager = backupEncryptionPreferencesManager,
         argon2CryptoManager = cryptoManager,
         legacyCryptoManager = legacyCryptoManager
     )
@@ -66,7 +66,7 @@ object SettingsViewModelModule {
     fun provideDataResetRepository(
         database: OarDatabase,
         preferencesManager: PreferencesManager,
-        securityPreferencesManager: SecurityPreferencesManager,
+        backupEncryptionPreferencesManager: BackupEncryptionPreferencesManager,
         backupRepository: BackupRepository,
         backupWorkManager: BackupWorkManager,
         appInitWorkManager: AppInitWorkManager,
@@ -76,7 +76,7 @@ object SettingsViewModelModule {
     ): DataResetRepository = DataResetRepositoryImpl(
         database = database,
         preferencesManager = preferencesManager,
-        securityPreferencesManager = securityPreferencesManager,
+        backupEncryptionPreferencesManager = backupEncryptionPreferencesManager,
         backupRepository = backupRepository,
         backupWorkManager = backupWorkManager,
         appInitWorkManager = appInitWorkManager,
