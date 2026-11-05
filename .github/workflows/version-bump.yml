@@ -12,13 +12,8 @@ on:
           - minor
           - major
           - build
-      base-branch:
-        description: "Branch to bump and tag (main for stable releases, e.g. feature/statistics for a beta build)"
-        required: false
-        type: string
-        default: main
       prerelease:
-        description: "Prerelease prefix, e.g. beta (numbered automatically: 1.8.0-beta.1, -beta.2, ...). Required when base-branch is not main; leave empty for a stable release."
+        description: "Prerelease prefix, e.g. beta (numbered automatically: 1.8.0-beta.1, -beta.2, ...). Required when running from a branch other than main; leave empty for a stable release."
         required: false
         type: string
       track:
@@ -47,15 +42,21 @@ jobs:
           client-id: ${{ secrets.PR_COMBI_BOT_CLIENT_ID }}
           private-key: ${{ secrets.PR_COMBI_BOT_PRIVATE_KEY }}
 
+      # The branch chosen under "Use workflow from" is the one bumped and tagged.
       # Guards so a feature-branch build can never look like (or ship as) a stable release.
       - name: Validate inputs
         env:
-          BASE_BRANCH: ${{ inputs.base-branch || 'main' }}
+          REF_TYPE: ${{ github.ref_type }}
+          BASE_BRANCH: ${{ github.ref_name }}
           PRERELEASE: ${{ inputs.prerelease }}
           TRACK: ${{ inputs.track }}
         run: |
+          if [ "$REF_TYPE" != "branch" ]; then
+            echo "::error::Run this workflow from a branch (\"Use workflow from\"), not a tag."
+            exit 1
+          fi
           if [ "$BASE_BRANCH" != "main" ] && [ -z "$PRERELEASE" ]; then
-            echo "::error::A prerelease prefix (e.g. beta) is required when base-branch is not main."
+            echo "::error::A prerelease prefix (e.g. beta) is required when running from a branch other than main."
             exit 1
           fi
           if { [ "$BASE_BRANCH" != "main" ] || [ -n "$PRERELEASE" ]; } && [ "$TRACK" = "production" ]; then
@@ -70,7 +71,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.base-branch || 'main' }}
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
@@ -108,7 +109,7 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          BASE_BRANCH: ${{ inputs.base-branch || 'main' }}
+          BASE_BRANCH: ${{ github.ref_name }}
         run: |
           pr_url=$(gh pr create \
             --base "$BASE_BRANCH" \
@@ -119,7 +120,7 @@ jobs:
 
       - name: Tag merged commit
         env:
-          BASE_BRANCH: ${{ inputs.base-branch || 'main' }}
+          BASE_BRANCH: ${{ github.ref_name }}
         run: |
           # new_version already carries any prerelease suffix (e.g. 1.8.0-beta.2)
           tag="v${{ steps.bump.outputs.new_version }}"
