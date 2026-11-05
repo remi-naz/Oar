@@ -4,13 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       bump-type:
-        description: "Which part of the semver to bump"
+        description: "Which part of the semver to bump. 'build' keeps versionName's core and only raises versionCode (next beta, or finalizing a beta)."
         required: true
         type: choice
         options:
           - patch
           - minor
           - major
+          - build
+      base-branch:
+        description: "Branch to bump and tag (main for stable releases, e.g. feature/statistics for a beta build)"
+        required: false
+        type: string
+        default: main
+      prerelease:
+        description: "Prerelease prefix, e.g. beta (numbered automatically: 1.8.0-beta.1, -beta.2, ...). Required when base-branch is not main; leave empty for a stable release."
+        required: false
+        type: string
       track:
         description: "Play Store track for the resulting release, or 'skip' to build only"
         required: false
@@ -34,12 +44,33 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ secrets.V_BUMP_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.V_BUMP_BOT_PRIVATE_KEY }}
+          client-id: ${{ secrets.PR_COMBI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.PR_COMBI_BOT_PRIVATE_KEY }}
+
+      # Guards so a feature-branch build can never look like (or ship as) a stable release.
+      - name: Validate inputs
+        env:
+          BASE_BRANCH: ${{ inputs.base-branch || 'main' }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          TRACK: ${{ inputs.track }}
+        run: |
+          if [ "$BASE_BRANCH" != "main" ] && [ -z "$PRERELEASE" ]; then
+            echo "::error::A prerelease prefix (e.g. beta) is required when base-branch is not main."
+            exit 1
+          fi
+          if { [ "$BASE_BRANCH" != "main" ] || [ -n "$PRERELEASE" ]; } && [ "$TRACK" = "production" ]; then
+            echo "::error::Prerelease or non-main builds cannot be deployed to the production track."
+            exit 1
+          fi
+          if ! [[ "$PRERELEASE" =~ ^[A-Za-z]*$ ]]; then
+            echo "::error::Prerelease prefix may only contain letters (e.g. beta)."
+            exit 1
+          fi
 
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ inputs.base-branch || 'main' }}
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
@@ -50,7 +81,10 @@ jobs:
 
       - name: Bump version
         id: bump
-        run: python3 .github/scripts/bump_version.py "${{ inputs.bump-type }}"
+        env:
+          BUMP_TYPE: ${{ inputs.bump-type }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: python3 .github/scripts/bump_version.py "$BUMP_TYPE" $PRERELEASE
 
       - name: Configure git
         run: |
@@ -67,24 +101,29 @@ jobs:
           git push origin "$branch"
           echo "name=$branch" >> "$GITHUB_OUTPUT"
 
-      # main requires PRs + signed commits. A squash-merge performed via the API
+      # main requires PRs + signed commits (other base branches use the same flow). A squash-merge performed via the API
       # is created and GPG-signed by GitHub itself, so this satisfies the signed
       # commit rule without needing a bot signing key or a branch-protection bypass.
       - name: Open and merge PR
         id: pr
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BASE_BRANCH: ${{ inputs.base-branch || 'main' }}
         run: |
           pr_url=$(gh pr create \
-            --base main \
+            --base "$BASE_BRANCH" \
             --head "${{ steps.branch.outputs.name }}" \
             --title "chore: bump version to ${{ steps.bump.outputs.new_version }}" \
             --body "Automated version bump (${{ inputs.bump-type }}) to ${{ steps.bump.outputs.new_version }} (code ${{ steps.bump.outputs.new_code }}). ${{ (inputs.track == 'skip' || inputs.track == '') && 'Build only, will not deploy to Play Store.' || format('Will deploy to the {0} track.', inputs.track) }}")
           gh pr merge "$pr_url" --squash --delete-branch
 
       - name: Tag merged commit
+        env:
+          BASE_BRANCH: ${{ inputs.base-branch || 'main' }}
         run: |
-          git fetch origin main
-          git checkout -B main origin/main
-          git tag -a "v${{ steps.bump.outputs.new_version }}" -m "release-track:${{ inputs.track || 'skip' }}"
-          git push origin "v${{ steps.bump.outputs.new_version }}"
+          # new_version already carries any prerelease suffix (e.g. 1.8.0-beta.2)
+          tag="v${{ steps.bump.outputs.new_version }}"
+          git fetch origin "$BASE_BRANCH"
+          git checkout -B "$BASE_BRANCH" "origin/$BASE_BRANCH"
+          git tag -a "$tag" -m "release-track:${{ inputs.track || 'skip' }}"
+          git push origin "$tag"

@@ -103,8 +103,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ secrets.V_BUMP_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.V_BUMP_BOT_PRIVATE_KEY }}
+          client-id: ${{ secrets.PR_COMBI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.PR_COMBI_BOT_PRIVATE_KEY }}
 
       # No files attached: Play Store is the only distribution channel for now.
       - name: Create GitHub Release
@@ -114,3 +114,6 @@ jobs:
           tag_name: ${{ steps.resolve.outputs.tag }}
           name: "v${{ steps.version.outputs.version }}"
           generate_release_notes: true
+          # Tags with a suffix (v1.8.0-beta.1) are prereleases; they still fire
+          # `release: published`, so deploy.yml runs for them.
+          prerelease: ${{ contains(steps.resolve.outputs.tag, '-') }}
