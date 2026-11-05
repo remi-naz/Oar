@@ -1,0 +1,114 @@
+name: Deploy
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to deploy (e.g. v1.4.2). Its AAB must still be in Actions artifacts."
+        required: true
+        type: string
+      track:
+        description: "Play Store track to deploy to"
+        required: true
+        type: choice
+        default: internal
+        options:
+          - internal
+          - beta
+          - production
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      track: ${{ steps.resolve.outputs.track }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+          fetch-depth: 0
+
+      - name: Resolve tag and track
+        id: resolve
+        env:
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          INPUT_TRACK: ${{ inputs.track }}
+        run: |
+          if [ -n "$INPUT_TRACK" ]; then
+            track="$INPUT_TRACK"
+          else
+            # Release-triggered runs have no inputs; read the track embedded by
+            # version-bump.yml's annotated tag (release-track:<track>).
+            # Absent or unrecognized falls back to 'skip' (no deploy) as the safe default.
+            tag_message=$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')
+            track=$(echo "$tag_message" | grep -oE 'release-track:[a-z]+' | cut -d: -f2)
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "track=${track:-skip}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: resolve
+    if: needs.resolve.outputs.track != 'skip'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve.outputs.tag }}
+
+      - name: Download release AAB
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          version="${TAG#v}"
+          # build-release.yml names its artifact <project>-productionRelease-code<N>-v<version>
+          read -r run_id name < <(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" \
+            --jq "[.artifacts[] | select(.expired == false and (.name | endswith(\"-v$version\")))] | first | \"\(.workflow_run.id) \(.name)\"")
+          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
+            echo "::error::No unexpired AAB artifact found for $TAG. Re-run the Build Release workflow for this tag first."
+            exit 1
+          fi
+          gh run download "$run_id" --name "$name" --dir "$RUNNER_TEMP/aab"
+
+          # fastlane's deploy lane globs this directory
+          dest="app/build/outputs/bundle/productionRelease"
+          mkdir -p "$dest"
+          find "$RUNNER_TEMP/aab" -name "*.aab" -exec mv {} "$dest/" \;
+          ls -l "$dest"
+
+      - name: Generate Play Store changelog
+        run: |
+          version_code=$(awk '/create\("production"\)/{f=1} f && /versionCode/{match($0, /[0-9]+/); print substr($0, RSTART, RLENGTH); exit}' app/build.gradle.kts)
+          changelog_dir="fastlane/metadata/android/en-US/changelogs"
+          changelog_file="$changelog_dir/${version_code}.txt"
+          mkdir -p "$changelog_dir"
+
+          if [ -f "$changelog_file" ]; then
+            echo "Custom changelog already committed at $changelog_file, leaving it as-is."
+          else
+            echo "Bug fixes and general improvements" > "$changelog_file"
+          fi
+          cat "$changelog_file"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Deploy to Play Store
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          TRACK: ${{ needs.resolve.outputs.track }}
+        run: |
+          echo "$PLAY_SERVICE_ACCOUNT_JSON" > fastlane/play-service-account.json
+          bundle exec fastlane deploy track:"$TRACK"

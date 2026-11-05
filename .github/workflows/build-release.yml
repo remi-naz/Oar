@@ -1,4 +1,4 @@
-name: Release
+name: Build Release
 
 on:
   push:
@@ -10,22 +10,12 @@ on:
         description: "Existing tag to build and release (e.g. v1.4.2)"
         required: true
         type: string
-      track:
-        description: "Play Store track to deploy to, or 'skip' to build only"
-        required: true
-        type: choice
-        default: skip
-        options:
-          - skip
-          - internal
-          - beta
-          - production
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Resolve tag
@@ -37,20 +27,6 @@ jobs:
         with:
           ref: ${{ steps.resolve.outputs.tag }}
           fetch-depth: 0
-
-      - name: Resolve track
-        id: track
-        run: |
-          if [ -n "${{ inputs.track }}" ]; then
-            track="${{ inputs.track }}"
-          else
-            # Push-triggered runs have no workflow_dispatch input; read the track
-            # embedded by version-bump.yml's annotated tag (release-track:<track>).
-            # Absent or unrecognized falls back to 'skip' (build-only) as the safe default.
-            tag_message=$(git for-each-ref "refs/tags/${{ steps.resolve.outputs.tag }}" --format='%(contents)')
-            track=$(echo "$tag_message" | grep -oE 'release-track:[a-z]+' | cut -d: -f2)
-          fi
-          echo "track=${track:-skip}" >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK
         uses: actions/setup-java@v6
@@ -109,37 +85,8 @@ jobs:
             echo "::warning::No merged native libs found at $native_libs_dir; skipping native-libs zip."
           fi
 
-      - name: Generate Play Store changelog
-        if: steps.track.outputs.track != 'skip'
-        run: |
-          changelog_dir="fastlane/metadata/android/en-US/changelogs"
-          changelog_file="$changelog_dir/${{ steps.artifacts.outputs.version_code }}.txt"
-          mkdir -p "$changelog_dir"
-
-          if [ -f "$changelog_file" ]; then
-            echo "Custom changelog already committed at $changelog_file, leaving it as-is."
-          else
-            echo "Bug fixes and general improvements" > "$changelog_file"
-          fi
-          cat "$changelog_file"
-
-      - name: Set up Ruby
-        if: steps.track.outputs.track != 'skip'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4"
-          bundler-cache: true
-
-      - name: Deploy to Play Store
-        if: steps.track.outputs.track != 'skip'
-        env:
-          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-        run: |
-          echo "$PLAY_SERVICE_ACCOUNT_JSON" > fastlane/play-service-account.json
-          bundle exec fastlane deploy track:${{ steps.track.outputs.track }}
-
-      # Kept as a private Actions artifact (not a public release download) so the
-      # bundle used for the Play Store upload is traceable to this tag/run.
+      # Kept as a private Actions artifact (not a public release download). deploy.yml
+      # looks this up by name (suffix -v<version>) to upload the exact bundle built here.
       - name: Upload AAB as workflow artifact
         uses: actions/upload-artifact@v7
         with:
@@ -148,12 +95,22 @@ jobs:
             ${{ steps.artifacts.outputs.aab }}
             ${{ steps.native_libs.outputs.zip }}
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30
+
+      # Must use the bot token, not GITHUB_TOKEN: events created by GITHUB_TOKEN never
+      # trigger other workflows, so deploy.yml (on: release) would not fire.
+      - name: Mint token as release bot
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.V_BUMP_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.V_BUMP_BOT_PRIVATE_KEY }}
 
       # No files attached: Play Store is the only distribution channel for now.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
+          token: ${{ steps.app-token.outputs.token }}
           tag_name: ${{ steps.resolve.outputs.tag }}
           name: "v${{ steps.version.outputs.version }}"
           generate_release_notes: true
