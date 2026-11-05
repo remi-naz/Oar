@@ -90,7 +90,7 @@ android {
         create("production") {
             dimension = "env"
             versionCode = 36
-            versionName = "1.7.4-beta.1"
+            versionName = "1.8.0-beta.1"
         }
     }
 
