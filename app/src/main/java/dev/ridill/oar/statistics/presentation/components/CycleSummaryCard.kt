@@ -127,7 +127,7 @@ internal fun CycleSummaryCard(
                     BodySmallText(
                         text = stringResource(
                             R.string.statistics_budget_used,
-                            "${TextFormat.number(animatedFraction.value)}%"
+                            TextFormat.percent(animatedFraction.value)
                         ),
                         color = LocalContentColor.current.copy(alpha = ContentAlpha.SUB_CONTENT)
                     )

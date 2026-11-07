@@ -277,6 +277,11 @@ private fun FeatureMenu(
     val bottomNavItems = remember {
         listOf(
             Triple(
+                StatisticsRoute,
+                R.drawable.ic_outlined_chart,
+                R.string.destination_statistics
+            ),
+            Triple(
                 AllMoneyPilesRoute,
                 R.drawable.ic_rounded_pile,
                 R.string.destination_money_piles_graph
@@ -290,11 +295,6 @@ private fun FeatureMenu(
                 AllFoldersRoute,
                 R.drawable.ic_outlined_folder,
                 R.string.destination_folders_graph
-            ),
-            Triple(
-                StatisticsRoute,
-                R.drawable.ic_outlined_chart,
-                R.string.destination_statistics
             ),
             Triple(
                 SettingsRoute,

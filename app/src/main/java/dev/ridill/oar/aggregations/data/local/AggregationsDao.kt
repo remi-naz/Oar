@@ -127,7 +127,7 @@ interface AggregationsDao {
             AND currencyCode = :currencyCode
             AND (:addExcluded = 1 OR excluded = 0)
         GROUP BY tagId
-        ORDER BY amount DESC
+        ORDER BY (tagId IS NULL) ASC, amount DESC
     """
     )
     @RewriteQueriesToDropUnusedColumns
