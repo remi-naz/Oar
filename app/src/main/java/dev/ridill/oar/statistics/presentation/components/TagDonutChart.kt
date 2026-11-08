@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -43,7 +44,8 @@ import java.util.Currency
 internal fun TagDonutChart(
     entries: List<ChartSlice>,
     currency: Currency,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    remainingFunds: ChartSlice? = null
 ) {
     EntryCard(modifier = modifier) {
         Column(
@@ -64,15 +66,16 @@ internal fun TagDonutChart(
             }
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
             ) {
                 val untaggedColor = UntaggedColor
+                // Card uses surfaceContainer, so go a step higher to stand out against it
+                val unfilledColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 DonutChart(
                     slices = entries,
                     fallbackColor = untaggedColor,
-                    // Card uses surfaceContainer, so go a step higher to stand out against it
-                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    backgroundColor = unfilledColor,
                 )
 
                 Column(
@@ -80,10 +83,21 @@ internal fun TagDonutChart(
                     modifier = Modifier.weight(1f)
                 ) {
                     entries.forEach { entry ->
-                        TagLegendRow(
-                            entry = entry,
-                            currency = currency,
-                            fallbackColor = untaggedColor,
+                        LegendRow(
+                            label = entry.label ?: stringResource(R.string.statistics_untagged),
+                            color = entry.color(untaggedColor),
+                            amount = entry.amount,
+                            fraction = entry.fraction,
+                            currency = currency
+                        )
+                    }
+                    remainingFunds?.let {
+                        LegendRow(
+                            label = stringResource(R.string.statistics_remaining_funds),
+                            color = unfilledColor,
+                            amount = it.amount,
+                            fraction = it.fraction,
+                            currency = currency
                         )
                     }
                 }
@@ -110,10 +124,12 @@ internal fun TagDonutChart(
 }
 
 @Composable
-private fun TagLegendRow(
-    entry: ChartSlice,
+private fun LegendRow(
+    label: String,
+    color: Color,
+    amount: Double,
+    fraction: Float,
     currency: Currency,
-    fallbackColor: Color,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -126,17 +142,17 @@ private fun TagLegendRow(
             modifier = Modifier
                 .size(9.dp)
                 .clip(MaterialTheme.shapes.extraSmall)
-                .background(entry.color(fallbackColor))
+                .background(color)
         )
         BodySmallText(
-            text = entry.label ?: stringResource(R.string.statistics_untagged),
+            text = label,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-        val amountFormatted = TextFormat.currency(entry.amount, currency)
+        val amountFormatted = TextFormat.currency(amount, currency)
         val percentFormatted = TextFormat.percent(
-            value = entry.fraction,
+            value = fraction,
             maxFractionDigits = 1,
             minFractionDigits = 0
         )
@@ -175,6 +191,54 @@ private fun PreviewTagDonutChart() {
         Surface {
             TagDonutChart(
                 entries = entries,
+                currency = LocaleUtil.currencyForCode("INR"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(MaterialTheme.spacing.medium)
+            )
+        }
+    }
+}
+
+private fun previewManyTagEntries(): List<ChartSlice> {
+    val names = listOf(
+        "Rent & Bills", "Food & Drink", "Transport", "Shopping", "Health", "Entertainment",
+        "Groceries", "Travel & Holidays", "Education", "Subscriptions", "Gifts & Donations",
+        "A very long tag name that should truncate"
+    )
+    val total = 100_000.0
+    return names.mapIndexed { index, name ->
+        val amount = 6_000.0 - index * 350.0
+        ChartSlice(
+            id = index.toLong(),
+            label = name,
+            amount = amount,
+            fraction = (amount / total).toFloat(),
+            colorCode = SelectableColorsList[index % SelectableColorsList.size].toArgb()
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewTagDonutChartManyEntries() {
+    val entries = remember { previewManyTagEntries() }
+    val remaining = remember(entries) {
+        val total = 100_000.0
+        val left = total - entries.sumOf { it.amount }
+        ChartSlice(
+            id = null,
+            label = null,
+            amount = left,
+            fraction = (left / total).toFloat(),
+            colorCode = null
+        )
+    }
+    OarTheme {
+        Surface(modifier = Modifier.safeDrawingPadding()) {
+            TagDonutChart(
+                entries = entries,
+                remainingFunds = remaining,
                 currency = LocaleUtil.currencyForCode("INR"),
                 modifier = Modifier
                     .fillMaxWidth()

@@ -189,6 +189,7 @@ fun StatisticsScreen(
                 ) {
                     TagDonutChart(
                         entries = state.tagSlices,
+                        remainingFunds = state.remainingFunds,
                         currency = state.currency,
                         modifier = Modifier
                             .animateItem(),
