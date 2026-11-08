@@ -134,9 +134,13 @@ private fun TagLegendRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-        BodySmallText(
-            text = TextFormat.currency(entry.amount, currency),
+        val amountFormatted = TextFormat.currency(entry.amount, currency)
+        val percentFormatted = TextFormat.percent(
+            value = entry.fraction,
+            maxFractionDigits = 1,
+            minFractionDigits = 0
         )
+        BodySmallText(text = "$amountFormatted ($percentFormatted)")
     }
 }
 
