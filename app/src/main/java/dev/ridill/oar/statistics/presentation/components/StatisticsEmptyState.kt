@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,6 +20,7 @@ import dev.ridill.oar.core.ui.components.EmptyListIndicator
 import dev.ridill.oar.core.ui.components.SpacerLarge
 import dev.ridill.oar.core.ui.components.SpacerMedium
 import dev.ridill.oar.core.ui.components.TitleLargeText
+import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.spacing
 
@@ -33,18 +35,25 @@ internal fun StatisticsEmptyState(
         verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = MaterialTheme.spacing.extraLarge)
+            .padding(
+                horizontal = MaterialTheme.spacing.extraLarge,
+                vertical = MaterialTheme.spacing.extraLarge
+            )
     ) {
+        EmptyListIndicator(rawResId = R.raw.lottie_empty_list_ghost)
+
+        SpacerMedium()
+
         TitleLargeText(
             text = stringResource(R.string.statistics_empty_title),
             textAlign = TextAlign.Center
         )
-
-        SpacerMedium()
-
-        EmptyListIndicator(
-            rawResId = R.raw.lottie_empty_list_ghost,
-            messageRes = R.string.statistics_empty_message
+        Text(
+            text = stringResource(R.string.statistics_empty_message),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = LocalContentColor.current
+                .copy(alpha = ContentAlpha.SUB_CONTENT)
         )
 
         SpacerLarge()
