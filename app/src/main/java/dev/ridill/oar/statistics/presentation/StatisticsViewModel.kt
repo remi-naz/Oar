@@ -259,7 +259,14 @@ class StatisticsViewModel @Inject constructor(
                         key = "LargestSpend",
                         label = UiText.StringResource(R.string.statistics_largest_spend),
                         value = it.amountFormatted,
-                        sub = UiText.DynamicString(it.note)
+                        sub = when {
+                            it.note.isNotEmpty() -> UiText.DynamicString(it.note)
+                            !it.folderName.isNullOrEmpty() -> UiText.DynamicString(it.folderName)
+                            !it.tagName.isNullOrEmpty() -> UiText.DynamicString(it.tagName)
+                            else -> UiText.DynamicString(
+                                it.timestamp.format(DateUtil.Formatters.MMM_ddth_spaceSep)
+                            )
+                        }
                     )
                 )
             }

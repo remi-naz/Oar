@@ -31,6 +31,9 @@ fun TagSpendRelation.toTagSpend(totalSpend: Double): TagSpend {
 fun LargestSpendRelation.toLargestSpend(currency: Currency): LargestSpend = LargestSpend(
     amount = amount,
     note = note,
+    tagName = tagName,
+    folderName = folderName,
+    timestamp = timestamp,
     currency = currency
 )
 
