@@ -11,6 +11,7 @@ data class StatisticsState(
     val selectedCycle: BudgetCycleEntry? = null,
     val summary: CycleSummary? = null,
     val tagSlices: List<ChartSlice> = emptyList(),
+    val remainingFunds: ChartSlice? = null,
     val statTileRows: List<List<StatTile>> = emptyList(),
     val currency: Currency = LocaleUtil.defaultCurrency,
     val showExcluded: Boolean = false,

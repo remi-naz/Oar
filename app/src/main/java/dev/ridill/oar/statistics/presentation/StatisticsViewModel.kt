@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.db.OarDatabase
+import dev.ridill.oar.core.domain.model.ChartSlice
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.Zero
@@ -178,6 +179,22 @@ class StatisticsViewModel @Inject constructor(
         ).mapLatest { list -> list.map(TagSpend::toChartSlice) }
     }
 
+    // What is left of the budget is the unfilled part of the donut, so it is not a slice
+    private val remainingFunds = combineTuple(
+        tagSlices,
+        creditsInclusiveBudget
+    ).mapLatest { (slices, total) ->
+        val remaining = total - slices.sumOf { it.amount }
+        if (slices.isEmpty() || total <= Double.Zero || remaining <= Double.Zero) null
+        else ChartSlice(
+            id = null,
+            label = null,
+            amount = remaining,
+            fraction = (remaining / total).toFloat(),
+            colorCode = null
+        )
+    }.distinctUntilChanged()
+
     // Stat tiles
     private val cycleDayAvg = cycleSummary.mapLatest {
         if (it == null) Double.Zero
@@ -294,6 +311,7 @@ class StatisticsViewModel @Inject constructor(
         resolvedCycle,
         cycleSummary,
         tagSlices,
+        remainingFunds,
         statTileRows,
         resolvedCurrency,
         showExcluded,
@@ -302,6 +320,7 @@ class StatisticsViewModel @Inject constructor(
                       cycle,
                       summary,
                       tagSlices,
+                      remainingFunds,
                       statTileRows,
                       currency,
                       showExcluded,
@@ -311,6 +330,7 @@ class StatisticsViewModel @Inject constructor(
             selectedCycle = cycle,
             summary = summary,
             tagSlices = tagSlices,
+            remainingFunds = remainingFunds,
             statTileRows = statTileRows,
             currency = currency,
             showExcluded = showExcluded,
