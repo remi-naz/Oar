@@ -159,54 +159,54 @@ fun StatisticsScreen(
                             .animateItem()
                     )
                 }
-            }
+            } else {
+                state.summary?.let { summary ->
+                    item(
+                        key = "Summary",
+                        contentType = "Summary"
+                    ) {
+                        CycleSummaryCard(
+                            net = summary.aggregate,
+                            budget = summary.budget,
+                            usageFraction = summary.usageFraction,
+                            elapsedDays = summary.elapsedDays,
+                            totalDays = summary.totalDays,
+                            spent = summary.spent,
+                            received = summary.received,
+                            baseCurrency = summary.currency,
+                            currency = state.currency,
+                            modifier = Modifier
+                                .animateItem()
+                        )
+                    }
 
-            state.summary?.let { summary ->
-                item(
-                    key = "Summary",
-                    contentType = "Summary"
-                ) {
-                    CycleSummaryCard(
-                        net = summary.aggregate,
-                        budget = summary.budget,
-                        usageFraction = summary.usageFraction,
-                        elapsedDays = summary.elapsedDays,
-                        totalDays = summary.totalDays,
-                        spent = summary.spent,
-                        received = summary.received,
-                        baseCurrency = summary.currency,
-                        currency = state.currency,
-                        modifier = Modifier
-                            .animateItem()
-                    )
-                }
-            }
+                    if (state.tagSlices.isNotEmpty()) {
+                        item(
+                            key = "TagDonut",
+                            contentType = "TagDonut"
+                        ) {
+                            TagDonutChart(
+                                entries = state.tagSlices,
+                                remainingFunds = state.remainingFunds,
+                                currency = state.currency,
+                                modifier = Modifier
+                                    .animateItem(),
+                            )
+                        }
+                    }
 
-            if (state.tagSlices.isNotEmpty()) {
-                item(
-                    key = "TagDonut",
-                    contentType = "TagDonut"
-                ) {
-                    TagDonutChart(
-                        entries = state.tagSlices,
-                        remainingFunds = state.remainingFunds,
-                        currency = state.currency,
-                        modifier = Modifier
-                            .animateItem(),
-                    )
-                }
-            }
-
-            if (state.tagSlices.isNotEmpty()) {
-                item(
-                    key = "StatTiles",
-                    contentType = "StatTiles"
-                ) {
-                    StatTileGrid(
-                        tileRows = state.statTileRows,
-                        modifier = Modifier
-                            .animateItem(),
-                    )
+                    if (state.statTileRows.isNotEmpty()) {
+                        item(
+                            key = "StatTiles",
+                            contentType = "StatTiles"
+                        ) {
+                            StatTileGrid(
+                                tileRows = state.statTileRows,
+                                modifier = Modifier
+                                    .animateItem(),
+                            )
+                        }
+                    }
                 }
             }
         }
