@@ -90,6 +90,7 @@ import dev.ridill.oar.core.ui.navigation.AllFoldersRoute
 import dev.ridill.oar.core.ui.navigation.AllMoneyPilesRoute
 import dev.ridill.oar.core.ui.navigation.AllSchedulesRoute
 import dev.ridill.oar.core.ui.navigation.SettingsRoute
+import dev.ridill.oar.core.ui.navigation.StatisticsRoute
 import dev.ridill.oar.core.ui.theme.ContentAlpha
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -275,6 +276,11 @@ private fun FeatureMenu(
 ) {
     val bottomNavItems = remember {
         listOf(
+            Triple(
+                StatisticsRoute,
+                R.drawable.ic_outlined_chart,
+                R.string.destination_statistics
+            ),
             Triple(
                 AllMoneyPilesRoute,
                 R.drawable.ic_rounded_pile,
