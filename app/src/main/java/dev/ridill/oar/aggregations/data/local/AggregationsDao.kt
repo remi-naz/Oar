@@ -139,7 +139,11 @@ interface AggregationsDao {
 
     @Query(
         """
-        SELECT transactionAmount as amount, transactionNote as note
+        SELECT transactionAmount as amount,
+            transactionNote as note,
+            tagName,
+            folderName,
+            transactionTimestamp AS timestamp
         FROM transaction_details_view
         WHERE cycleId = :cycleId
             AND currencyCode = :currencyCode
