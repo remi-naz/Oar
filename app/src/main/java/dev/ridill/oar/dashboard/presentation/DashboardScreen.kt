@@ -3,6 +3,7 @@ package dev.ridill.oar.dashboard.presentation
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.FilledTonalIconToggleButton
@@ -160,6 +160,7 @@ internal fun DashboardScreen(
                         areActiveSchedulesEmpty = areActiveSchedulesEmpty,
                         activeSchedules = state.activeSchedules,
                         onScheduleClick = { navigateToAddEditSchedule(it.id) },
+                        onProfileClick = { navigateTo(SettingsRoute) },
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding()
                         ),
@@ -387,6 +388,7 @@ private fun DashboardHeader(
     areActiveSchedulesEmpty: Boolean,
     activeSchedules: List<ActiveSchedule>,
     onScheduleClick: (ActiveSchedule) -> Unit,
+    onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     shape: CornerBasedShape = MaterialTheme.shapes.large
@@ -404,6 +406,7 @@ private fun DashboardHeader(
         ) {
             GreetingBar(
                 signedInUser = signedInUser,
+                onProfileClick = onProfileClick,
                 modifier = Modifier
                     .padding(horizontal = MaterialTheme.spacing.medium)
             )
@@ -442,6 +445,7 @@ private fun DashboardHeader(
 @Composable
 private fun GreetingBar(
     signedInUser: UserAccount?,
+    onProfileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var partOfDay by remember { mutableStateOf(PartOfDay.MORNING) }
@@ -461,6 +465,12 @@ private fun GreetingBar(
                 contentDescription = it.displayName,
                 size = ProfileIconSize,
                 placeholderRes = R.drawable.ic_rounded_person,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = onProfileClick
+                    )
             )
         }
 
