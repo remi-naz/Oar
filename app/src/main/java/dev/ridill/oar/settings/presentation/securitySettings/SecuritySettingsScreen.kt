@@ -16,16 +16,13 @@ import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import dev.ridill.oar.R
-import dev.ridill.oar.core.domain.util.BuildUtil
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.LabelledRadioButton
 import dev.ridill.oar.core.ui.components.OarScaffold
-import dev.ridill.oar.core.ui.components.PermissionRationaleDialog
 import dev.ridill.oar.core.ui.components.SnackbarController
 import dev.ridill.oar.core.ui.theme.spacing
 import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
@@ -79,6 +76,20 @@ fun SecuritySettingsScreen(
                     )
 
                     HorizontalDivider()
+
+                    if (state.exactAlarmPermissionRequired) {
+                        SimpleSettingsPreference(
+                            titleRes = R.string.preference_exact_alarm_permission,
+                            summary = stringResource(
+                                R.string.preference_exact_alarm_permission_summary,
+                                stringResource(R.string.app_name)
+                            ),
+                            leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_clock),
+                            onClick = actions::onExactAlarmPermissionClick
+                        )
+
+                        HorizontalDivider()
+                    }
                 }
             }
 
@@ -90,18 +101,6 @@ fun SecuritySettingsScreen(
             )
         }
     }
-
-    if (state.showNotificationPermissionRationale) {
-        PermissionRationaleDialog(
-            icon = ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell),
-            rationaleText = stringResource(
-                R.string.permission_rationale_notification,
-                stringResource(R.string.app_name)
-            ),
-            onDismiss = actions::onNotificationPermissionRationaleDismiss,
-            onSettingsClick = actions::onNotificationPermissionRationaleConfirm,
-        )
-    }
 }
 
 @Composable
@@ -110,15 +109,11 @@ private fun AutoLockIntervalSelection(
     onIntervalSelect: (AppAutoLockInterval) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val entries = remember {
-        AppAutoLockInterval.entries
-            .filter { BuildUtil.isDebug || !it.debugOnly }
-    }
     Column(
         modifier = modifier
     ) {
         SimpleSettingsPreference(titleRes = R.string.auto_lock_after)
-        entries.forEach { interval ->
+        AppAutoLockInterval.entries.forEach { interval ->
             LabelledRadioButton(
                 label = stringResource(interval.labelRes),
                 selected = interval == selectedInterval,

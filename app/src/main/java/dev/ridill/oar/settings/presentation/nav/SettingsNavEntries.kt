@@ -55,6 +55,7 @@ import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.launchAppNotificationSettings
 import dev.ridill.oar.core.ui.util.launchAppSettings
+import dev.ridill.oar.core.ui.util.launchExactAlarmPermissionSettings
 import dev.ridill.oar.core.ui.util.launchShareFile
 import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionScreen
 import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionViewModel
@@ -291,11 +292,8 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
             }
         )
 
-        val notificationPermissionLauncher = if (BuildUtil.isNotificationRuntimePermissionNeeded())
-            rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.RequestPermission(),
-                onResult = viewModel::onNotificationPermissionResult
-            ) else null
+        // The exact alarm permission is granted in system settings, so re-check on return
+        OnLifecycleStartEffect { viewModel.refreshExactAlarmPermission() }
 
         LaunchedEffect(snackbarController, context) {
             viewModel.events.collect { event ->
@@ -330,14 +328,8 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
                         }
                     }
 
-                    SecuritySettingsViewModel.SecuritySettingsEvent.CheckNotificationPermission -> {
-                        if (BuildUtil.isNotificationRuntimePermissionNeeded()) {
-                            notificationPermissionLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }
-
-                    SecuritySettingsViewModel.SecuritySettingsEvent.NavigateToNotificationSettings -> {
-                        context.launchAppNotificationSettings()
+                    SecuritySettingsViewModel.SecuritySettingsEvent.LaunchExactAlarmPermissionSettings -> {
+                        context.launchExactAlarmPermissionSettings()
                     }
                 }
             }

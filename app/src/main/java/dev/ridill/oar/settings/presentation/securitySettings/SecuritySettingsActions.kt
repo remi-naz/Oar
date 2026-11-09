@@ -6,6 +6,5 @@ interface SecuritySettingsActions {
     fun onAppLockToggle(enabled: Boolean)
     fun onAutoLockIntervalSelect(interval: AppAutoLockInterval)
     fun onScreenSecurityToggle(enabled: Boolean)
-    fun onNotificationPermissionRationaleDismiss()
-    fun onNotificationPermissionRationaleConfirm()
+    fun onExactAlarmPermissionClick()
 }

@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -32,6 +33,18 @@ fun Activity.shouldShowPermissionRationale(
 fun Context.launchAppNotificationSettings() {
     val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
         putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+    }
+    startActivity(intent)
+}
+
+/**
+ * Opens the system screen to allow exact alarms for this app. No-op below Android 12,
+ * where the permission is granted implicitly.
+ */
+fun Context.launchExactAlarmPermissionSettings() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+        data = Uri.fromParts("package", packageName, null)
     }
     startActivity(intent)
 }
