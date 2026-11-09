@@ -4,7 +4,7 @@ import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
 
 data class SecuritySettingsState(
     val appLockEnabled: Boolean = false,
-    val autoLockInterval: AppAutoLockInterval = AppAutoLockInterval.ONE_MINUTE,
+    val autoLockInterval: AppAutoLockInterval = AppAutoLockInterval.Default,
     val screenSecurityEnabled: Boolean = false,
-    val showNotificationPermissionRationale: Boolean = false
+    val exactAlarmPermissionRequired: Boolean = false
 )

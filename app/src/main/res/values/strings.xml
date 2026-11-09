@@ -54,7 +54,6 @@
     <string name="notification_channel_group_others_name">Others</string>
     <string name="notification_channel_pile_reminders_name">Pile Reminders</string>
     <string name="notification_channel_backups_name">Data backup</string>
-    <string name="notification_channel_app_lock_name">App Lock</string>
     <string name="notification_channel_app_init_name">App Init</string>
     <string name="notification_channel_budget_cycle_name">Budget Cycle</string>
 
@@ -336,7 +335,6 @@
     <string name="biometric_prompt_title_app_name">Unlock %s</string>
     <string name="biometric_or_screen_lock_prompt_message" tools:override="true">Use your biometric or screen lock to continue</string>
 
-    <string name="app_lock_service_special_use_message">The service runs as a timer to auto update the app to the locked state after the specified time interval</string>
 
     <string name="filter_section_date">Date</string>
     <string name="filter_section_transaction_type">Transaction Type</string>
@@ -457,12 +455,11 @@
     <string name="enter_percent">Enter Percent</string>
     <string name="create_new_tag">Create New Tag</string>
     <string name="tap_to_unlock">Tap to Unlock</string>
-    <string name="app_unlocked">%s is unlocked</string>
-    <string name="lock_now">Lock Now</string>
-    <string name="tap_to_open">Tap to open</string>
+    <string name="immediately">Immediately</string>
+    <string name="thirty_seconds">30 Seconds</string>
     <string name="one_minute">1 Minute</string>
-    <string name="five_minutes">5 Minutes</string>
-    <string name="ten_minutes">10 Minutes</string>
+    <string name="preference_exact_alarm_permission">Allow exact alarms</string>
+    <string name="preference_exact_alarm_permission_summary">Lets %s lock right on time, even when your device is idle. Tap to open settings.</string>
     <string name="auto_lock_after">Auto lock after</string>
     <string name="enter_password">Enter Password</string>
     <string name="update_password">Update Password</string>

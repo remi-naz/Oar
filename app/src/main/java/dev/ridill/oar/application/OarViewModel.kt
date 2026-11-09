@@ -12,7 +12,10 @@ import dev.ridill.oar.core.domain.util.LocaleUtil
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.settings.domain.appInit.AppInitWorkManager
-import dev.ridill.oar.settings.domain.appLock.AppLockServiceManager
+import dev.ridill.oar.di.ApplicationScope
+import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
+import dev.ridill.oar.settings.domain.appLock.AppLockScheduler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -26,7 +29,8 @@ import javax.inject.Inject
 class OarViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val receiverService: ReceiverService,
-    private val appLockServiceManager: AppLockServiceManager,
+    private val appLockScheduler: AppLockScheduler,
+    @ApplicationScope private val applicationScope: CoroutineScope,
     private val appInitWorkManager: AppInitWorkManager,
     private val remoteConfigService: FirebaseRemoteConfigService,
     cycleRepo: BudgetCycleRepository,
@@ -65,7 +69,6 @@ class OarViewModel @Inject constructor(
 
     init {
         collectTransactionAutoDetectEnabled()
-        collectIsAppLocked()
         initRemoteConfig()
         startCycleCatchUp()
     }
@@ -94,45 +97,43 @@ class OarViewModel @Inject constructor(
         receiverService.toggleNotificationActionReceivers(granted)
     }
 
-    private fun collectIsAppLocked() = viewModelScope.launch {
-        preferences
-            .mapLatest { Pair(it.appLockEnabled, it.isAppLocked) }
-            .distinctUntilChanged()
-            .collectLatest { (appLockedEnabled, isLocked) ->
-                if (!appLockedEnabled || isLocked) {
-                    appLockServiceManager.stopAppUnlockedIndicator()
-                } else {
-                    appLockServiceManager.startAppUnlockedIndicator()
-                }
+    /**
+     * App moved to the background: lock right away or arm the auto lock alarm.
+     * Uses the application scope so the lock still lands if the activity is being torn down.
+     */
+    fun onAppStop() {
+        applicationScope.launch {
+            val preferences = preferences.first()
+            if (!preferences.appLockEnabled || preferences.isAppLocked) {
+                appLockScheduler.cancel()
+                return@launch
             }
+
+            if (preferences.appAutoLockInterval == AppAutoLockInterval.IMMEDIATELY) {
+                appLockScheduler.cancel()
+                preferencesManager.updateAppLocked(true)
+            } else {
+                appLockScheduler.schedule(preferences.appAutoLockInterval)
+            }
+        }
     }
 
-    fun startAppAutoLockTimerIfApplicable() = viewModelScope.launch {
+    /**
+     * App is visible again: the pending auto lock alarm no longer applies.
+     * The alarm may have fired late or been lost, so lock here if the interval already ran
+     * out, then ask for authentication if the app is locked.
+     */
+    fun onAppStart() = viewModelScope.launch {
+        val deadlinePassed = appLockScheduler.hasDeadlinePassed()
+        appLockScheduler.cancel()
         val preferences = preferences.first()
-        if (!preferences.appLockEnabled) {
-            // Stop the entire service because app lock not enabled.
-            appLockServiceManager.stopAppUnlockedIndicator()
-            return@launch
-        }
-        if (preferences.isAppLocked) {
-            // Stop the timer because app is locked.
-            appLockServiceManager.stopAppLockTimer()
-            return@launch
-        }
+        if (!preferences.appLockEnabled) return@launch
 
-        appLockServiceManager.startAppAutoLockTimer()
-    }
-
-    fun startAppUnlockOrServiceStop() = viewModelScope.launch {
-        val preferences = preferences.first()
-        if (!preferences.appLockEnabled) {
-            appLockServiceManager.stopAppUnlockedIndicator()
-            return@launch
+        if (deadlinePassed && !preferences.isAppLocked) {
+            preferencesManager.updateAppLocked(true)
         }
-        if (preferences.isAppLocked) {
+        if (deadlinePassed || preferences.isAppLocked) {
             eventBus.send(OarEvent.LaunchBiometricAuthentication)
-        } else {
-            appLockServiceManager.stopAppLockTimer()
         }
     }
 

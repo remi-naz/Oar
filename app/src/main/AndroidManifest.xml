@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:name=".application.OarApplication"
@@ -42,7 +43,7 @@
         <receiver android:name=".budgetCycles.domain.cycleManager.CycleCompletionReceiver" />
         <receiver android:name=".transactions.domain.notification.DeleteTransactionActionReceiver" />
         <receiver android:name=".transactions.domain.notification.MarkTransactionExcludedActionReceiver" />
-        <receiver android:name=".settings.domain.notification.LockAppImmediateReceiver" />
+        <receiver android:name=".settings.domain.appLock.AppLockReceiver" />
         <receiver android:name=".schedules.domain.scheduleReminder.ScheduledPaymentReminderReceiver" />
         <receiver android:name=".schedules.domain.scheduleReminder.MarkScheduleAsPaidActionReceiver" />
         <receiver android:name=".moneyPiles.domain.pileReminder.PileReminderReceiver" />
@@ -79,15 +80,6 @@
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync|specialUse"
             tools:node="merge" />
-
-        <service
-            android:name=".settings.domain.appLock.AppLockService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="@string/app_lock_service_special_use_message" />
-        </service>
         <!-- /Services -->
 
         <provider

@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import dev.ridill.oar.schedules.domain.scheduleReminder.MarkScheduleAsPaidActionReceiver
 import dev.ridill.oar.application.BootReceiver
 import dev.ridill.oar.application.TimeOrTimezoneChangeReceiver
-import dev.ridill.oar.settings.domain.notification.LockAppImmediateReceiver
 import dev.ridill.oar.transactions.domain.autoDetection.TransactionSmsReceiver
 import dev.ridill.oar.transactions.domain.notification.DeleteTransactionActionReceiver
 import dev.ridill.oar.transactions.domain.notification.MarkTransactionExcludedActionReceiver
@@ -20,7 +19,6 @@ class ReceiverService(
     fun toggleNotificationActionReceivers(enable: Boolean) {
         toggleReceiver(DeleteTransactionActionReceiver::class.java, enable)
         toggleReceiver(MarkTransactionExcludedActionReceiver::class.java, enable)
-        toggleReceiver(LockAppImmediateReceiver::class.java, enable)
         toggleReceiver(MarkScheduleAsPaidActionReceiver::class.java, enable)
     }
 

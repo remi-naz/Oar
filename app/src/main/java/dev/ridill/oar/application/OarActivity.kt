@@ -196,12 +196,12 @@ class OarActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        viewModel.startAppAutoLockTimerIfApplicable()
+        viewModel.onAppStop()
         super.onStop()
     }
 
     override fun onStart() {
-        viewModel.startAppUnlockOrServiceStop()
+        viewModel.onAppStart()
         super.onStart()
     }
 

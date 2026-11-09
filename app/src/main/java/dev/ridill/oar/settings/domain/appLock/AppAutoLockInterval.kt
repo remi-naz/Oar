@@ -8,11 +8,21 @@ import kotlin.time.Duration.Companion.seconds
 
 enum class AppAutoLockInterval(
     val duration: Duration,
-    @StringRes val labelRes: Int,
-    val debugOnly: Boolean = false
+    @StringRes val labelRes: Int
 ) {
-    FIVE_SECONDS(duration = 5.seconds, labelRes = R.string.five_seconds, debugOnly = true),
-    ONE_MINUTE(duration = 1.minutes, labelRes = R.string.one_minute),
-    FIVE_MINUTE(duration = 5.minutes, labelRes = R.string.five_minutes),
-    TEN_MINUTE(duration = 10.minutes, labelRes = R.string.ten_minutes)
+    IMMEDIATELY(duration = Duration.ZERO, labelRes = R.string.immediately),
+    FIVE_SECONDS(duration = 5.seconds, labelRes = R.string.five_seconds),
+    THIRTY_SECONDS(duration = 30.seconds, labelRes = R.string.thirty_seconds),
+    ONE_MINUTE(duration = 1.minutes, labelRes = R.string.one_minute);
+
+    companion object {
+        val Default = ONE_MINUTE
+
+        /**
+         * Resolves a stored name, falling back to [Default] for names that no longer exist
+         * (e.g. the removed 5 and 10 minute options).
+         */
+        fun fromName(name: String?): AppAutoLockInterval =
+            entries.firstOrNull { it.name == name } ?: Default
+    }
 }

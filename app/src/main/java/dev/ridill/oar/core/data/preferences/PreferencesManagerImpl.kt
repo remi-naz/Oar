@@ -54,9 +54,8 @@ class PreferencesManagerImpl(
             val allTransactionsShowExcludedOption =
                 preferences[Keys.ALL_TX_SHOW_EXCLUDED_OPTION].orTrue()
             val appLockEnabled = preferences[Keys.APP_LOCK_ENABLED].orFalse()
-            val appAutoLockInterval = AppAutoLockInterval.valueOf(
-                preferences[Keys.APP_AUTO_LOCK_INTERVAL] ?: AppAutoLockInterval.ONE_MINUTE.name
-            )
+            val appAutoLockInterval = AppAutoLockInterval
+                .fromName(preferences[Keys.APP_AUTO_LOCK_INTERVAL])
             val isAppLocked = preferences[Keys.IS_APP_LOCKED].orFalse()
             val screenSecurityEnabled = preferences[Keys.SCREEN_SECURITY_ENABLED].orFalse()
             val fatalBackupError = tryOrNull {

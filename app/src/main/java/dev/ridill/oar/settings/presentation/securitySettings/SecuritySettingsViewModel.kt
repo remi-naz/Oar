@@ -1,15 +1,15 @@
 package dev.ridill.oar.settings.presentation.securitySettings
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.domain.util.BuildUtil
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
+import dev.ridill.oar.settings.domain.appLock.AppLockScheduler
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
@@ -17,8 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SecuritySettingsViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val preferencesManager: PreferencesManager,
+    private val appLockScheduler: AppLockScheduler,
     private val eventBus: EventBus<SecuritySettingsEvent>
 ) : ViewModel(), SecuritySettingsActions {
 
@@ -35,29 +35,33 @@ class SecuritySettingsViewModel @Inject constructor(
         .mapLatest { it.screenSecurityEnabled }
         .distinctUntilChanged()
 
-    private val showNotificationPermissionRationale = savedStateHandle
-        .getStateFlow(SHOW_NOTIFICATION_PERMISSION_RATIONALE, false)
+    // The user grants this in system settings, so it is re-checked whenever the screen resumes
+    private val canScheduleExactAlarms = MutableStateFlow(appLockScheduler.canScheduleExactAlarms())
 
     val state = combineTuple(
         appLockEnabled,
         autoLockInterval,
         screenSecurityEnabled,
-        showNotificationPermissionRationale
+        canScheduleExactAlarms
     ).mapLatest { (
                       appLockEnabled,
                       autoLockInterval,
                       screenSecurityEnabled,
-                      showNotificationPermissionRationale
+                      canScheduleExactAlarms
                   ) ->
         SecuritySettingsState(
             appLockEnabled = appLockEnabled,
             autoLockInterval = autoLockInterval,
             screenSecurityEnabled = screenSecurityEnabled,
-            showNotificationPermissionRationale = showNotificationPermissionRationale
+            exactAlarmPermissionRequired = appLockEnabled && !canScheduleExactAlarms
         )
     }.asStateFlow(viewModelScope, SecuritySettingsState())
 
     val events = eventBus.eventFlow
+
+    fun refreshExactAlarmPermission() {
+        canScheduleExactAlarms.value = appLockScheduler.canScheduleExactAlarms()
+    }
 
     override fun onAppLockToggle(enabled: Boolean) {
         viewModelScope.launch {
@@ -65,19 +69,7 @@ class SecuritySettingsViewModel @Inject constructor(
                 preferencesManager.updateAppLockEnabled(false)
                 return@launch
             }
-            if (BuildUtil.isNotificationRuntimePermissionNeeded()) {
-                eventBus.send(SecuritySettingsEvent.CheckNotificationPermission)
-            } else {
-                eventBus.send(SecuritySettingsEvent.LaunchBiometricAuthentication)
-            }
-        }
-    }
-
-    fun onNotificationPermissionResult(granted: Boolean) = viewModelScope.launch {
-        if (granted) {
             eventBus.send(SecuritySettingsEvent.LaunchBiometricAuthentication)
-        } else {
-            savedStateHandle[SHOW_NOTIFICATION_PERMISSION_RATIONALE] = true
         }
     }
 
@@ -99,22 +91,14 @@ class SecuritySettingsViewModel @Inject constructor(
         }
     }
 
-    override fun onNotificationPermissionRationaleDismiss() {
-        savedStateHandle[SHOW_NOTIFICATION_PERMISSION_RATIONALE] = false
-    }
-
-    override fun onNotificationPermissionRationaleConfirm() {
+    override fun onExactAlarmPermissionClick() {
         viewModelScope.launch {
-            savedStateHandle[SHOW_NOTIFICATION_PERMISSION_RATIONALE] = false
-            eventBus.send(SecuritySettingsEvent.NavigateToNotificationSettings)
+            eventBus.send(SecuritySettingsEvent.LaunchExactAlarmPermissionSettings)
         }
     }
 
     sealed interface SecuritySettingsEvent {
-        data object CheckNotificationPermission : SecuritySettingsEvent
         data object LaunchBiometricAuthentication : SecuritySettingsEvent
-        data object NavigateToNotificationSettings : SecuritySettingsEvent
+        data object LaunchExactAlarmPermissionSettings : SecuritySettingsEvent
     }
 }
-
-private const val SHOW_NOTIFICATION_PERMISSION_RATIONALE = "SHOW_NOTIFICATION_PERMISSION_RATIONALE"

@@ -21,7 +21,7 @@ import dev.ridill.oar.settings.data.remote.interceptors.GoogleAccessTokenInterce
 import dev.ridill.oar.settings.data.repository.BackupRepositoryImpl
 import dev.ridill.oar.settings.data.repository.JSON_MIME_TYPE
 import dev.ridill.oar.settings.domain.appInit.AppInitWorkManager
-import dev.ridill.oar.settings.domain.appLock.AppLockServiceManager
+import dev.ridill.oar.settings.domain.appLock.AppLockScheduler
 import dev.ridill.oar.settings.domain.backup.BackupService
 import dev.ridill.oar.settings.domain.backup.BackupWorkManager
 import dev.ridill.oar.settings.domain.notification.AppInitNotificationHelper
@@ -139,9 +139,9 @@ object SettingsSingletonModule {
     ): NotificationHelper<String> = BackupNotificationHelper(context)
 
     @Provides
-    fun provideAppLockServiceManager(
+    fun provideAppLockScheduler(
         @ApplicationContext context: Context
-    ): AppLockServiceManager = AppLockServiceManager(context)
+    ): AppLockScheduler = AppLockScheduler(context)
 
     @AppInitFeature
     @Provides
