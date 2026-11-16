@@ -62,6 +62,8 @@ class PreferencesManagerImpl(
                 preferences[Keys.FATAL_BACKUP_ERROR]?.let { FatalBackupError.valueOf(it) }
             }
             val showAutoDetectTxInfo = preferences[Keys.SHOW_AUTO_DETECT_TX_INFO].orTrue()
+            val remoteConfigForceRefreshRequired =
+                preferences[Keys.REMOTE_CONFIG_FORCE_REFRESH_REQUIRED].orFalse()
 
             OarPreferences(
                 showOnboarding = showOnboarding,
@@ -76,6 +78,7 @@ class PreferencesManagerImpl(
                 screenSecurityEnabled = screenSecurityEnabled,
                 fatalBackupError = fatalBackupError,
                 showAutoDetectTxInfo = showAutoDetectTxInfo,
+                remoteConfigForceRefreshRequired = remoteConfigForceRefreshRequired,
             )
         }
 
@@ -178,6 +181,14 @@ class PreferencesManagerImpl(
         }
     }
 
+    override suspend fun updateRemoteConfigForceRefreshRequired(required: Boolean) {
+        withContext(Dispatchers.IO) {
+            dataStore.edit { preferences ->
+                preferences[Keys.REMOTE_CONFIG_FORCE_REFRESH_REQUIRED] = required
+            }
+        }
+    }
+
     override suspend fun resetDataPreferences() {
         withContext(Dispatchers.IO) {
             dataStore.edit { preferences ->
@@ -208,5 +219,7 @@ class PreferencesManagerImpl(
         val SCREEN_SECURITY_ENABLED = booleanPreferencesKey("SCREEN_SECURITY_ENABLED")
         val FATAL_BACKUP_ERROR = stringPreferencesKey("FATAL_BACKUP_ERROR")
         val SHOW_AUTO_DETECT_TX_INFO = booleanPreferencesKey("SHOW_AUTO_DETECT_TX_INFO")
+        val REMOTE_CONFIG_FORCE_REFRESH_REQUIRED =
+            booleanPreferencesKey("REMOTE_CONFIG_FORCE_REFRESH_REQUIRED")
     }
 }

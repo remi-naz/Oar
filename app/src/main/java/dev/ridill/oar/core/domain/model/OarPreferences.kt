@@ -18,4 +18,5 @@ data class OarPreferences(
     val screenSecurityEnabled: Boolean,
     val fatalBackupError: FatalBackupError?,
     val showAutoDetectTxInfo: Boolean,
+    val remoteConfigForceRefreshRequired: Boolean,
 )
