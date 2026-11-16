@@ -26,6 +26,7 @@ interface PreferencesManager {
     suspend fun updateScreenSecurityEnabled(enabled: Boolean)
     suspend fun updateFatalBackupError(error: FatalBackupError?)
     suspend fun toggleShowAutoDetectTxInfoFalse()
+    suspend fun updateRemoteConfigForceRefreshRequired(required: Boolean)
 
     /**
      * Resets data-derived preferences and re-enables onboarding; app-level choices like theme and

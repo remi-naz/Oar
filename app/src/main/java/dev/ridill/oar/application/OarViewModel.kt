@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.preferences.PreferencesManager
+import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.EventBus
@@ -16,6 +17,7 @@ import dev.ridill.oar.di.ApplicationScope
 import dev.ridill.oar.settings.domain.appLock.AppAutoLockInterval
 import dev.ridill.oar.settings.domain.appLock.AppLockScheduler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -124,6 +126,7 @@ class OarViewModel @Inject constructor(
      * out, then ask for authentication if the app is locked.
      */
     fun onAppStart() = viewModelScope.launch {
+        refreshRemoteConfigIfRequested()
         val deadlinePassed = appLockScheduler.hasDeadlinePassed()
         appLockScheduler.cancel()
         val preferences = preferences.first()
@@ -147,9 +150,39 @@ class OarViewModel @Inject constructor(
 
     fun startConfigRestore() = appInitWorkManager.startConfigRestoreWorkers()
 
-    private fun initRemoteConfig() = viewModelScope.launch {
+    private var remoteConfigJob: Job? = null
+
+    private fun initRemoteConfig() {
+        remoteConfigJob = viewModelScope.launch {
+            if (preferences.first().remoteConfigForceRefreshRequired) {
+                forceRefreshRemoteConfig()
+                return@launch
+            }
+            remoteConfigService.fetch()
+            remoteConfigService.activate()
+        }
+    }
+
+    /**
+     * Picks up a refresh requested by a push while the app was in the background.
+     * Skipped while another remote config run is in progress, e.g. on launch or after the
+     * activity is recreated, so runs never overlap.
+     */
+    private fun refreshRemoteConfigIfRequested() {
+        if (remoteConfigJob?.isActive == true) return
+        remoteConfigJob = viewModelScope.launch {
+            if (!preferences.first().remoteConfigForceRefreshRequired) return@launch
+            forceRefreshRemoteConfig()
+        }
+    }
+
+    // The flag is cleared only after a successful fetch, so a failed attempt retries next launch
+    private suspend fun forceRefreshRemoteConfig() {
+        // Interval 0 bypasses the fetch throttle; activate so the new values apply right away
+        val result = remoteConfigService.fetch(interval = 0)
+        if (result !is Result.Success) return
         remoteConfigService.activate()
-        remoteConfigService.fetch()
+        preferencesManager.updateRemoteConfigForceRefreshRequired(false)
     }
 
     fun refreshTransactionAutoDetectFeatureEnabledState() = viewModelScope.launch {
