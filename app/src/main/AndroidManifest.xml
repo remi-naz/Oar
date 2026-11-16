@@ -39,6 +39,10 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <meta-data
+            android:name="firebase_messaging_installation_id_enabled"
+            android:value="true" />
+
         <!-- Receivers -->
         <receiver android:name=".budgetCycles.domain.cycleManager.CycleCompletionReceiver" />
         <receiver android:name=".transactions.domain.notification.DeleteTransactionActionReceiver" />
@@ -80,6 +84,13 @@
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync|specialUse"
             tools:node="merge" />
+        <service
+            android:name=".core.domain.messaging.OarFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <!-- /Services -->
 
         <provider
