@@ -45,6 +45,7 @@ import dev.ridill.oar.core.ui.navigation.CurrencySelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.CycleSelectedResult
 import dev.ridill.oar.core.ui.navigation.CycleSelectionSheetRoute
 import dev.ridill.oar.core.ui.navigation.EncryptionPasswordUpdatedResult
+import dev.ridill.oar.core.ui.navigation.HelpRoute
 import dev.ridill.oar.core.ui.navigation.LocalResultBus
 import dev.ridill.oar.core.ui.navigation.OarNavigator
 import dev.ridill.oar.core.ui.navigation.ResultEffect
@@ -62,6 +63,8 @@ import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionVie
 import dev.ridill.oar.settings.presentation.backupEncryption.ENCRYPTION_PASSWORD_UPDATED
 import dev.ridill.oar.settings.presentation.backupSettings.BackupSettingsScreen
 import dev.ridill.oar.settings.presentation.backupSettings.BackupSettingsViewModel
+import dev.ridill.oar.settings.presentation.help.HelpScreen
+import dev.ridill.oar.settings.presentation.help.HelpViewModel
 import dev.ridill.oar.settings.presentation.securitySettings.SecuritySettingsScreen
 import dev.ridill.oar.settings.presentation.securitySettings.SecuritySettingsViewModel
 import dev.ridill.oar.settings.presentation.settings.SettingsScreen
@@ -85,7 +88,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
         val credentialService = rememberCredentialService(context = context)
         val activity = LocalActivity.current
 
-        val shareLogsChooserTitle = stringResource(R.string.export_logs_chooser_title)
         CollectFlowEffect(
             viewModel.events,
             snackbarController,
@@ -108,14 +110,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
                     context.launchAppSettings()
                 }
 
-                is SettingsViewModel.SettingsEvent.ShareLogs -> {
-                    context.launchShareFile(
-                        uri = event.uri,
-                        mimeType = "application/zip",
-                        chooserTitle = shareLogsChooserTitle
-                    )
-                }
-
                 SettingsViewModel.SettingsEvent.StartManualSignInFlow -> {
                     activity?.let {
                         val result =
@@ -136,9 +130,44 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
             navigateToManageTags = { navigator.navigate(AllTagsRoute) },
             navigateToBackupSettings = { navigator.navigate(BackupSettingsRoute) },
             navigateToSecuritySettings = { navigator.navigate(SecuritySettingsRoute) },
+            navigateToHelp = { navigator.navigate(HelpRoute) }
+        )
+    }
+
+    entry<HelpRoute> {
+        val viewModel: HelpViewModel = hiltViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        val context = LocalContext.current
+        val snackbarController = rememberSnackbarController()
+
+        val shareLogsChooserTitle = stringResource(R.string.export_logs_chooser_title)
+        CollectFlowEffect(viewModel.events, snackbarController, context) { event ->
+            when (event) {
+                is HelpViewModel.HelpEvent.ShowUiMessage -> {
+                    snackbarController.showSnackbar(
+                        event.uiText.asString(context),
+                        event.uiText.isErrorText
+                    )
+                }
+
+                is HelpViewModel.HelpEvent.ShareLogs -> {
+                    context.launchShareFile(
+                        uri = event.uri,
+                        mimeType = "application/zip",
+                        chooserTitle = shareLogsChooserTitle
+                    )
+                }
+            }
+        }
+
+        HelpScreen(
+            snackbarController = snackbarController,
+            state = state,
+            actions = viewModel,
+            navigateUp = navigator::goBack,
             launchUriInBrowser = {
-                val intent = Intent(Intent.ACTION_VIEW, it)
-                context.startActivity(intent)
+                context.startActivity(Intent(Intent.ACTION_VIEW, it))
             }
         )
     }

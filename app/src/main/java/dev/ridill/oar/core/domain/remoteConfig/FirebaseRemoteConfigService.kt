@@ -46,7 +46,8 @@ class FirebaseRemoteConfigService(
 
     fun getConfig(): RemoteConfig {
         logI(TAG) { "getConfig() called" }
-        val sourceCodeUrl = remoteConfig.getString(Keys.SOURCE_CODE_URL)
+        val websiteUrl = remoteConfig.getString(Keys.WEBSITE_URL)
+        val privacyPolicyUrl = remoteConfig.getString(Keys.PRIVACY_POLICY_URL)
         val transactionAutoDetectFeatureEnabled =
             remoteConfig.getBoolean(Keys.TRANSACTION_AUTO_DETECT_FEATURE_ENABLED)
         val deleteAccountFeatureEnabled =
@@ -57,7 +58,8 @@ class FirebaseRemoteConfigService(
         }
 
         val remoteConfig = RemoteConfig(
-            sourceCodeUrl = sourceCodeUrl,
+            websiteUrl = websiteUrl,
+            privacyPolicyUrl = privacyPolicyUrl,
             transactionAutoDetectFeatureEnabled = transactionAutoDetectFeatureEnabled,
             deleteAccountFeatureEnabled = deleteAccountFeatureEnabled,
             autoDetectTransactionRegexPatterns = txAutoDetectPatterns
@@ -68,7 +70,8 @@ class FirebaseRemoteConfigService(
     }
 
     object Keys {
-        const val SOURCE_CODE_URL = "code_repo_link"
+        const val WEBSITE_URL = "website_url"
+        const val PRIVACY_POLICY_URL = "privacy_policy_url"
         const val TRANSACTION_AUTO_DETECT_FEATURE_ENABLED = "transaction_auto_detect_enabled"
         const val DELETE_ACCOUNT_FEATURE_ENABLED = "delete_account_feature_enabled"
         const val TX_AUTO_DETECT_PATTERNS = "tx_auto_detect_patterns"

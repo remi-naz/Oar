@@ -1,6 +1,5 @@
 package dev.ridill.oar.settings.presentation.settings
 
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
 import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.model.AuthState
 import dev.ridill.oar.core.domain.util.BuildUtil
@@ -63,7 +61,7 @@ fun SettingsScreen(
     navigateToManageTags: () -> Unit,
     navigateToBackupSettings: () -> Unit,
     navigateToSecuritySettings: () -> Unit,
-    launchUriInBrowser: (Uri) -> Unit
+    navigateToHelp: () -> Unit
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -181,31 +179,11 @@ fun SettingsScreen(
                 }
             }
 
-            if (state.hasValidSourceCodeUrl) {
-                SimpleSettingsPreference(
-                    titleRes = R.string.preference_source_code,
-                    summary = stringResource(R.string.preference_source_code_summary),
-                    leadingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_code),
-                    trailingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_link_square),
-                    onClick = {
-                        state.sourceCodeUrl?.let {
-                            launchUriInBrowser(it.toUri())
-                        }
-                    }
-                )
-            }
-
             SimpleSettingsPreference(
-                titleRes = R.string.preference_export_logs,
-                summary = stringResource(R.string.preference_export_logs_summary),
-                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_tree),
-                onClick = actions::onExportLogsClick
-            )
-
-            SimpleSettingsPreference(
-                titleRes = R.string.preference_version,
-                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_git_commit),
-                summary = BuildUtil.versionName
+                titleRes = R.string.preference_help,
+                summary = stringResource(R.string.preference_help_summary),
+                leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_help),
+                onClick = navigateToHelp
             )
         }
 
@@ -313,8 +291,7 @@ private fun PreviewSettingsScreen() {
         SettingsScreen(
             snackbarController = rememberSnackbarController(),
             state = SettingsState(
-                showAutoDetectTxOption = true,
-                sourceCodeUrl = "https://github.com"
+                showAutoDetectTxOption = true
             ),
             actions = object : SettingsActions {
                 override fun onAppThemePreferenceClick() {}
@@ -332,7 +309,6 @@ private fun PreviewSettingsScreen() {
                 override fun onLogoutKeepDataClick() {}
                 override fun onLogoutClearDataClick() {}
                 override fun onLogoutClearDataConfirm() {}
-                override fun onExportLogsClick() {}
             },
             navigateUp = {},
             navigateToNotificationSettings = {},
@@ -340,7 +316,7 @@ private fun PreviewSettingsScreen() {
             navigateToManageTags = {},
             navigateToBackupSettings = {},
             navigateToSecuritySettings = {},
-            launchUriInBrowser = {}
+            navigateToHelp = {}
         )
     }
 }

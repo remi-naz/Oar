@@ -18,5 +18,4 @@ interface SettingsActions {
     fun onLogoutKeepDataClick()
     fun onLogoutClearDataClick()
     fun onLogoutClearDataConfirm()
-    fun onExportLogsClick()
 }

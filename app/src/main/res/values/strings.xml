@@ -17,6 +17,7 @@
     <string name="destination_backup_settings">Backup</string>
     <string name="destination_backup_encryption">Backup Encryption</string>
     <string name="destination_security_settings">Security</string>
+    <string name="destination_help">Help</string>
     <string name="destination_all_transactions">All Transactions</string>
     <string name="destination_folders_graph">Folders</string>
     <string name="destination_all_folders">All Folders</string>
@@ -186,8 +187,12 @@
     <string name="preference_budget_cycles_summary">Checkout your cycle history</string>
     <string name="preference_auto_detect_transactions">Auto-detect Transactions</string>
     <string name="preference_auto_detect_transactions_summary">Try to add transactions from SMS</string>
-    <string name="preference_source_code">Source Code</string>
-    <string name="preference_source_code_summary">Take a look at the app\'s Source Code</string>
+    <string name="preference_help">Help</string>
+    <string name="preference_help_summary">About, privacy policy, logs and version</string>
+    <string name="preference_about">About %1$s</string>
+    <string name="preference_about_summary">Visit the website and learn more</string>
+    <string name="preference_privacy_policy">Privacy Policy</string>
+    <string name="preference_privacy_policy_summary">Read how your data is handled</string>
     <string name="preference_version">Version</string>
     <string name="preference_export_logs">Export Logs</string>
     <string name="preference_export_logs_summary">Share diagnostic logs to help fix issues. Personal data is removed.</string>

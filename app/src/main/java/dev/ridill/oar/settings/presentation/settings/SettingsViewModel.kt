@@ -1,6 +1,5 @@
 package dev.ridill.oar.settings.presentation.settings
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +8,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.account.presentation.util.CredentialService
-import dev.ridill.oar.core.data.logging.LogFileManager
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.util.EventBus
@@ -40,7 +38,6 @@ class SettingsViewModel @Inject constructor(
     private val backupSettingsRepo: BackupSettingsRepository,
     private val dataResetRepo: DataResetRepository,
     private val remoteConfigService: FirebaseRemoteConfigService,
-    private val logFileManager: LogFileManager,
     private val eventBus: EventBus<SettingsEvent>
 ) : ViewModel(), SettingsActions {
 
@@ -67,8 +64,6 @@ class SettingsViewModel @Inject constructor(
     private val showTransactionAutoDetectInfo = savedStateHandle
         .getStateFlow(SHOW_AUTO_DETECT_TX_INFO, false)
 
-    private val _appSourceCodeUrl = MutableStateFlow<String?>(null)
-
     private val logoutDialog = savedStateHandle
         .getStateFlow<String?>(LOGOUT_DIALOG, null)
         .mapLatest { name -> LogoutDialog.entries.firstOrNull { it.name == name } }
@@ -87,7 +82,6 @@ class SettingsViewModel @Inject constructor(
         transactionAutoDetectEnabled,
         showSmsPermissionRationale,
         showTransactionAutoDetectInfo,
-        _appSourceCodeUrl,
         logoutDialog,
         lastBackupDateTime,
         isClearingLocalData
@@ -100,7 +94,6 @@ class SettingsViewModel @Inject constructor(
                       autoAddTransactionEnabled,
                       showSmsPermissionRationale,
                       showTransactionAutoDetectInfo,
-                      appSourceCodeUrl,
                       logoutDialog,
                       lastBackupDateTime,
                       isClearingLocalData
@@ -114,7 +107,6 @@ class SettingsViewModel @Inject constructor(
             autoDetectTransactionEnabled = autoAddTransactionEnabled,
             showSmsPermissionRationale = showSmsPermissionRationale,
             showAutoDetectTransactionFeatureInfo = showTransactionAutoDetectInfo,
-            sourceCodeUrl = appSourceCodeUrl,
             logoutDialog = logoutDialog,
             lastBackupDateTime = lastBackupDateTime,
             isClearingLocalData = isClearingLocalData
@@ -293,28 +285,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private var exportLogsJob: Job? = null
-    override fun onExportLogsClick() {
-        exportLogsJob?.cancel()
-        exportLogsJob = viewModelScope.launch {
-            try {
-                val logsUri = logFileManager.exportLogs()
-                eventBus.send(SettingsEvent.ShareLogs(logsUri))
-            } catch (t: Throwable) {
-                t.rethrowIfCoroutineCancellation()
-                logE(t) { "Failed to export logs" }
-                eventBus.send(
-                    SettingsEvent.ShowUiMessage(
-                        UiText.StringResource(R.string.error_export_logs_failed, true)
-                    )
-                )
-            }
-        }
-    }
-
     private fun refreshConfigs() = viewModelScope.launch {
         val config = remoteConfigService.getConfig()
-        _appSourceCodeUrl.update { config.sourceCodeUrl }
         _transactionAutoDetectFeatureEnabled.update { config.transactionAutoDetectFeatureEnabled }
         _isValidTxAutoDetectPatternsAvailable.update { config.autoDetectTransactionRegexPatterns != null }
     }
@@ -324,7 +296,6 @@ class SettingsViewModel @Inject constructor(
         data object RequestSMSPermission : SettingsEvent
         data object LaunchAppSettings : SettingsEvent
         data object StartManualSignInFlow : SettingsEvent
-        data class ShareLogs(val uri: Uri) : SettingsEvent
     }
 }
 

@@ -100,6 +100,9 @@ data object BackupEncryptionRoute : NavKey
 data object SecuritySettingsRoute : NavKey
 
 @Serializable
+data object HelpRoute : NavKey
+
+@Serializable
 data object BudgetCyclesRoute : NavKey
 
 // --- Shared sheets ---
