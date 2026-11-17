@@ -17,14 +17,10 @@ data class SettingsState(
     val autoDetectTransactionEnabled: Boolean = false,
     val showSmsPermissionRationale: Boolean = false,
     val showAutoDetectTransactionFeatureInfo: Boolean = false,
-    val sourceCodeUrl: String? = null,
     val logoutDialog: LogoutDialog? = null,
     val lastBackupDateTime: LocalDateTime? = null,
     val isClearingLocalData: Boolean = false
 ) {
-    val hasValidSourceCodeUrl: Boolean
-        get() = !sourceCodeUrl.isNullOrEmpty()
-
     val lastBackupDateFormatted: UiText?
         get() = lastBackupDateTime?.let { DateUtil.Formatters.prettyDateAgo(it.toLocalDate()) }
 }

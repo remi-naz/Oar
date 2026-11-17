@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import dev.ridill.oar.account.domain.model.AuthState
 import dev.ridill.oar.account.domain.repository.AuthRepository
-import dev.ridill.oar.core.data.logging.LogFileManager
 import dev.ridill.oar.core.domain.model.DataError
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
@@ -43,7 +42,6 @@ class SettingsViewModelLogoutTest {
     private val backupSettingsRepo = mockk<BackupSettingsRepository>()
     private val settingsRepo = mockk<SettingsRepository>(relaxed = true)
     private val remoteConfig = mockk<FirebaseRemoteConfigService>(relaxed = true)
-    private val logFileManager = mockk<LogFileManager>(relaxed = true)
 
     private val lastBackup = MutableStateFlow<LocalDateTime?>(null)
     private val eventBus = EventBus<SettingsViewModel.SettingsEvent>()
@@ -72,7 +70,6 @@ class SettingsViewModelLogoutTest {
         backupSettingsRepo = backupSettingsRepo,
         dataResetRepo = dataResetRepo,
         remoteConfigService = remoteConfig,
-        logFileManager = logFileManager,
         eventBus = eventBus
     )
 

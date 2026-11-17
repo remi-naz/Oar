@@ -4,7 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 data class RemoteConfig(
-    val sourceCodeUrl: String,
+    val websiteUrl: String,
+    val privacyPolicyUrl: String,
     val transactionAutoDetectFeatureEnabled: Boolean,
     val deleteAccountFeatureEnabled: Boolean,
     val autoDetectTransactionRegexPatterns: AutoDetectTransactionRegexPatterns?

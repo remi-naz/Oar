@@ -24,6 +24,7 @@ import dev.ridill.oar.settings.domain.repositoty.BackupSettingsRepository
 import dev.ridill.oar.settings.domain.repositoty.SettingsRepository
 import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionViewModel
 import dev.ridill.oar.settings.presentation.backupSettings.BackupSettingsViewModel
+import dev.ridill.oar.settings.presentation.help.HelpViewModel
 import dev.ridill.oar.settings.presentation.securitySettings.SecuritySettingsViewModel
 import dev.ridill.oar.settings.presentation.settings.SettingsViewModel
 
@@ -92,4 +93,7 @@ object SettingsViewModelModule {
     @Provides
     fun provideBackupEncryptionEventBus(): EventBus<BackupEncryptionViewModel.BackupEncryptionEvent> =
         EventBus()
+
+    @Provides
+    fun provideHelpEventBus(): EventBus<HelpViewModel.HelpEvent> = EventBus()
 }
