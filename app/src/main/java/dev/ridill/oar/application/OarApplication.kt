@@ -9,6 +9,7 @@ import dev.ridill.oar.core.data.logging.FileLoggingTree
 import dev.ridill.oar.core.data.logging.LogFileManager
 import dev.ridill.oar.core.domain.crypto.KeystoreCryptoManager
 import dev.ridill.oar.core.domain.logging.LogRedactor
+import dev.ridill.oar.core.domain.messaging.PushMessagingManager
 import dev.ridill.oar.core.domain.util.BuildUtil
 import dev.ridill.oar.core.domain.util.logE
 import dev.ridill.oar.core.domain.util.logI
@@ -37,6 +38,9 @@ class OarApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var logRedactor: LogRedactor
 
+    @Inject
+    lateinit var pushMessagingManager: PushMessagingManager
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -46,6 +50,7 @@ class OarApplication : Application(), Configuration.Provider {
         super.onCreate()
         setupTimber()
         clearLegacyAccessTokenCache()
+        applicationScope.launch { pushMessagingManager.subscribeToTopics() }
     }
 
     private fun setupTimber() {
