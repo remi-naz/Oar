@@ -46,8 +46,29 @@ fun SimpleSettingsPreference(
     trailingIcon: ImageVector? = null,
     contentPadding: PaddingValues = PreferenceContentPadding,
     contentColor: Color = LocalContentColor.current
+) = SimpleSettingsPreference(
+    title = stringResource(titleRes),
+    modifier = modifier,
+    summary = summary,
+    onClick = onClick,
+    leadingIcon = leadingIcon,
+    trailingIcon = trailingIcon,
+    contentPadding = contentPadding,
+    contentColor = contentColor
+)
+
+@Composable
+fun SimpleSettingsPreference(
+    title: String,
+    modifier: Modifier = Modifier,
+    summary: String? = null,
+    onClick: (() -> Unit)? = null,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
+    contentPadding: PaddingValues = PreferenceContentPadding,
+    contentColor: Color = LocalContentColor.current
 ) = BasicPreference(
-    titleContent = { Text(text = stringResource(titleRes)) },
+    titleContent = { Text(text = title) },
     summaryContent = summary?.let {
         { Text(text = it) }
     },

@@ -57,7 +57,10 @@ fun HelpScreen(
         ) {
             if (state.hasValidWebsiteUrl) {
                 SimpleSettingsPreference(
-                    titleRes = R.string.preference_about,
+                    title = stringResource(
+                        R.string.preference_about,
+                        stringResource(R.string.app_name)
+                    ),
                     summary = stringResource(R.string.preference_about_summary),
                     leadingIcon = ImageVector.vectorResource(R.drawable.ic_outlined_globe),
                     trailingIcon = ImageVector.vectorResource(R.drawable.ic_rounded_link_square),
