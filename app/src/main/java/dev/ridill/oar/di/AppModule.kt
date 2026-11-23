@@ -192,8 +192,7 @@ object AppModule {
     }
 
     @Provides
-    fun provideRemoteConfigService(json: Json): RemoteConfigService =
-        FirebaseRemoteConfigService(json = json)
+    fun provideRemoteConfigService(): RemoteConfigService = FirebaseRemoteConfigService()
 
     @Provides
     fun provideConnectivityObserver(

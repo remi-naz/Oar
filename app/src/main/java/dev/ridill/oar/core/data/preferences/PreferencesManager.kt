@@ -18,14 +18,12 @@ interface PreferencesManager {
     suspend fun updateAppThem(theme: AppTheme)
     suspend fun updateDynamicColorsEnabled(enabled: Boolean)
     suspend fun updateLastBackupTimestamp(localDateTime: LocalDateTime)
-    suspend fun updateTransactionAutoDetectEnabled(enabled: Boolean)
     suspend fun updateAllTransactionsShowExcludedOption(show: Boolean)
     suspend fun updateAppLockEnabled(enabled: Boolean)
     suspend fun updateAppAutoLockInterval(interval: AppAutoLockInterval)
     suspend fun updateAppLocked(locked: Boolean)
     suspend fun updateScreenSecurityEnabled(enabled: Boolean)
     suspend fun updateFatalBackupError(error: FatalBackupError?)
-    suspend fun toggleShowAutoDetectTxInfoFalse()
     suspend fun updateRemoteConfigForceRefreshRequired(required: Boolean)
 
     /**

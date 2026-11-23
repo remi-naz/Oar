@@ -9,7 +9,6 @@ import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.fakes.FakeAuthRepository
 import dev.ridill.oar.fakes.FakeBackupSettingsRepository
 import dev.ridill.oar.fakes.FakeDataResetRepository
-import dev.ridill.oar.fakes.FakeRemoteConfigService
 import dev.ridill.oar.fakes.FakeSettingsRepository
 import dev.ridill.oar.util.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +37,6 @@ class SettingsViewModelLogoutTest {
         authRepo = authRepo,
         backupSettingsRepo = FakeBackupSettingsRepository(),
         dataResetRepo = dataResetRepo,
-        remoteConfigService = FakeRemoteConfigService(),
         eventBus = eventBus
     )
 

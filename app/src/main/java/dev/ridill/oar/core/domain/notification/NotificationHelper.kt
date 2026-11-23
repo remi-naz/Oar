@@ -20,9 +20,6 @@ interface NotificationHelper<T> {
     fun dismissAllNotifications() {}
 
     object Groups {
-        fun transactions(context: Context): String =
-            "${context.packageName}.NOTIFICATION_CHANNEL_GROUP_TRANSACTIONS"
-
         fun schedules(context: Context): String =
             "${context.packageName}.NOTIFICATION_CHANNEL_GROUP_NOTIFICATION"
 

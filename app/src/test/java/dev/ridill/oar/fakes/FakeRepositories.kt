@@ -97,8 +97,6 @@ class FakeSettingsRepository : SettingsRepository {
 
     val appTheme = MutableStateFlow(AppTheme.SYSTEM_DEFAULT)
     val dynamicColorsEnabled = MutableStateFlow(false)
-    val transactionAutoDetectEnabled = MutableStateFlow(false)
-    var showTransactionAutoDetectInfo = true
 
     override fun refreshCurrentDate() = Unit
     override fun getCurrentAppTheme(): Flow<AppTheme> = appTheme
@@ -109,18 +107,6 @@ class FakeSettingsRepository : SettingsRepository {
     override fun getDynamicColorsEnabled(): Flow<Boolean> = dynamicColorsEnabled
     override suspend fun toggleDynamicColors(enabled: Boolean) {
         dynamicColorsEnabled.value = enabled
-    }
-
-    override fun getTransactionAutoDetectEnabled(): Flow<Boolean> = transactionAutoDetectEnabled
-    override suspend fun toggleAutoDetectTransactions(enabled: Boolean) {
-        transactionAutoDetectEnabled.value = enabled
-    }
-
-    override suspend fun getShowTransactionAutoDetectInfoValue(): Boolean =
-        showTransactionAutoDetectInfo
-
-    override suspend fun toggleShowAutoDetectTxInfoFalse() {
-        showTransactionAutoDetectInfo = false
     }
 }
 

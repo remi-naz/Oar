@@ -10,13 +10,11 @@ data class OarPreferences(
     val appTheme: AppTheme,
     val dynamicColorsEnabled: Boolean,
     val lastBackupDateTime: LocalDateTime?,
-    val transactionAutoDetectEnabled: Boolean,
     val allTransactionsShowExcludedOption: Boolean,
     val appLockEnabled: Boolean,
     val appAutoLockInterval: AppAutoLockInterval,
     val isAppLocked: Boolean,
     val screenSecurityEnabled: Boolean,
     val fatalBackupError: FatalBackupError?,
-    val showAutoDetectTxInfo: Boolean,
     val remoteConfigForceRefreshRequired: Boolean,
 )

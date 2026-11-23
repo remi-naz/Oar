@@ -1,24 +1,14 @@
 package dev.ridill.oar.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.OarDatabase
-import dev.ridill.oar.core.domain.crashlytics.CrashlyticsManager
-import dev.ridill.oar.core.domain.notification.NotificationHelper
-import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.TransactionPagedQueryBuilder
 import dev.ridill.oar.transactions.data.repository.TransactionRepositoryImpl
-import dev.ridill.oar.transactions.domain.autoDetection.RegexTransactionDataExtractor
-import dev.ridill.oar.transactions.domain.autoDetection.TransactionAutoDetectService
-import dev.ridill.oar.transactions.domain.autoDetection.TransactionDataExtractor
-import dev.ridill.oar.transactions.domain.model.Transaction
-import dev.ridill.oar.transactions.domain.notification.TransactionAutoDetectNotificationHelper
 import dev.ridill.oar.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 
@@ -45,31 +35,4 @@ object TransactionSingletonModule {
         db = db,
         applicationScope = applicationScope
     )
-
-    @Provides
-    fun provideTransactionDataExtractor(
-        @ApplicationScope applicationScope: CoroutineScope,
-        remoteConfigService: RemoteConfigService
-    ): TransactionDataExtractor = RegexTransactionDataExtractor(
-        applicationScope = applicationScope,
-        remoteConfigService = remoteConfigService
-    )
-
-    @Provides
-    fun provideTransactionSmsService(
-        extractor: TransactionDataExtractor,
-        transactionRepository: TransactionRepository,
-        crashlyticsManager: CrashlyticsManager,
-        notificationHelper: NotificationHelper<Transaction>,
-    ): TransactionAutoDetectService = TransactionAutoDetectService(
-        extractor = extractor,
-        transactionRepo = transactionRepository,
-        crashlyticsManager = crashlyticsManager,
-        notificationHelper = notificationHelper,
-    )
-
-    @Provides
-    fun provideTransactionAutoDetectNotificationHelper(
-        @ApplicationContext context: Context
-    ): NotificationHelper<Transaction> = TransactionAutoDetectNotificationHelper(context)
 }

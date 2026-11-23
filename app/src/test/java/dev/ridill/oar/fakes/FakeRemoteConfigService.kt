@@ -2,7 +2,6 @@ package dev.ridill.oar.fakes
 
 import dev.ridill.oar.core.domain.model.DataError
 import dev.ridill.oar.core.domain.model.Result
-import dev.ridill.oar.core.domain.remoteConfig.AutoDetectTransactionRegexPatterns
 import dev.ridill.oar.core.domain.remoteConfig.RemoteConfig
 import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 
@@ -25,14 +24,10 @@ class FakeRemoteConfigService(
     override fun getConfig(): RemoteConfig = currentConfig
 
     companion object {
-        fun defaultConfig(
-            patterns: AutoDetectTransactionRegexPatterns? = null
-        ) = RemoteConfig(
+        fun defaultConfig() = RemoteConfig(
             websiteUrl = "https://example.com",
             privacyPolicyUrl = "https://example.com/privacy",
-            transactionAutoDetectFeatureEnabled = false,
-            deleteAccountFeatureEnabled = false,
-            autoDetectTransactionRegexPatterns = patterns
+            deleteAccountFeatureEnabled = false
         )
     }
 }

@@ -6,7 +6,6 @@ import androidx.paging.cachedIn
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
-import dev.ridill.oar.core.domain.notification.NotificationHelper
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.Zero
 import dev.ridill.oar.core.domain.util.asStateFlow
@@ -15,7 +14,6 @@ import dev.ridill.oar.core.ui.navigation.AddEditScheduleResult
 import dev.ridill.oar.core.ui.navigation.AddEditTxResult
 import dev.ridill.oar.core.ui.util.UiText
 import dev.ridill.oar.dashboard.domain.repository.DashboardRepository
-import dev.ridill.oar.transactions.domain.model.Transaction
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
@@ -24,7 +22,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     repo: DashboardRepository,
-    private val notificationHelper: NotificationHelper<Transaction>,
     private val eventBus: EventBus<DashboardEvent>
 ) : ViewModel() {
     private val signedInUser = repo.getSignedInUser()
@@ -90,10 +87,6 @@ class DashboardViewModel @Inject constructor(
 
     val events = eventBus.eventFlow
 
-    init {
-        cancelNotifications()
-    }
-
     fun onNavResult(result: AddEditTxResult) = viewModelScope.launch {
         val event = when (result) {
             AddEditTxResult.TRANSACTION_DELETED ->
@@ -115,10 +108,6 @@ class DashboardViewModel @Inject constructor(
         if (result == AddEditScheduleResult.SCHEDULE_SAVED) {
             eventBus.send(DashboardEvent.ScheduleSaved)
         }
-    }
-
-    private fun cancelNotifications() {
-        notificationHelper.dismissAllNotifications()
     }
 
     sealed interface DashboardEvent {

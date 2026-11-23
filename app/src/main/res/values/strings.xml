@@ -48,8 +48,6 @@
     <string name="shortcut_add_new_transaction_label">Add New Transaction</string>
 
     <!-- Notifications -->
-    <string name="notification_channel_group_transactions_name">Transactions</string>
-    <string name="notification_channel_transaction_auto_detect_name">Transaction Auto-Detect</string>
     <string name="notification_channel_group_schedules_name">Schedules</string>
     <string name="notification_channel_schedule_reminders_name">Schedule Reminders</string>
     <string name="notification_channel_group_others_name">Others</string>
@@ -161,7 +159,6 @@
     <string name="action_continue">Continue</string>
     <string name="action_not_now">Not Now</string>
     <string name="action_delete">Delete</string>
-    <string name="action_mark_excluded">Mark Excluded</string>
     <string name="action_ok">OK</string>
     <string name="action_skip">Skip</string>
     <string name="action_undo">Undo</string>
@@ -173,9 +170,7 @@
 
     <!-- Permission Rationales -->
     <string name="permission_notification">Notifications</string>
-    <string name="permission_rationale_notification"><b>%s</b> requires notification permissions to ensures you\'re kept up-to-date on important activity, such as schedules, auto-detected transactions, app lock and backups, etc. Tap Settings > Notifications, and turn it on.</string>
-    <string name="permission_sms">Receive SMS Messages</string>
-    <string name="permission_rationale_read_sms"><b>%s</b> needs to read your SMS messages to try and add transactions automatically. Tap Settings > Permissions, and turn <b>SMS</b> on.</string>
+    <string name="permission_rationale_notification"><b>%s</b> requires notification permissions to ensures you\'re kept up-to-date on important activity, such as schedules, app lock and backups, etc. Tap Settings > Notifications, and turn it on.</string>
 
     <!-- Preferences -->
     <string name="preference_app_theme">App Theme</string>
@@ -185,8 +180,6 @@
     <string name="preference_notification_summary">Manage your notification preferences</string>
     <string name="preference_budget_cycles">Budget Cycles</string>
     <string name="preference_budget_cycles_summary">Checkout your cycle history</string>
-    <string name="preference_auto_detect_transactions">Auto-detect Transactions</string>
-    <string name="preference_auto_detect_transactions_summary">Try to add transactions from SMS</string>
     <string name="preference_help">Help</string>
     <string name="preference_help_summary">About, privacy policy, logs and version</string>
     <string name="preference_about">About %1$s</string>
@@ -289,8 +282,6 @@
     <string name="complete_cycle_confirmation_title">Complete current cycle?</string>
     <string name="complete_cycle_confirmation_message">This action will complete your current active cycle and start the next. This action is irreversible and cannot be undone. Are you sure you want to continue?</string>
 
-    <string name="feature_info_auto_detect_transaction_title">Auto-Detect Transactions</string>
-    <string name="feature_info_auto_detect_transaction_message">%s tries to read SMS data to automatically detect and add transactions.</string>
     <string name="feature_experimental_message">Note: This feature is still experimental and may not function properly.</string>
 
     <string name="app_theme_system_default">System Default</string>
@@ -366,9 +357,6 @@
     <string name="tag_saved">Tag saved</string>
     <string name="tag_deleted">Tag deleted</string>
     <string name="tag_deleted_with_transactions">Tag deleted with transactions</string>
-    <string name="amount_debited_notification_message">Debit of %1$s %2$s</string>
-    <string name="amount_credited_notification_message">Credit of %1$s %2$s</string>
-    <string name="new_transaction_detected">New Transaction Detected</string>
     <string name="tag_name">Tag Name</string>
     <string name="app_update_in_progress">App update in progress</string>
     <string name="update_failed">Update failed</string>
