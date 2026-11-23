@@ -10,7 +10,7 @@ import dev.ridill.oar.core.data.db.FtsQueryFormatter
 import dev.ridill.oar.core.data.db.OarDatabase
 import dev.ridill.oar.core.domain.crashlytics.CrashlyticsManager
 import dev.ridill.oar.core.domain.notification.NotificationHelper
-import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
+import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.transactions.data.local.TransactionDao
 import dev.ridill.oar.transactions.data.local.TransactionPagedQueryBuilder
 import dev.ridill.oar.transactions.data.repository.TransactionRepositoryImpl
@@ -49,7 +49,7 @@ object TransactionSingletonModule {
     @Provides
     fun provideTransactionDataExtractor(
         @ApplicationScope applicationScope: CoroutineScope,
-        remoteConfigService: FirebaseRemoteConfigService
+        remoteConfigService: RemoteConfigService
     ): TransactionDataExtractor = RegexTransactionDataExtractor(
         applicationScope = applicationScope,
         remoteConfigService = remoteConfigService

@@ -10,26 +10,25 @@ import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.tryOrNull
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
 private const val TAG = "FirebaseRemoteConfigService"
 
 class FirebaseRemoteConfigService(
     private val json: Json
-) {
+) : RemoteConfigService {
 
     private val remoteConfig = Firebase.remoteConfig
 
-    fun init() {
+    override fun init() {
         val configSettings = remoteConfigSettings {
             fetchTimeoutInSeconds = DEFAULT_FETCH_TIMEOUT.inWholeSeconds
         }
         remoteConfig.setConfigSettingsAsync(configSettings)
     }
 
-    suspend fun fetch(
-        interval: Long = DEFAULT_FETCH_INTERVAL.inWholeSeconds
+    override suspend fun fetch(
+        interval: Long
     ): Result<Unit, DataError> = tryNetworkCall {
         logI(TAG) { "fetch() called with: interval = $interval" }
         remoteConfig.fetch(interval).await()
@@ -37,14 +36,14 @@ class FirebaseRemoteConfigService(
         Result.Success(Unit)
     }
 
-    suspend fun activate(): Result<Boolean, DataError> = tryNetworkCall {
+    override suspend fun activate(): Result<Boolean, DataError> = tryNetworkCall {
         logI(TAG) { "activate() called" }
         val success = remoteConfig.activate().await()
         logI(TAG) { "activate() completed with: success = $success" }
         Result.Success(success)
     }
 
-    fun getConfig(): RemoteConfig {
+    override fun getConfig(): RemoteConfig {
         logI(TAG) { "getConfig() called" }
         val websiteUrl = remoteConfig.getString(Keys.WEBSITE_URL)
         val privacyPolicyUrl = remoteConfig.getString(Keys.PRIVACY_POLICY_URL)
@@ -78,5 +77,4 @@ class FirebaseRemoteConfigService(
     }
 }
 
-private val DEFAULT_FETCH_INTERVAL = 12.hours
 private val DEFAULT_FETCH_TIMEOUT = 30.seconds

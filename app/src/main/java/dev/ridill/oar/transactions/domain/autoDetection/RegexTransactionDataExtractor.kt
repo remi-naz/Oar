@@ -1,7 +1,7 @@
 package dev.ridill.oar.transactions.domain.autoDetection
 
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
+import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.core.domain.util.DateUtil
 import dev.ridill.oar.core.domain.util.Empty
 import dev.ridill.oar.core.domain.util.LocaleUtil
@@ -28,7 +28,7 @@ import java.time.temporal.ChronoField
 
 class RegexTransactionDataExtractor(
     @ApplicationContext private val applicationScope: CoroutineScope,
-    private val remoteConfigService: FirebaseRemoteConfigService
+    private val remoteConfigService: RemoteConfigService
 ) : TransactionDataExtractor {
 
     private val englishCharsRegex = ENGLISH_CHARS_PATTERN.toRegex()
