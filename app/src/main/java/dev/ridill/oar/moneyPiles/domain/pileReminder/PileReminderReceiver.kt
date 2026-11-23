@@ -19,7 +19,7 @@ class PileReminderReceiver : BroadcastReceiver() {
 
     @ApplicationScope
     @Inject
-    lateinit var applicationContext: CoroutineScope
+    lateinit var applicationScope: CoroutineScope
 
     @Inject
     lateinit var repo: PileReminderRepository
@@ -38,7 +38,7 @@ class PileReminderReceiver : BroadcastReceiver() {
             ?: return
 
         val pendingResult = goAsync()
-        applicationContext.launch {
+        applicationScope.launch {
             try {
                 handleReminder(id)
             } finally {
