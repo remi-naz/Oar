@@ -22,7 +22,7 @@ class CycleCompletionReceiver : BroadcastReceiver() {
 
     @ApplicationScope
     @Inject
-    lateinit var applicationContext: CoroutineScope
+    lateinit var applicationScope: CoroutineScope
 
     @Inject
     lateinit var repo: BudgetCycleRepository
@@ -40,7 +40,7 @@ class CycleCompletionReceiver : BroadcastReceiver() {
             }
         logI("CycleReceiver") { "Cycle completion alarm received, cycle = $id" }
         val pendingResult = goAsync()
-        applicationContext.launch {
+        applicationScope.launch {
             try {
                 completeCycleAndNotify(id, context)
             } finally {

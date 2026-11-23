@@ -47,8 +47,11 @@ import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.EventBus
+import dev.ridill.oar.core.domain.util.logE
 import dev.ridill.oar.core.domain.util.logI
 import dev.ridill.oar.core.domain.util.logW
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -141,9 +144,24 @@ object AppModule {
     @Provides
     fun provideExpressionEvaluationService(): ExpEvalService = ExpEvalService()
 
-    @ApplicationScope
+    @Dispatcher(OarDispatchers.Default)
     @Provides
-    fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob())
+    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    // Singleton so every injection site shares one process-wide scope. Never cancelled.
+    // The handler keeps an uncaught failure in a launch from crashing the app.
+    @ApplicationScope
+    @Singleton
+    @Provides
+    fun provideApplicationScope(
+        @Dispatcher(OarDispatchers.Default) dispatcher: CoroutineDispatcher,
+        crashlyticsManager: CrashlyticsManager
+    ): CoroutineScope = CoroutineScope(
+        SupervisorJob() + dispatcher + CoroutineExceptionHandler { _, throwable ->
+            logE(throwable) { "Uncaught exception in application scope" }
+            crashlyticsManager.recordError(throwable)
+        }
+    )
 
     @Provides
     fun provideReceiverService(
@@ -217,6 +235,12 @@ private fun Context.buildPreferencesDataStore(
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ApplicationScope
+
+enum class OarDispatchers { Default }
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Dispatcher(val dispatcher: OarDispatchers)
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

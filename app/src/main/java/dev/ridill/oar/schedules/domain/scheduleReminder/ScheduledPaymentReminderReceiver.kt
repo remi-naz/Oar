@@ -20,7 +20,7 @@ class ScheduledPaymentReminderReceiver : BroadcastReceiver() {
 
     @ApplicationScope
     @Inject
-    lateinit var applicationContext: CoroutineScope
+    lateinit var applicationScope: CoroutineScope
 
     @Inject
     lateinit var currencyPrefRepo: CurrencyRepository
@@ -42,7 +42,7 @@ class ScheduledPaymentReminderReceiver : BroadcastReceiver() {
             ?: return
 
         val pendingResult = goAsync()
-        applicationContext.launch {
+        applicationScope.launch {
             try {
                 notifyAndSetNextNextReminder(id)
             } finally {
