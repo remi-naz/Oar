@@ -13,7 +13,7 @@ class CycleDateCalculatorTest {
     // region periodForMonth
 
     @Test
-    fun `first day of month period spans the calendar month`() {
+    fun firstDayPeriod_spansCalendarMonth() {
         val period = calculator.periodForMonth(
             CycleStartDay.FirstDayOfMonth,
             YearMonth.of(2026, 11)
@@ -24,7 +24,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `last day of month period starts previous month end and ends day before this month end`() {
+    fun lastDayPeriod_runsPrevMonthEndToDayBeforeMonthEnd() {
         val period = calculator.periodForMonth(
             CycleStartDay.LastDayOfMonth,
             YearMonth.of(2026, 11)
@@ -35,7 +35,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `specific day period runs from that day to the day before it next month`() {
+    fun specificDayPeriod_endsDayBeforeSameDayNextMonth() {
         val period = calculator.periodForMonth(
             CycleStartDay.SpecificDayOfMonth(5),
             YearMonth.of(2026, 11)
@@ -46,7 +46,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `january period reaches back into previous year without crashing`() {
+    fun januaryPeriod_reachesIntoPreviousYear() {
         val specific = calculator.periodForMonth(
             CycleStartDay.SpecificDayOfMonth(10),
             YearMonth.of(2027, 1)
@@ -63,7 +63,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `specific day 31 is clamped in short months`() {
+    fun specificDay31_isClampedInShortMonths() {
         val april = calculator.periodForMonth(
             CycleStartDay.SpecificDayOfMonth(31),
             YearMonth.of(2026, 4)
@@ -82,7 +82,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `specific day 29 to 30 are clamped in february`() {
+    fun specificDay29To30_areClampedInFebruary() {
         val leapFeb = calculator.periodForMonth(
             CycleStartDay.SpecificDayOfMonth(30),
             YearMonth.of(2028, 2)
@@ -103,7 +103,7 @@ class CycleDateCalculatorTest {
     private val firstDay = CycleStartDay.FirstDayOfMonth
 
     @Test
-    fun `on time completion moves to next month`() {
+    fun onTimeCompletion_movesToNextMonth() {
         val result = calculator.nextCycleMonth(
             startDay = firstDay,
             completedCycleScheduledEnd = LocalDate.of(2026, 10, 31),
@@ -114,7 +114,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `early manual completion still moves to next month`() {
+    fun earlyManualCompletion_movesToNextMonth() {
         val result = calculator.nextCycleMonth(
             startDay = firstDay,
             completedCycleScheduledEnd = LocalDate.of(2026, 10, 31),
@@ -125,7 +125,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `late completion does not skip a period`() {
+    fun lateCompletion_doesNotSkipPeriod() {
         // Regression: completing on Nov 4 used to derive December from "yesterday + 1 month"
         val result = calculator.nextCycleMonth(
             startDay = firstDay,
@@ -137,7 +137,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `months of inactivity jump to the period containing today`() {
+    fun monthsOfInactivity_jumpToPeriodContainingToday() {
         val result = calculator.nextCycleMonth(
             startDay = firstDay,
             completedCycleScheduledEnd = LocalDate.of(2026, 10, 31),
@@ -148,7 +148,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `specific day late completion stays within the following period`() {
+    fun specificDayLateCompletion_staysInNextPeriod() {
         val startDay = CycleStartDay.SpecificDayOfMonth(5)
         // Cycle Oct 5 - Nov 4 completed late on Nov 8 -> next is Nov 5 - Dec 4 (December)
         val result = calculator.nextCycleMonth(
@@ -161,7 +161,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `last day of month late completion stays within the following period`() {
+    fun lastDayLateCompletion_staysInNextPeriod() {
         val startDay = CycleStartDay.LastDayOfMonth
         // Cycle Oct 31 - Nov 29 completed on Dec 2 -> next is Nov 30 - Dec 30 (December)
         val result = calculator.nextCycleMonth(
@@ -174,7 +174,7 @@ class CycleDateCalculatorTest {
     }
 
     @Test
-    fun `year boundary advances to january of next year`() {
+    fun yearBoundary_advancesToNextJanuary() {
         val result = calculator.nextCycleMonth(
             startDay = firstDay,
             completedCycleScheduledEnd = LocalDate.of(2026, 12, 31),

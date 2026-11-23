@@ -10,7 +10,7 @@ class ScheduleDateCalculatorTest {
     private val calculator = ScheduleDateCalculator()
 
     @Test
-    fun `next payment for NO_REPEAT is always null`() {
+    fun nextPaymentForNoRepeat_isNull() {
         val result = calculator.calculateNextPaymentTimestamp(
             anchor = LocalDateTime.of(2026, 10, 5, 9, 0),
             repetition = ScheduleRepetition.NO_REPEAT,
@@ -21,7 +21,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `monthly schedule paid late still advances to next month`() {
+    fun monthlyPaidLate_advancesToNextMonth() {
         // Regression test: due Oct 5, paid Oct 10. Previously this collapsed back to
         // Oct 31 (same month as the due date) instead of advancing to November.
         val dueDate = LocalDateTime.of(2026, 10, 5, 9, 0)
@@ -37,7 +37,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `monthly schedule paid exactly on due date advances by one month`() {
+    fun monthlyPaidOnDueDate_advancesOneMonth() {
         val dueDate = LocalDateTime.of(2026, 10, 5, 9, 0)
 
         val result = calculator.calculateNextPaymentTimestamp(
@@ -50,7 +50,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `monthly schedule paid early is not shifted by the early payment date`() {
+    fun monthlyPaidEarly_ignoresPaymentDate() {
         val dueDate = LocalDateTime.of(2026, 10, 5, 9, 0)
         val paidOn = LocalDateTime.of(2026, 10, 2, 9, 0)
 
@@ -64,7 +64,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `monthly schedule paid a month or more late still advances a single period from the due date`() {
+    fun monthlyPaidMonthsLate_advancesOnePeriod() {
         val dueDate = LocalDateTime.of(2026, 8, 5, 9, 0)
         val paidOn = LocalDateTime.of(2026, 10, 10, 9, 0)
 
@@ -78,7 +78,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `monthly schedule due on the 31st clamps to a shorter next month`() {
+    fun monthlyDueOn31st_clampsInShorterMonth() {
         val dueDate = LocalDateTime.of(2026, 1, 31, 9, 0)
 
         val result = calculator.calculateNextPaymentTimestamp(
@@ -91,7 +91,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `monthly schedule due on the 31st recovers its day after passing through a shorter month`() {
+    fun monthlyDueOn31st_recoversDayAfterShortMonth() {
         // Regression test for month-end drift: a schedule due on the 31st must not
         // permanently settle on the 28th just because it passed through February.
         val originalDueDate = LocalDateTime.of(2026, 1, 31, 9, 0)
@@ -115,7 +115,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `yearly schedule due on Feb 29 recovers on the next leap year`() {
+    fun yearlyDueOnFeb29_recoversNextLeapYear() {
         val originalDueDate = LocalDateTime.of(2024, 2, 29, 9, 0)
 
         val nonLeapYearOccurrence = calculator.calculateNextPaymentTimestamp(
@@ -137,7 +137,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `next payment falls back to anchor when there is no expected timestamp`() {
+    fun nextPayment_withoutExpectedTimestamp_usesAnchor() {
         val now = LocalDateTime.of(2026, 9, 24, 9, 0)
 
         val result = calculator.calculateNextPaymentTimestamp(
@@ -150,7 +150,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `weekly schedule advances by exactly one week from its due date`() {
+    fun weekly_advancesOneWeekFromDueDate() {
         val dueDate = LocalDateTime.of(2026, 9, 24, 9, 0)
         val paidOn = LocalDateTime.of(2026, 9, 26, 9, 0)
 
@@ -164,7 +164,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `bi-monthly schedule advances by exactly two months from its due date`() {
+    fun biMonthly_advancesTwoMonthsFromDueDate() {
         val dueDate = LocalDateTime.of(2026, 8, 5, 9, 0)
         val paidOn = LocalDateTime.of(2026, 8, 12, 9, 0)
 
@@ -178,7 +178,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `yearly schedule advances by exactly one year from its due date`() {
+    fun yearly_advancesOneYearFromDueDate() {
         val dueDate = LocalDateTime.of(2026, 3, 15, 9, 0)
         val paidOn = LocalDateTime.of(2026, 3, 20, 9, 0)
 
@@ -192,7 +192,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `last payment for NO_REPEAT is always null`() {
+    fun lastPaymentForNoRepeat_isNull() {
         val result = calculator.calculateLastPaymentTimestamp(
             anchor = LocalDateTime.of(2026, 10, 5, 9, 0),
             repetition = ScheduleRepetition.NO_REPEAT,
@@ -203,7 +203,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `monthly last payment steps back exactly one month from the due date`() {
+    fun monthlyLastPayment_stepsBackOneMonth() {
         val dueDate = LocalDateTime.of(2026, 10, 5, 9, 0)
 
         val result = calculator.calculateLastPaymentTimestamp(
@@ -216,7 +216,7 @@ class ScheduleDateCalculatorTest {
     }
 
     @Test
-    fun `bi-monthly last payment steps back exactly two months from the due date`() {
+    fun biMonthlyLastPayment_stepsBackTwoMonths() {
         val dueDate = LocalDateTime.of(2026, 10, 5, 9, 0)
 
         val result = calculator.calculateLastPaymentTimestamp(

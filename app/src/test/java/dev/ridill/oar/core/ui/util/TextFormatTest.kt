@@ -23,7 +23,7 @@ class TextFormatTest {
     }
 
     @Test
-    fun testParseAmountStringWithCurrencySymbol_isNotNull() {
+    fun parseAmountStringWithCurrencySymbol_isNotNull() {
         println("Amount string - $amountString")
         val parsedNumber = TextFormat.parseNumber(amountString)
         assertThat(parsedNumber).isNotNull()
