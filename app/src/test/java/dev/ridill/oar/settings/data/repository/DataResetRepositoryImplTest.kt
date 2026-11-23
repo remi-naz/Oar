@@ -1,149 +1,221 @@
 package dev.ridill.oar.settings.data.repository
 
-import dev.ridill.oar.budgetCycles.data.local.BudgetCycleDao
-import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleManager
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import dev.ridill.oar.budgetCycles.data.local.entity.BudgetCycleEntity
 import dev.ridill.oar.core.data.db.OarDatabase
-import dev.ridill.oar.core.data.preferences.PreferencesManager
-import dev.ridill.oar.core.data.preferences.backupEncryption.BackupEncryptionPreferencesManager
-import dev.ridill.oar.moneyPiles.data.local.MoneyPileDao
-import dev.ridill.oar.moneyPiles.domain.pileReminder.PileReminder
-import dev.ridill.oar.schedules.data.local.SchedulesDao
-import dev.ridill.oar.schedules.domain.scheduleReminder.ScheduleReminder
-import dev.ridill.oar.settings.domain.appInit.AppInitWorkManager
-import dev.ridill.oar.settings.domain.backup.BackupWorkManager
-import dev.ridill.oar.settings.domain.repositoty.BackupRepository
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.coVerifyOrder
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
+import dev.ridill.oar.core.domain.crypto.EncryptionScheme
+import dev.ridill.oar.core.domain.model.FundMovement
+import dev.ridill.oar.fakes.FakeAppInitWorkManager
+import dev.ridill.oar.fakes.FakeBackupEncryptionPreferencesManager
+import dev.ridill.oar.fakes.FakeBackupRepository
+import dev.ridill.oar.fakes.FakeBackupWorkManager
+import dev.ridill.oar.fakes.FakeCycleManager
+import dev.ridill.oar.fakes.FakePileReminder
+import dev.ridill.oar.fakes.FakePreferencesManager
+import dev.ridill.oar.fakes.FakeScheduleReminder
+import dev.ridill.oar.moneyPiles.data.local.entity.MoneyPileEntity
+import dev.ridill.oar.moneyPiles.domain.model.PileContributionMode
+import dev.ridill.oar.moneyPiles.domain.model.PileIcon
+import dev.ridill.oar.moneyPiles.domain.model.PileReminderBehavior
+import dev.ridill.oar.moneyPiles.domain.model.PileReminderCadence
+import dev.ridill.oar.schedules.data.local.entity.ScheduleEntity
+import dev.ridill.oar.schedules.domain.model.ScheduleRepetition
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertThrows
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import java.time.LocalDate
+import java.time.LocalDateTime
 
+@RunWith(RobolectricTestRunner::class)
 class DataResetRepositoryImplTest {
 
-    private val database = mockk<OarDatabase>()
-    private val preferencesManager = mockk<PreferencesManager>()
-    private val backupEncryptionPreferencesManager = mockk<BackupEncryptionPreferencesManager>()
-    private val backupRepository = mockk<BackupRepository>()
-    private val backupWorkManager = mockk<BackupWorkManager>()
-    private val appInitWorkManager = mockk<AppInitWorkManager>()
-    private val scheduleReminder = mockk<ScheduleReminder>()
-    private val pileReminder = mockk<PileReminder>()
-    private val cycleManager = mockk<CycleManager>()
+    private lateinit var db: OarDatabase
 
-    private val schedulesDao = mockk<SchedulesDao>()
-    private val pileDao = mockk<MoneyPileDao>()
-    private val cycleDao = mockk<BudgetCycleDao>()
+    private val events = mutableListOf<String>()
+    private val tablesEmptyWhenCalled = mutableMapOf<String, Boolean>()
 
-    private val repo = DataResetRepositoryImpl(
-        database = database,
-        preferencesManager = preferencesManager,
-        backupEncryptionPreferencesManager = backupEncryptionPreferencesManager,
-        backupRepository = backupRepository,
-        backupWorkManager = backupWorkManager,
-        appInitWorkManager = appInitWorkManager,
-        scheduleReminder = scheduleReminder,
-        pileReminder = pileReminder,
-        cycleManager = cycleManager
-    )
+    private val backupWorkManager = FakeBackupWorkManager()
+    private val scheduleReminder = FakeScheduleReminder()
+    private val pileReminder = FakePileReminder()
+    private val cycleManager = FakeCycleManager()
+    private val backupRepository = FakeBackupRepository()
+    private val backupEncryptionPreferences = FakeBackupEncryptionPreferencesManager()
+    private val preferencesManager = FakePreferencesManager(onReset = { events += RESET_PREFERENCES })
+    private val appInitWorkManager = FakeAppInitWorkManager { call ->
+        events += call
+        tablesEmptyWhenCalled[call] = seededRowCount() == 0
+    }
+
+    private lateinit var repo: DataResetRepositoryImpl
 
     @Before
     fun setUp() {
-        every { database.schedulesDao() } returns schedulesDao
-        every { database.moneyPileDao() } returns pileDao
-        every { database.budgetCycleDao() } returns cycleDao
-        coEvery { schedulesDao.getAllScheduleIds() } returns listOf(1L, 2L)
-        coEvery { pileDao.getAllPileIds() } returns listOf(10L)
-        coEvery { cycleDao.getAllCycleIds() } returns listOf(100L, 101L, 102L)
+        db = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            OarDatabase::class.java
+        ).allowMainThreadQueries().build()
 
-        every { backupWorkManager.cancelAllBackupAndRestoreWork() } just Runs
-        every { scheduleReminder.cancel(any()) } just Runs
-        every { pileReminder.cancel(any()) } just Runs
-        every { cycleManager.cancelCycleCompletion(any()) } just Runs
-        every { database.clearAllTables() } just Runs
-        coEvery { preferencesManager.resetDataPreferences() } just Runs
-        coEvery { backupEncryptionPreferencesManager.updateBackupEncryptionHash(any(), any(), any()) } just Runs
-        coEvery { backupRepository.tryClearLocalCache() } just Runs
-        every { appInitWorkManager.startAppInitWorker() } just Runs
-        every { appInitWorkManager.startAlarmsAndReminderInitWorkers() } just Runs
+        repo = DataResetRepositoryImpl(
+            database = db,
+            preferencesManager = preferencesManager,
+            backupEncryptionPreferencesManager = backupEncryptionPreferences,
+            backupRepository = backupRepository,
+            backupWorkManager = backupWorkManager,
+            appInitWorkManager = appInitWorkManager,
+            scheduleReminder = scheduleReminder,
+            pileReminder = pileReminder,
+            cycleManager = cycleManager
+        )
     }
+
+    @After
+    fun tearDown() {
+        db.close()
+    }
+
+    private class SeededIds(
+        val scheduleIds: Set<Long>,
+        val pileIds: Set<Long>,
+        val cycleIds: Set<Long>
+    )
+
+    private suspend fun seedData(): SeededIds {
+        val scheduleIds = db.schedulesDao().upsert(schedule(), schedule())
+        val pileIds = db.moneyPileDao().upsert(pile("Trip"))
+        val cycleIds = db.budgetCycleDao().upsert(
+            cycle(startDay = 1, endDay = 10),
+            cycle(startDay = 11, endDay = 20),
+            cycle(startDay = 21, endDay = 28)
+        )
+        return SeededIds(scheduleIds.toSet(), pileIds.toSet(), cycleIds.toSet())
+    }
+
+    private fun schedule() = ScheduleEntity(
+        amount = 100.0,
+        note = null,
+        currencyCode = "INR",
+        type = FundMovement.OUT,
+        tagId = null,
+        folderId = null,
+        repetition = ScheduleRepetition.entries.first(),
+        lastPaymentTimestamp = null,
+        nextPaymentTimestamp = null,
+        originalDueDate = null
+    )
+
+    private fun pile(name: String) = MoneyPileEntity(
+        name = name,
+        icon = PileIcon.entries.first(),
+        color = 0,
+        contributionMode = PileContributionMode.entries.first(),
+        reminderCadence = PileReminderCadence.entries.first(),
+        reminderBehavior = PileReminderBehavior.entries.first(),
+        reminderAmount = null,
+        locked = false,
+        currencyCode = "INR",
+        targetAmount = null,
+        targetRemainingAmount = null,
+        targetDate = null,
+        createdTimestamp = LocalDateTime.of(2026, 1, 1, 0, 0),
+        completionTimestamp = null,
+        nextReminderTimestamp = null
+    )
+
+    private fun cycle(startDay: Int, endDay: Int) = BudgetCycleEntity(
+        startDate = LocalDate.of(2026, 1, startDay),
+        endDate = LocalDate.of(2026, 1, endDay),
+        budget = 1_000L,
+        currencyCode = "INR"
+    )
+
+    private fun rowCount(table: String): Int =
+        db.query("SELECT COUNT(*) FROM $table", emptyArray()).use { cursor ->
+            cursor.moveToFirst()
+            cursor.getInt(0)
+        }
+
+    private fun seededRowCount(): Int = SEEDED_TABLES.sumOf(::rowCount)
 
     @Test
     fun cancelsEveryAlarmByRowId() = runTest {
+        // Alarms are keyed by row id, so this only works if the cancels run before the wipe
+        val seeded = seedData()
+
         repo.clearAllLocalData()
 
-        verify { scheduleReminder.cancel(1L) }
-        verify { scheduleReminder.cancel(2L) }
-        verify { pileReminder.cancel(10L) }
-        listOf(100L, 101L, 102L).forEach { verify { cycleManager.cancelCycleCompletion(it) } }
-        verify(exactly = 1) { backupWorkManager.cancelAllBackupAndRestoreWork() }
+        assertThat(scheduleReminder.cancelledIds).containsExactlyElementsIn(seeded.scheduleIds)
+        assertThat(pileReminder.cancelledIds).containsExactlyElementsIn(seeded.pileIds)
+        assertThat(cycleManager.cancelledCycleIds).containsExactlyElementsIn(seeded.cycleIds)
+        assertThat(backupWorkManager.cancelAllCount).isEqualTo(1)
     }
 
     @Test
-    fun alarmsAreCancelledBeforeTablesAreCleared() = runTest {
+    fun clearsAllTables() = runTest {
+        seedData()
+        assertThat(seededRowCount()).isGreaterThan(0)
+
         repo.clearAllLocalData()
 
-        // The cancels run in parallel, so only their order relative to the wipe is guaranteed
-        coVerifyOrder {
-            scheduleReminder.cancel(1L)
-            database.clearAllTables()
-        }
-        coVerifyOrder {
-            pileReminder.cancel(10L)
-            database.clearAllTables()
-        }
-        coVerifyOrder {
-            cycleManager.cancelCycleCompletion(100L)
-            database.clearAllTables()
-        }
-        coVerifyOrder {
-            backupWorkManager.cancelAllBackupAndRestoreWork()
-            database.clearAllTables()
-        }
+        assertThat(seededRowCount()).isEqualTo(0)
     }
 
     @Test
-    fun clearsTablesPreferencesEncryptionHashAndCache() = runTest {
+    fun dropsBackupEncryptionHashAndLocalBackupCache() = runTest {
         repo.clearAllLocalData()
 
-        verify(exactly = 1) { database.clearAllTables() }
-        coVerify(exactly = 1) { preferencesManager.resetDataPreferences() }
-        coVerify(exactly = 1) {
-            backupEncryptionPreferencesManager.updateBackupEncryptionHash(
+        assertThat(backupEncryptionPreferences.hashUpdates).containsExactly(
+            FakeBackupEncryptionPreferencesManager.HashUpdate(
                 hash = null,
                 salt = null,
-                scheme = any()
+                scheme = EncryptionScheme.fromTag(null)
             )
-        }
-        coVerify(exactly = 1) { backupRepository.tryClearLocalCache() }
+        )
+        assertThat(backupRepository.clearCacheCount).isEqualTo(1)
     }
 
     @Test
-    fun reseedsInitWorkersAfterClearing() = runTest {
+    fun reseedsInitWorkersOnlyAfterTablesAreCleared() = runTest {
+        seedData()
+
         repo.clearAllLocalData()
 
-        coVerifyOrder {
-            database.clearAllTables()
-            appInitWorkManager.startAppInitWorker()
-            appInitWorkManager.startAlarmsAndReminderInitWorkers()
-        }
+        assertThat(appInitWorkManager.calls)
+            .containsExactly("startAppInitWorker", "startAlarmsAndReminderInitWorkers")
+            .inOrder()
+        assertThat(tablesEmptyWhenCalled.values).containsExactly(true, true)
     }
 
     @Test
-    fun clearFailure_propagatesAndSkipsReseed() = runTest {
-        every { database.clearAllTables() } throws IllegalStateException("boom")
+    fun resetsPreferencesLast_soOnboardingStartsAfterTheReseed() = runTest {
+        repo.clearAllLocalData()
 
-        assertThrows(IllegalStateException::class.java) {
-            kotlinx.coroutines.runBlocking { repo.clearAllLocalData() }
-        }
+        assertThat(events)
+            .containsExactly(
+                "startAppInitWorker",
+                "startAlarmsAndReminderInitWorkers",
+                RESET_PREFERENCES
+            )
+            .inOrder()
+    }
 
-        verify(exactly = 0) { appInitWorkManager.startAppInitWorker() }
-        verify(exactly = 0) { appInitWorkManager.startAlarmsAndReminderInitWorkers() }
+    @Test
+    fun clearFailure_propagates_andSkipsReseedAndPreferenceReset() = runTest {
+        backupRepository.clearCacheFailure = IllegalStateException("boom")
+
+        val result = runCatching { repo.clearAllLocalData() }
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(appInitWorkManager.calls).isEmpty()
+        assertThat(preferencesManager.resetCount).isEqualTo(0)
+    }
+
+    private companion object {
+        const val RESET_PREFERENCES = "resetDataPreferences"
+        val SEEDED_TABLES = listOf("schedules_table", "money_pile_table", "budget_cycle_table")
     }
 }

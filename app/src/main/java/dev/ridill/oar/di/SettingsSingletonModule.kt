@@ -21,9 +21,11 @@ import dev.ridill.oar.settings.data.remote.interceptors.GoogleAccessTokenInterce
 import dev.ridill.oar.settings.data.repository.BackupRepositoryImpl
 import dev.ridill.oar.settings.data.repository.JSON_MIME_TYPE
 import dev.ridill.oar.settings.domain.appInit.AppInitWorkManager
+import dev.ridill.oar.settings.domain.appInit.AppInitWorkManagerImpl
 import dev.ridill.oar.settings.domain.appLock.AppLockScheduler
 import dev.ridill.oar.settings.domain.backup.BackupService
 import dev.ridill.oar.settings.domain.backup.BackupWorkManager
+import dev.ridill.oar.settings.domain.backup.BackupWorkManagerImpl
 import dev.ridill.oar.settings.domain.notification.AppInitNotificationHelper
 import dev.ridill.oar.settings.domain.notification.BackupNotificationHelper
 import dev.ridill.oar.settings.domain.repositoty.BackupRepository
@@ -130,7 +132,7 @@ object SettingsSingletonModule {
     @Provides
     fun provideBackupWorkManager(
         @ApplicationContext context: Context
-    ): BackupWorkManager = BackupWorkManager(context)
+    ): BackupWorkManager = BackupWorkManagerImpl(context)
 
     @BackupFeature
     @Provides
@@ -152,7 +154,7 @@ object SettingsSingletonModule {
     @Provides
     fun provideAppInitWorkManager(
         @ApplicationContext context: Context
-    ): AppInitWorkManager = AppInitWorkManager(context)
+    ): AppInitWorkManager = AppInitWorkManagerImpl(context)
 }
 
 @Qualifier

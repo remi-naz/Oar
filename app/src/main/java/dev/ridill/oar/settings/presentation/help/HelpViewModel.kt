@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.R
 import dev.ridill.oar.core.data.logging.LogFileManager
-import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
+import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.logE
@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HelpViewModel @Inject constructor(
-    private val remoteConfigService: FirebaseRemoteConfigService,
+    private val remoteConfigService: RemoteConfigService,
     private val logFileManager: LogFileManager,
     private val eventBus: EventBus<HelpEvent>
 ) : ViewModel(), HelpActions {

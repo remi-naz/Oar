@@ -9,7 +9,7 @@ import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.account.presentation.util.CredentialService
 import dev.ridill.oar.core.domain.model.Result
-import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
+import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.logE
@@ -37,7 +37,7 @@ class SettingsViewModel @Inject constructor(
     private val authRepo: AuthRepository,
     private val backupSettingsRepo: BackupSettingsRepository,
     private val dataResetRepo: DataResetRepository,
-    private val remoteConfigService: FirebaseRemoteConfigService,
+    private val remoteConfigService: RemoteConfigService,
     private val eventBus: EventBus<SettingsEvent>
 ) : ViewModel(), SettingsActions {
 

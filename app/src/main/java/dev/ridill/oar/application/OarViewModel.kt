@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.oar.budgetCycles.domain.repository.BudgetCycleRepository
 import dev.ridill.oar.core.data.preferences.PreferencesManager
 import dev.ridill.oar.core.domain.model.Result
-import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
+import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.LocaleUtil
@@ -34,7 +34,7 @@ class OarViewModel @Inject constructor(
     private val appLockScheduler: AppLockScheduler,
     @ApplicationScope private val applicationScope: CoroutineScope,
     private val appInitWorkManager: AppInitWorkManager,
-    private val remoteConfigService: FirebaseRemoteConfigService,
+    private val remoteConfigService: RemoteConfigService,
     cycleRepo: BudgetCycleRepository,
     private val eventBus: EventBus<OarEvent>
 ) : ViewModel() {

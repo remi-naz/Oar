@@ -44,6 +44,7 @@ import dev.ridill.oar.core.domain.crypto.KeystoreCryptoManager
 import dev.ridill.oar.core.domain.crypto.PasswordBasedCryptoManager
 import dev.ridill.oar.core.domain.logging.LogRedactor
 import dev.ridill.oar.core.domain.remoteConfig.FirebaseRemoteConfigService
+import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.core.domain.service.ExpEvalService
 import dev.ridill.oar.core.domain.service.ReceiverService
 import dev.ridill.oar.core.domain.util.EventBus
@@ -191,7 +192,7 @@ object AppModule {
     }
 
     @Provides
-    fun provideRemoteConfigService(json: Json): FirebaseRemoteConfigService =
+    fun provideRemoteConfigService(json: Json): RemoteConfigService =
         FirebaseRemoteConfigService(json = json)
 
     @Provides

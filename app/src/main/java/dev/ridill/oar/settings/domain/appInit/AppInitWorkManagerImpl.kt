@@ -1,0 +1,142 @@
+package dev.ridill.oar.settings.domain.appInit
+
+import android.content.Context
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import dev.ridill.oar.budgetCycles.domain.cycleManager.CycleCatchUpWorker
+import dev.ridill.oar.core.domain.util.toUUID
+import dev.ridill.oar.moneyPiles.domain.pileReminder.RestorePileRemindersWorker
+import dev.ridill.oar.schedules.domain.scheduleReminder.RestoreScheduleRemindersWorker
+import dev.ridill.oar.settings.domain.backup.workers.RestoreBackupJobsWorker
+import java.util.concurrent.TimeUnit
+
+internal class AppInitWorkManagerImpl(
+    private val context: Context
+) : AppInitWorkManager {
+
+    private val workManager = WorkManager.getInstance(context)
+
+    private val configRestoreWorkerName: String
+        get() = "${context.packageName}.CONFIG_RESTORE_WORKERS"
+
+    private val budgetCycleInitWorkerName: String
+        get() = "${context.packageName}.BUDGET_CYCLE_INIT_WORKER"
+
+    private val restoreScheduleRemindersWorkerName: String
+        get() = "${context.packageName}.RESTORE_SCHEDULE_REMINDERS_WORKER"
+
+    private val restorePileRemindersWorkerName: String
+        get() = "${context.packageName}.RESTORE_PILE_REMINDERS_WORKER"
+
+    private val restoreBackupJobsWorkerName: String
+        get() = "${context.packageName}.RESTORE_BACKUP_JOBS_WORKER"
+
+    private val cycleCatchUpWorkerName: String
+        get() = "${context.packageName}.CYCLE_CATCH_UP_WORKER"
+
+    private val periodicCycleCatchUpWorkerName: String
+        get() = "${context.packageName}.PERIODIC_CYCLE_CATCH_UP_WORKER"
+
+    private val currencyListInitWorkerName: String
+        get() = "${context.packageName}.CURRENCY_LIST_INIT_WORKER"
+
+    override fun startAppInitWorker() {
+        val currencyInitWorker = OneTimeWorkRequestBuilder<CurrencyInitWorker>()
+            .setId(currencyListInitWorkerName.toUUID())
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        workManager.beginUniqueWork(
+            currencyListInitWorkerName,
+            ExistingWorkPolicy.REPLACE,
+            currencyInitWorker
+        ).enqueue()
+    }
+
+    override fun startCycleCatchUpWorker() {
+        val request = OneTimeWorkRequestBuilder<CycleCatchUpWorker>()
+            .setId(cycleCatchUpWorkerName.toUUID())
+            .build()
+
+        workManager.enqueueUniqueWork(
+            cycleCatchUpWorkerName,
+            ExistingWorkPolicy.KEEP,
+            request
+        )
+    }
+
+    override fun scheduleDailyCycleCatchUp() {
+        val request = PeriodicWorkRequestBuilder<CycleCatchUpWorker>(1, TimeUnit.DAYS)
+            .setId(periodicCycleCatchUpWorkerName.toUUID())
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            periodicCycleCatchUpWorkerName,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request
+        )
+    }
+
+    override fun startConfigRestoreWorkers() {
+        val budgetCycleInitWorker = OneTimeWorkRequestBuilder<BudgetCycleInitWorker>()
+            .setId(budgetCycleInitWorkerName.toUUID())
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+        val restoreBackupJobsWorker = OneTimeWorkRequestBuilder<RestoreBackupJobsWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setId(restoreBackupJobsWorkerName.toUUID())
+            .build()
+
+        val restoreScheduleRemindersWorker =
+            OneTimeWorkRequestBuilder<RestoreScheduleRemindersWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .setId(restoreScheduleRemindersWorkerName.toUUID())
+                .build()
+
+        val restorePileRemindersWorker = OneTimeWorkRequestBuilder<RestorePileRemindersWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setId(restorePileRemindersWorkerName.toUUID())
+            .build()
+
+        workManager.beginUniqueWork(
+            configRestoreWorkerName,
+            ExistingWorkPolicy.REPLACE,
+            budgetCycleInitWorker
+        )
+            .then(restoreBackupJobsWorker)
+            .then(restoreScheduleRemindersWorker)
+            .then(restorePileRemindersWorker)
+            .enqueue()
+    }
+
+    override fun startAlarmsAndReminderInitWorkers() {
+        val budgetCycleInitWorker = OneTimeWorkRequestBuilder<BudgetCycleInitWorker>()
+            .setId(budgetCycleInitWorkerName.toUUID())
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        val restoreScheduleRemindersWorker =
+            OneTimeWorkRequestBuilder<RestoreScheduleRemindersWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .setId(restoreScheduleRemindersWorkerName.toUUID())
+                .build()
+
+        val restorePileRemindersWorker = OneTimeWorkRequestBuilder<RestorePileRemindersWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setId(restorePileRemindersWorkerName.toUUID())
+            .build()
+
+        workManager.beginUniqueWork(
+            configRestoreWorkerName,
+            ExistingWorkPolicy.REPLACE,
+            budgetCycleInitWorker
+        )
+            .then(restoreScheduleRemindersWorker)
+            .then(restorePileRemindersWorker)
+            .enqueue()
+    }
+}
