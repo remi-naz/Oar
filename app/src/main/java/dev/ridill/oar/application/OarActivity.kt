@@ -192,7 +192,6 @@ class OarActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkAppPermissions()
-        viewModel.refreshTransactionAutoDetectFeatureEnabledState()
     }
 
     override fun onStop() {
@@ -215,9 +214,6 @@ class OarActivity : AppCompatActivity() {
 
     private fun checkAppPermissions() {
         if (viewModel.showOnboarding.value != false) return
-        val isSmsPermissionGranted = isPermissionGranted(Manifest.permission.RECEIVE_SMS)
-        viewModel.onSmsPermissionCheck(isSmsPermissionGranted)
-
         if (BuildUtil.isNotificationRuntimePermissionNeeded()) {
             val isNotificationPermissionGranted =
                 isPermissionGranted(Manifest.permission.POST_NOTIFICATIONS)

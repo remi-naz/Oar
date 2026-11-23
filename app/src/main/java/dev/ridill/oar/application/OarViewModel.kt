@@ -19,7 +19,6 @@ import dev.ridill.oar.settings.domain.appLock.AppLockScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
@@ -70,7 +69,6 @@ class OarViewModel @Inject constructor(
     val events = eventBus.eventFlow
 
     init {
-        collectTransactionAutoDetectEnabled()
         initRemoteConfig()
         startCycleCatchUp()
     }
@@ -79,20 +77,6 @@ class OarViewModel @Inject constructor(
     private fun startCycleCatchUp() {
         appInitWorkManager.startCycleCatchUpWorker()
         appInitWorkManager.scheduleDailyCycleCatchUp()
-    }
-
-    private fun collectTransactionAutoDetectEnabled() = viewModelScope.launch {
-        preferences.mapLatest { it.transactionAutoDetectEnabled }
-            .distinctUntilChanged()
-            .collectLatest { enabled ->
-                receiverService.toggleSmsReceiver(enabled)
-            }
-    }
-
-    fun onSmsPermissionCheck(granted: Boolean) = viewModelScope.launch {
-        if (!granted) {
-            preferencesManager.updateTransactionAutoDetectEnabled(false)
-        }
     }
 
     fun onNotificationPermissionCheck(granted: Boolean) {
@@ -183,14 +167,6 @@ class OarViewModel @Inject constructor(
         if (result !is Result.Success) return
         remoteConfigService.activate()
         preferencesManager.updateRemoteConfigForceRefreshRequired(false)
-    }
-
-    fun refreshTransactionAutoDetectFeatureEnabledState() = viewModelScope.launch {
-        val isTransactionAutoDetectEnabled = remoteConfigService.getConfig()
-            .transactionAutoDetectFeatureEnabled
-        if (isTransactionAutoDetectEnabled) {
-            preferencesManager.updateTransactionAutoDetectEnabled(false)
-        }
     }
 
     sealed class OarEvent {

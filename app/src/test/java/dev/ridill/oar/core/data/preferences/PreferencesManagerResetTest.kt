@@ -42,12 +42,11 @@ class PreferencesManagerResetTest {
     )
 
     @Test
-    fun resetDataPreferences_clearsDataAndSecurityFieldsAndReenablesOnboarding_keepsAppearanceAndAutoDetect() = runTest {
+    fun resetDataPreferences_clearsDataAndSecurityFieldsAndReenablesOnboarding_keepsAppearance() = runTest {
         val manager = manager()
         manager.updateAppThem(AppTheme.DARK)
         manager.updateAppLockEnabled(true)
         manager.updateScreenSecurityEnabled(true)
-        manager.updateTransactionAutoDetectEnabled(true)
         manager.concludeOnboarding()
         manager.updateLastBackupTimestamp(LocalDateTime.of(2026, 1, 1, 10, 0))
         manager.updateFatalBackupError(FatalBackupError.entries.first())
@@ -65,6 +64,5 @@ class PreferencesManagerResetTest {
         assertThat(prefs.screenSecurityEnabled).isFalse()
 
         assertThat(prefs.appTheme).isEqualTo(AppTheme.DARK)
-        assertThat(prefs.transactionAutoDetectEnabled).isTrue()
     }
 }

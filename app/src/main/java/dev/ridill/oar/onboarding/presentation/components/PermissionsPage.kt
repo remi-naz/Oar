@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +33,6 @@ import dev.ridill.oar.core.domain.util.One
 import dev.ridill.oar.core.ui.components.DisplayMediumText
 import dev.ridill.oar.core.ui.components.MultiplePermissionsState
 import dev.ridill.oar.core.ui.components.SpacerMedium
-import dev.ridill.oar.core.ui.components.icons.Message
 import dev.ridill.oar.core.ui.theme.spacing
 
 @Composable
@@ -68,17 +66,14 @@ fun PermissionsPage(
             permissionsState.permissions.forEach { permission ->
                 val icon = when (permission) {
                     Manifest.permission.POST_NOTIFICATIONS -> ImageVector.vectorResource(R.drawable.ic_outlined_notification_bell)
-                    Manifest.permission.RECEIVE_SMS -> Icons.Rounded.Message
                     else -> null
                 }
                 val titleRes = when (permission) {
                     Manifest.permission.POST_NOTIFICATIONS -> R.string.permission_notification
-                    Manifest.permission.RECEIVE_SMS -> R.string.permission_sms
                     else -> null
                 }
                 val messageRes = when (permission) {
                     Manifest.permission.POST_NOTIFICATIONS -> R.string.permission_rationale_notification
-                    Manifest.permission.RECEIVE_SMS -> R.string.permission_rationale_read_sms
                     else -> null
                 }
                 if (icon != null && titleRes != null && messageRes != null) {

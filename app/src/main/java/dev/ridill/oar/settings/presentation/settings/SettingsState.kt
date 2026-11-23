@@ -13,10 +13,6 @@ data class SettingsState(
     val dynamicColorsEnabled: Boolean = false,
     val showAppThemeSelection: Boolean = false,
     val currentMonthlyBudget: Long = Long.Zero,
-    val showAutoDetectTxOption: Boolean = false,
-    val autoDetectTransactionEnabled: Boolean = false,
-    val showSmsPermissionRationale: Boolean = false,
-    val showAutoDetectTransactionFeatureInfo: Boolean = false,
     val logoutDialog: LogoutDialog? = null,
     val lastBackupDateTime: LocalDateTime? = null,
     val isClearingLocalData: Boolean = false

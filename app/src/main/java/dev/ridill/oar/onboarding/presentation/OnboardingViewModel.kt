@@ -1,6 +1,5 @@
 package dev.ridill.oar.onboarding.presentation
 
-import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
 import androidx.compose.foundation.text.input.TextFieldState
@@ -234,9 +233,6 @@ class OnboardingViewModel @Inject constructor(
     fun onPermissionsRequestResult(result: Map<String, Boolean>) {
         logD { "onPermissionsRequestResult() called with: result = $result" }
         viewModelScope.launch {
-            val isSMSPermissionGranted = result[Manifest.permission.RECEIVE_SMS] == true
-            preferencesManager.updateTransactionAutoDetectEnabled(isSMSPermissionGranted)
-
             val areAllGranted = result.all { it.value }
             if (areAllGranted) {
                 eventBus.send(OnboardingEvent.NavigateToPage(OnboardingPage.ACCOUNT_SIGN_IN_AND_DATA_RESTORE))

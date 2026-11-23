@@ -1,6 +1,5 @@
 package dev.ridill.oar.settings.presentation.nav
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
@@ -33,7 +32,6 @@ import dev.ridill.oar.core.domain.util.BiometricUtil
 import dev.ridill.oar.core.domain.util.BuildUtil
 import dev.ridill.oar.core.ui.components.CollectFlowEffect
 import dev.ridill.oar.core.ui.components.OnLifecycleStartEffect
-import dev.ridill.oar.core.ui.components.rememberPermissionState
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.navigation.AllTagsRoute
 import dev.ridill.oar.core.ui.navigation.BackupEncryptionRoute
@@ -55,7 +53,6 @@ import dev.ridill.oar.core.ui.navigation.UpdateBudgetSheetRoute
 import dev.ridill.oar.core.ui.util.LocalCurrencyPreference
 import dev.ridill.oar.core.ui.util.TextFormat
 import dev.ridill.oar.core.ui.util.launchAppNotificationSettings
-import dev.ridill.oar.core.ui.util.launchAppSettings
 import dev.ridill.oar.core.ui.util.launchExactAlarmPermissionSettings
 import dev.ridill.oar.core.ui.util.launchShareFile
 import dev.ridill.oar.settings.presentation.backupEncryption.BackupEncryptionScreen
@@ -78,10 +75,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
     entry<SettingsRoute> {
         val viewModel: SettingsViewModel = hiltViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
-        val smsPermissionState = rememberPermissionState(
-            permission = Manifest.permission.RECEIVE_SMS,
-            onPermissionResult = viewModel::onSmsPermissionResult
-        )
 
         val context = LocalContext.current
         val snackbarController = rememberSnackbarController()
@@ -100,14 +93,6 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: OarNavigator) {
                         event.uiText.asString(context),
                         event.uiText.isErrorText
                     )
-                }
-
-                SettingsViewModel.SettingsEvent.RequestSMSPermission -> {
-                    smsPermissionState.launchRequest()
-                }
-
-                SettingsViewModel.SettingsEvent.LaunchAppSettings -> {
-                    context.launchAppSettings()
                 }
 
                 SettingsViewModel.SettingsEvent.StartManualSignInFlow -> {

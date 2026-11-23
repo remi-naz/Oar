@@ -7,7 +7,6 @@ import dev.ridill.oar.settings.domain.repositoty.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 
@@ -34,17 +33,4 @@ class SettingsRepositoryImpl(
 
     override suspend fun toggleDynamicColors(enabled: Boolean) = preferencesManager
         .updateDynamicColorsEnabled(enabled)
-
-    override fun getTransactionAutoDetectEnabled(): Flow<Boolean> = preferences
-        .mapLatest { it.transactionAutoDetectEnabled }
-        .distinctUntilChanged()
-
-    override suspend fun toggleAutoDetectTransactions(enabled: Boolean) =
-        preferencesManager.updateTransactionAutoDetectEnabled(enabled)
-
-    override suspend fun getShowTransactionAutoDetectInfoValue(): Boolean = preferences.first()
-        .showAutoDetectTxInfo
-
-    override suspend fun toggleShowAutoDetectTxInfoFalse() =
-        preferencesManager.toggleShowAutoDetectTxInfoFalse()
 }

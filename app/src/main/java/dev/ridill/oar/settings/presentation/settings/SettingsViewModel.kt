@@ -9,7 +9,6 @@ import dev.ridill.oar.R
 import dev.ridill.oar.account.domain.repository.AuthRepository
 import dev.ridill.oar.account.presentation.util.CredentialService
 import dev.ridill.oar.core.domain.model.Result
-import dev.ridill.oar.core.domain.remoteConfig.RemoteConfigService
 import dev.ridill.oar.core.domain.util.EventBus
 import dev.ridill.oar.core.domain.util.asStateFlow
 import dev.ridill.oar.core.domain.util.logE
@@ -37,7 +36,6 @@ class SettingsViewModel @Inject constructor(
     private val authRepo: AuthRepository,
     private val backupSettingsRepo: BackupSettingsRepository,
     private val dataResetRepo: DataResetRepository,
-    private val remoteConfigService: RemoteConfigService,
     private val eventBus: EventBus<SettingsEvent>
 ) : ViewModel(), SettingsActions {
 
@@ -46,23 +44,8 @@ class SettingsViewModel @Inject constructor(
     private val appTheme = settingsRepo.getCurrentAppTheme()
     private val dynamicColorsEnabled = settingsRepo.getDynamicColorsEnabled()
 
-    private val _transactionAutoDetectFeatureEnabled = MutableStateFlow(false)
-    private val _isValidTxAutoDetectPatternsAvailable = MutableStateFlow(false)
-    private val showAutoDetectTxOption = combineTuple(
-        _transactionAutoDetectFeatureEnabled,
-        _isValidTxAutoDetectPatternsAvailable
-    ).mapLatest { it.first && it.second }
-        .distinctUntilChanged()
-    private val transactionAutoDetectEnabled = settingsRepo.getTransactionAutoDetectEnabled()
-
     private val showAppThemeSelection = savedStateHandle
         .getStateFlow(SHOW_APP_THEME_SELECTION, false)
-
-    private val showSmsPermissionRationale = savedStateHandle
-        .getStateFlow(SHOW_SMS_PERMISSION_RATIONALE, false)
-
-    private val showTransactionAutoDetectInfo = savedStateHandle
-        .getStateFlow(SHOW_AUTO_DETECT_TX_INFO, false)
 
     private val logoutDialog = savedStateHandle
         .getStateFlow<String?>(LOGOUT_DIALOG, null)
@@ -78,10 +61,6 @@ class SettingsViewModel @Inject constructor(
         appTheme,
         dynamicColorsEnabled,
         showAppThemeSelection,
-        showAutoDetectTxOption,
-        transactionAutoDetectEnabled,
-        showSmsPermissionRationale,
-        showTransactionAutoDetectInfo,
         logoutDialog,
         lastBackupDateTime,
         isClearingLocalData
@@ -90,10 +69,6 @@ class SettingsViewModel @Inject constructor(
                       appTheme,
                       dynamicColorsEnabled,
                       showAppThemeSelection,
-                      showAutoDetectTxOption,
-                      autoAddTransactionEnabled,
-                      showSmsPermissionRationale,
-                      showTransactionAutoDetectInfo,
                       logoutDialog,
                       lastBackupDateTime,
                       isClearingLocalData
@@ -103,17 +78,12 @@ class SettingsViewModel @Inject constructor(
             appTheme = appTheme,
             dynamicColorsEnabled = dynamicColorsEnabled,
             showAppThemeSelection = showAppThemeSelection,
-            showAutoDetectTxOption = showAutoDetectTxOption,
-            autoDetectTransactionEnabled = autoAddTransactionEnabled,
-            showSmsPermissionRationale = showSmsPermissionRationale,
-            showAutoDetectTransactionFeatureInfo = showTransactionAutoDetectInfo,
             logoutDialog = logoutDialog,
             lastBackupDateTime = lastBackupDateTime,
             isClearingLocalData = isClearingLocalData
         )
     }
         .onStart { settingsRepo.refreshCurrentDate() }
-        .onStart { refreshConfigs() }
         .asStateFlow(viewModelScope, SettingsState())
 
     val events = eventBus.eventFlow
@@ -136,49 +106,6 @@ class SettingsViewModel @Inject constructor(
     override fun onDynamicThemeEnabledChange(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepo.toggleDynamicColors(enabled)
-        }
-    }
-
-    override fun onToggleAutoAddTransactions(enabled: Boolean) {
-        viewModelScope.launch {
-            savedStateHandle[TEMP_AUTO_ADD_TRANSACTION_STATE] = enabled
-            if (settingsRepo.getShowTransactionAutoDetectInfoValue() && enabled) {
-                savedStateHandle[SHOW_AUTO_DETECT_TX_INFO] = true
-            } else {
-                eventBus.send(SettingsEvent.RequestSMSPermission)
-            }
-        }
-    }
-
-    override fun onAutoDetectTxFeatureInfoDismiss() {
-        savedStateHandle[SHOW_AUTO_DETECT_TX_INFO] = false
-    }
-
-    override fun onAutoDetectTxFeatureInfoAcknowledge() {
-        viewModelScope.launch {
-            settingsRepo.toggleShowAutoDetectTxInfoFalse()
-            savedStateHandle[SHOW_AUTO_DETECT_TX_INFO] = false
-            eventBus.send(SettingsEvent.RequestSMSPermission)
-        }
-    }
-
-    fun onSmsPermissionResult(granted: Boolean) = viewModelScope.launch {
-        if (granted) {
-            val enabled = savedStateHandle.get<Boolean?>(TEMP_AUTO_ADD_TRANSACTION_STATE) == true
-            settingsRepo.toggleAutoDetectTransactions(enabled)
-            savedStateHandle[TEMP_AUTO_ADD_TRANSACTION_STATE] = null
-        }
-        savedStateHandle[SHOW_SMS_PERMISSION_RATIONALE] = !granted
-    }
-
-    override fun onSmsPermissionRationaleDismiss() {
-        savedStateHandle[SHOW_SMS_PERMISSION_RATIONALE] = false
-    }
-
-    override fun onSmsPermissionRationaleSettingsClick() {
-        viewModelScope.launch {
-            savedStateHandle[SHOW_SMS_PERMISSION_RATIONALE] = false
-            eventBus.send(SettingsEvent.LaunchAppSettings)
         }
     }
 
@@ -285,22 +212,11 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun refreshConfigs() = viewModelScope.launch {
-        val config = remoteConfigService.getConfig()
-        _transactionAutoDetectFeatureEnabled.update { config.transactionAutoDetectFeatureEnabled }
-        _isValidTxAutoDetectPatternsAvailable.update { config.autoDetectTransactionRegexPatterns != null }
-    }
-
     sealed interface SettingsEvent {
         data class ShowUiMessage(val uiText: UiText) : SettingsEvent
-        data object RequestSMSPermission : SettingsEvent
-        data object LaunchAppSettings : SettingsEvent
         data object StartManualSignInFlow : SettingsEvent
     }
 }
 
 private const val SHOW_APP_THEME_SELECTION = "SHOW_APP_THEME_SELECTION"
-private const val SHOW_SMS_PERMISSION_RATIONALE = "SHOW_SMS_PERMISSION_RATIONALE"
-private const val TEMP_AUTO_ADD_TRANSACTION_STATE = "TEMP_AUTO_ADD_TRANSACTION_STATE"
-private const val SHOW_AUTO_DETECT_TX_INFO = "SHOW_AUTO_DETECT_TX_INFO"
 private const val LOGOUT_DIALOG = "LOGOUT_DIALOG"

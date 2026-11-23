@@ -29,14 +29,12 @@ class FakePreferencesManager(
     override suspend fun updateAppThem(theme: AppTheme) = Unit
     override suspend fun updateDynamicColorsEnabled(enabled: Boolean) = Unit
     override suspend fun updateLastBackupTimestamp(localDateTime: LocalDateTime) = Unit
-    override suspend fun updateTransactionAutoDetectEnabled(enabled: Boolean) = Unit
     override suspend fun updateAllTransactionsShowExcludedOption(show: Boolean) = Unit
     override suspend fun updateAppLockEnabled(enabled: Boolean) = Unit
     override suspend fun updateAppAutoLockInterval(interval: AppAutoLockInterval) = Unit
     override suspend fun updateAppLocked(locked: Boolean) = Unit
     override suspend fun updateScreenSecurityEnabled(enabled: Boolean) = Unit
     override suspend fun updateFatalBackupError(error: FatalBackupError?) = Unit
-    override suspend fun toggleShowAutoDetectTxInfoFalse() = Unit
     override suspend fun updateRemoteConfigForceRefreshRequired(required: Boolean) = Unit
 
     override suspend fun resetDataPreferences() {

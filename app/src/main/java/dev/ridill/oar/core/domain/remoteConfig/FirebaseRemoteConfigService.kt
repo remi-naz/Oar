@@ -7,16 +7,12 @@ import dev.ridill.oar.core.data.util.tryNetworkCall
 import dev.ridill.oar.core.domain.model.DataError
 import dev.ridill.oar.core.domain.model.Result
 import dev.ridill.oar.core.domain.util.logI
-import dev.ridill.oar.core.domain.util.tryOrNull
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
 private const val TAG = "FirebaseRemoteConfigService"
 
-class FirebaseRemoteConfigService(
-    private val json: Json
-) : RemoteConfigService {
+class FirebaseRemoteConfigService : RemoteConfigService {
 
     private val remoteConfig = Firebase.remoteConfig
 
@@ -47,21 +43,13 @@ class FirebaseRemoteConfigService(
         logI(TAG) { "getConfig() called" }
         val websiteUrl = remoteConfig.getString(Keys.WEBSITE_URL)
         val privacyPolicyUrl = remoteConfig.getString(Keys.PRIVACY_POLICY_URL)
-        val transactionAutoDetectFeatureEnabled =
-            remoteConfig.getBoolean(Keys.TRANSACTION_AUTO_DETECT_FEATURE_ENABLED)
         val deleteAccountFeatureEnabled =
             remoteConfig.getBoolean(Keys.DELETE_ACCOUNT_FEATURE_ENABLED)
-        val txAutoDetectPatterns = tryOrNull {
-            val patternsJson = remoteConfig.getString(Keys.TX_AUTO_DETECT_PATTERNS)
-            json.decodeFromString<AutoDetectTransactionRegexPatterns>(patternsJson)
-        }
 
         val remoteConfig = RemoteConfig(
             websiteUrl = websiteUrl,
             privacyPolicyUrl = privacyPolicyUrl,
-            transactionAutoDetectFeatureEnabled = transactionAutoDetectFeatureEnabled,
-            deleteAccountFeatureEnabled = deleteAccountFeatureEnabled,
-            autoDetectTransactionRegexPatterns = txAutoDetectPatterns
+            deleteAccountFeatureEnabled = deleteAccountFeatureEnabled
         )
 
         logI(TAG) { "getConfig() completed" }
@@ -71,9 +59,7 @@ class FirebaseRemoteConfigService(
     object Keys {
         const val WEBSITE_URL = "website_url"
         const val PRIVACY_POLICY_URL = "privacy_policy_url"
-        const val TRANSACTION_AUTO_DETECT_FEATURE_ENABLED = "transaction_auto_detect_enabled"
         const val DELETE_ACCOUNT_FEATURE_ENABLED = "delete_account_feature_enabled"
-        const val TX_AUTO_DETECT_PATTERNS = "tx_auto_detect_patterns"
     }
 }
 

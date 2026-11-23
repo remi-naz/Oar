@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
@@ -35,13 +34,10 @@ import dev.ridill.oar.account.domain.model.AuthState
 import dev.ridill.oar.core.domain.util.BuildUtil
 import dev.ridill.oar.core.ui.components.BackArrowButton
 import dev.ridill.oar.core.ui.components.ConfirmationDialog
-import dev.ridill.oar.core.ui.components.FeatureInfoDialog
 import dev.ridill.oar.core.ui.components.MultiActionConfirmationDialog
 import dev.ridill.oar.core.ui.components.OarScaffold
-import dev.ridill.oar.core.ui.components.PermissionRationaleDialog
 import dev.ridill.oar.core.ui.components.RadioOptionListDialog
 import dev.ridill.oar.core.ui.components.SnackbarController
-import dev.ridill.oar.core.ui.components.icons.Message
 import dev.ridill.oar.core.ui.components.rememberSnackbarController
 import dev.ridill.oar.core.ui.theme.OarTheme
 import dev.ridill.oar.core.ui.theme.PaddingScrollEnd
@@ -129,15 +125,6 @@ fun SettingsScreen(
                 summary = stringResource(R.string.preference_tags_summary),
                 onClick = navigateToManageTags
             )
-
-            if (state.showAutoDetectTxOption) {
-                SwitchPreference(
-                    titleRes = R.string.preference_auto_detect_transactions,
-                    summary = stringResource(R.string.preference_auto_detect_transactions_summary),
-                    value = state.autoDetectTransactionEnabled,
-                    onValueChange = actions::onToggleAutoAddTransactions
-                )
-            }
 
             AnimatedVisibility(state.authState is AuthState.Authenticated) {
                 SimpleSettingsPreference(
@@ -239,30 +226,6 @@ fun SettingsScreen(
                 confirmButton = {}
             )
         }
-
-        if (state.showSmsPermissionRationale) {
-            PermissionRationaleDialog(
-                icon = Icons.Rounded.Message,
-                rationaleText = stringResource(
-                    R.string.permission_rationale_read_sms, stringResource(R.string.app_name)
-                ),
-                onDismiss = actions::onSmsPermissionRationaleDismiss,
-                onSettingsClick = actions::onSmsPermissionRationaleSettingsClick
-            )
-        }
-
-        if (state.showAutoDetectTransactionFeatureInfo) {
-            FeatureInfoDialog(
-                title = stringResource(R.string.feature_info_auto_detect_transaction_title),
-                text = stringResource(
-                    R.string.feature_info_auto_detect_transaction_message,
-                    stringResource(R.string.app_name)
-                ),
-                onAcknowledge = actions::onAutoDetectTxFeatureInfoAcknowledge,
-                onDismiss = actions::onAutoDetectTxFeatureInfoDismiss,
-                isExperimental = true
-            )
-        }
     }
 }
 
@@ -290,19 +253,12 @@ private fun PreviewSettingsScreen() {
     OarTheme {
         SettingsScreen(
             snackbarController = rememberSnackbarController(),
-            state = SettingsState(
-                showAutoDetectTxOption = true
-            ),
+            state = SettingsState(),
             actions = object : SettingsActions {
                 override fun onAppThemePreferenceClick() {}
                 override fun onAppThemeSelectionDismiss() {}
                 override fun onAppThemeSelectionConfirm(appTheme: AppTheme) {}
                 override fun onDynamicThemeEnabledChange(enabled: Boolean) {}
-                override fun onToggleAutoAddTransactions(enabled: Boolean) {}
-                override fun onAutoDetectTxFeatureInfoDismiss() {}
-                override fun onAutoDetectTxFeatureInfoAcknowledge() {}
-                override fun onSmsPermissionRationaleDismiss() {}
-                override fun onSmsPermissionRationaleSettingsClick() {}
                 override fun onLoginClick() {}
                 override fun onLogoutClick() {}
                 override fun onLogoutDialogDismiss() {}

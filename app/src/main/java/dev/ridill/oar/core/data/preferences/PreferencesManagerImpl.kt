@@ -49,8 +49,6 @@ class PreferencesManagerImpl(
                     }
                         ?: DateUtil.parseDateTimeOrNull(str)
                 }
-            val transactionAutoDetectEnabled =
-                preferences[Keys.TRANSACTION_AUTO_DETECT_ENABLED].orFalse()
             val allTransactionsShowExcludedOption =
                 preferences[Keys.ALL_TX_SHOW_EXCLUDED_OPTION].orTrue()
             val appLockEnabled = preferences[Keys.APP_LOCK_ENABLED].orFalse()
@@ -61,7 +59,6 @@ class PreferencesManagerImpl(
             val fatalBackupError = tryOrNull {
                 preferences[Keys.FATAL_BACKUP_ERROR]?.let { FatalBackupError.valueOf(it) }
             }
-            val showAutoDetectTxInfo = preferences[Keys.SHOW_AUTO_DETECT_TX_INFO].orTrue()
             val remoteConfigForceRefreshRequired =
                 preferences[Keys.REMOTE_CONFIG_FORCE_REFRESH_REQUIRED].orFalse()
 
@@ -70,14 +67,12 @@ class PreferencesManagerImpl(
                 appTheme = appTheme,
                 dynamicColorsEnabled = dynamicColorsEnabled,
                 lastBackupDateTime = lastBackupDateTime,
-                transactionAutoDetectEnabled = transactionAutoDetectEnabled,
                 allTransactionsShowExcludedOption = allTransactionsShowExcludedOption,
                 appLockEnabled = appLockEnabled,
                 appAutoLockInterval = appAutoLockInterval,
                 isAppLocked = isAppLocked,
                 screenSecurityEnabled = screenSecurityEnabled,
                 fatalBackupError = fatalBackupError,
-                showAutoDetectTxInfo = showAutoDetectTxInfo,
                 remoteConfigForceRefreshRequired = remoteConfigForceRefreshRequired,
             )
         }
@@ -113,14 +108,6 @@ class PreferencesManagerImpl(
                     .atZone(ZoneId.systemDefault())
                     .toInstant()
                     .toString()
-            }
-        }
-    }
-
-    override suspend fun updateTransactionAutoDetectEnabled(enabled: Boolean) {
-        withContext(Dispatchers.IO) {
-            dataStore.edit { preferences ->
-                preferences[Keys.TRANSACTION_AUTO_DETECT_ENABLED] = enabled
             }
         }
     }
@@ -173,14 +160,6 @@ class PreferencesManagerImpl(
         }
     }
 
-    override suspend fun toggleShowAutoDetectTxInfoFalse() {
-        withContext(Dispatchers.IO) {
-            dataStore.edit { preferences ->
-                preferences[Keys.SHOW_AUTO_DETECT_TX_INFO] = false
-            }
-        }
-    }
-
     override suspend fun updateRemoteConfigForceRefreshRequired(required: Boolean) {
         withContext(Dispatchers.IO) {
             dataStore.edit { preferences ->
@@ -210,15 +189,12 @@ class PreferencesManagerImpl(
         val APP_THEME = stringPreferencesKey("APP_THEME")
         val DYNAMIC_COLORS_ENABLED = booleanPreferencesKey("DYNAMIC_COLORS_ENABLED")
         val LAST_BACKUP_TIMESTAMP = stringPreferencesKey("LAST_BACKUP_TIMESTAMP")
-        val TRANSACTION_AUTO_DETECT_ENABLED =
-            booleanPreferencesKey("TRANSACTION_AUTO_DETECT_ENABLED")
         val ALL_TX_SHOW_EXCLUDED_OPTION = booleanPreferencesKey("ALL_TX_SHOW_EXCLUDED_OPTION")
         val APP_LOCK_ENABLED = booleanPreferencesKey("APP_LOCK_ENABLED")
         val APP_AUTO_LOCK_INTERVAL = stringPreferencesKey("APP_AUTO_LOCK_INTERVAL")
         val IS_APP_LOCKED = booleanPreferencesKey("IS_APP_LOCKED")
         val SCREEN_SECURITY_ENABLED = booleanPreferencesKey("SCREEN_SECURITY_ENABLED")
         val FATAL_BACKUP_ERROR = stringPreferencesKey("FATAL_BACKUP_ERROR")
-        val SHOW_AUTO_DETECT_TX_INFO = booleanPreferencesKey("SHOW_AUTO_DETECT_TX_INFO")
         val REMOTE_CONFIG_FORCE_REFRESH_REQUIRED =
             booleanPreferencesKey("REMOTE_CONFIG_FORCE_REFRESH_REQUIRED")
     }
